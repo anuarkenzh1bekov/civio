@@ -20,7 +20,7 @@ export const metadata: Metadata = {
     "Manage taxes, insurance, paperwork, and life changes in one place. Civio turns a move between states into a sourced, dated checklist.",
 };
 
-export const viewport: Viewport = { themeColor: "#ece8dd" };
+export const viewport: Viewport = { themeColor: "#f0f5f7" };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (

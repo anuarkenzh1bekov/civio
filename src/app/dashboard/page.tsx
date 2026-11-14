@@ -44,10 +44,10 @@ const STATUSES: { value: "all" | TaskStatus; label: string }[] = [
 
 /** One tint per module, used by the donut, the folders and the sidebar tree. */
 const TINT: Record<Category, string> = {
-  taxes: "var(--color-rose)",
-  health: "var(--color-moss-fill)",
-  vehicle: "var(--color-sky)",
-  family: "var(--color-peach)",
+  taxes: "var(--color-mod-taxes)",
+  health: "var(--color-mod-health)",
+  vehicle: "var(--color-mod-vehicle)",
+  family: "var(--color-mod-family)",
 };
 
 const MONEY_LABEL = { fee: "Fee", penalty: "Penalty risk", tax: "Tax", coverage: "Coverage gap" } as const;
@@ -71,7 +71,7 @@ function ModuleDonut({ counts, total }: { counts: Record<Category, number>; tota
   let offset = 0;
   return (
     <svg viewBox="0 0 120 120" className="size-40 shrink-0 -rotate-90" role="img" aria-label="Tasks by module">
-      <circle cx="60" cy="60" r={radius} fill="none" stroke="var(--color-mist)" strokeWidth="14" />
+      <circle cx="60" cy="60" r={radius} fill="none" stroke="var(--color-panel)" strokeWidth="14" />
       {CATEGORIES.map((category) => {
         const share = total > 0 ? counts[category] / total : 0;
         const length = Math.max(0, share * circumference - gap);
@@ -97,7 +97,7 @@ function ModuleDonut({ counts, total }: { counts: Record<Category, number>; tota
   );
 }
 
-/** A soft glass folder, tinted per module. */
+/** A soft folder, tinted per module. */
 function FolderArt({ tint, sheets }: { tint: string; sheets: number }) {
   return (
     <div className="relative h-24" aria-hidden="true">
@@ -106,15 +106,15 @@ function FolderArt({ tint, sheets }: { tint: string; sheets: number }) {
       {Array.from({ length: Math.min(sheets, 3) }).map((_, i) => (
         <div
           key={i}
-          className="absolute top-1 h-14 w-2/5 rounded-md bg-white shadow-soft"
+          className="absolute top-1 h-14 w-2/5 rounded-md bg-card shadow-soft"
           style={{ left: `${14 + i * 20}%`, transform: `rotate(${-6 + i * 6}deg)` }}
         >
-          <span className="mx-2 mt-2.5 block h-1 rounded-full bg-hair" />
-          <span className="mx-2 mt-1.5 block h-1 w-1/2 rounded-full bg-hair" />
+          <span className="mx-2 mt-2.5 block h-1 rounded-full bg-line" />
+          <span className="mx-2 mt-1.5 block h-1 w-1/2 rounded-full bg-line" />
         </div>
       ))}
       <div
-        className="absolute inset-x-0 bottom-0 h-14 rounded-2xl border border-white/60 backdrop-blur-sm"
+        className="absolute inset-x-0 bottom-0 h-14 rounded-2xl border border-card/60 backdrop-blur-sm"
         style={{ background: `linear-gradient(180deg, color-mix(in oklab, ${tint} 70%, white), ${tint})`, opacity: 0.92 }}
       />
     </div>
@@ -143,7 +143,7 @@ function TaskRow({
   return (
     <li
       id={`row-${task.id}`}
-      className="rise border-t border-hair first:border-t-0"
+      className="rise border-t border-line first:border-t-0"
       style={{ "--i": Math.min(index, 8) } as React.CSSProperties}
     >
       <div className="flex items-start gap-3 px-4 py-3.5 md:items-center md:px-5">
@@ -153,7 +153,7 @@ function TaskRow({
           aria-pressed={done}
           aria-label={done ? `Mark “${task.title}” as not done` : `Mark “${task.title}” as done`}
           className={`grid size-11 shrink-0 place-items-center rounded-full border transition-colors duration-150 md:size-7 ${
-            done ? "border-moss bg-moss text-white" : "border-taupe bg-white text-transparent hover:border-moss"
+            done ? "border-ok bg-ok text-card" : "border-ink-faint bg-card text-transparent hover:border-ok"
           }`}
         >
           <Check className="size-4" strokeWidth={3} aria-hidden="true" />
@@ -167,17 +167,17 @@ function TaskRow({
           className="grid min-w-0 flex-1 gap-2 text-left md:grid-cols-[minmax(0,1fr)_7.5rem_13rem_10.5rem_1.25rem] md:items-center md:gap-4"
         >
           <span className="flex min-w-0 items-center gap-2">
-            <FileText className="hidden size-4 shrink-0 text-taupe md:block" strokeWidth={1.75} aria-hidden="true" />
-            <span className={`truncate font-medium ${done ? "text-muted line-through decoration-taupe" : ""}`}>
+            <FileText className="hidden size-4 shrink-0 text-ink-faint md:block" strokeWidth={1.75} aria-hidden="true" />
+            <span className={`truncate font-medium ${done ? "text-ink-muted line-through decoration-ink-faint" : ""}`}>
               {task.title}
             </span>
             {!done && <PriorityBadge priority={task.priority} />}
           </span>
-          <span className="inline-flex items-center gap-2 text-sm text-muted">
+          <span className="inline-flex items-center gap-2 text-sm text-ink-muted">
             <span className="size-2.5 rounded-full" style={{ background: TINT[task.category] }} aria-hidden="true" />
             {CATEGORY_SHORT[task.category]}
           </span>
-          <span className={`text-sm md:truncate ${due?.urgent ? "font-semibold text-oxblood" : "text-muted"}`}>
+          <span className={`text-sm md:truncate ${due?.urgent ? "font-semibold text-risk" : "text-ink-muted"}`}>
             {due ? due.text : "No deadline recorded"}
           </span>
           <span>
@@ -192,26 +192,26 @@ function TaskRow({
             )}
           </span>
           <ChevronDown
-            className={`hidden size-5 text-muted transition-transform duration-200 md:block ${open ? "rotate-180" : ""}`}
+            className={`hidden size-5 text-ink-muted transition-transform duration-200 md:block ${open ? "rotate-180" : ""}`}
             aria-hidden="true"
           />
         </button>
       </div>
 
       {open && (
-        <div id={panelId} className="fade border-t border-hair bg-mist/60 px-4 py-5 md:px-5">
+        <div id={panelId} className="fade border-t border-line bg-panel/60 px-4 py-5 md:px-5">
           {task.verificationNote && !done && (
-            <p className="mb-5 rounded-2xl bg-amber-wash px-4 py-3 text-sm text-amber">{task.verificationNote}</p>
+            <p className="mb-5 rounded-2xl bg-warn-soft px-4 py-3 text-sm text-warn">{task.verificationNote}</p>
           )}
           <p className="max-w-prose">{task.description}</p>
 
           <div className="mt-6 grid gap-6 md:grid-cols-2">
             <div>
-              <h4 className="mono-label text-muted">How to do it</h4>
+              <h4 className="mono-label text-ink-muted">How to do it</h4>
               <ol className="mt-3 grid gap-2.5 text-sm">
                 {task.steps.map((step, i) => (
                   <li key={step} className="flex gap-3">
-                    <span className="grid size-5 shrink-0 place-items-center rounded-full bg-white font-mono text-[0.6875rem] text-muted ring-1 ring-hair">
+                    <span className="grid size-5 shrink-0 place-items-center rounded-full bg-card font-mono text-[0.6875rem] text-ink-muted ring-1 ring-line">
                       {i + 1}
                     </span>
                     {step}
@@ -220,18 +220,18 @@ function TaskRow({
               </ol>
             </div>
             <div>
-              <h4 className="mono-label text-muted">Documents</h4>
+              <h4 className="mono-label text-ink-muted">Documents</h4>
               <ul className="mt-3 grid gap-2.5 text-sm">
                 {task.documents.map((doc) => (
                   <li key={doc} className="flex gap-2.5">
-                    <FileText className="mt-0.5 size-4 shrink-0 text-taupe" strokeWidth={1.75} aria-hidden="true" />
+                    <FileText className="mt-0.5 size-4 shrink-0 text-ink-faint" strokeWidth={1.75} aria-hidden="true" />
                     {doc}
                   </li>
                 ))}
               </ul>
               {task.financial && (
                 <>
-                  <h4 className="mono-label mt-6 text-muted">Money impact · {MONEY_LABEL[task.financial.kind]}</h4>
+                  <h4 className="mono-label mt-6 text-ink-muted">Money impact · {MONEY_LABEL[task.financial.kind]}</h4>
                   <p className="mt-3 text-sm">{task.financial.note}</p>
                 </>
               )}
@@ -239,32 +239,32 @@ function TaskRow({
           </div>
 
           {task.deadline?.date && (
-            <p className="mt-6 text-sm text-muted">
+            <p className="mt-6 text-sm text-ink-muted">
               <span className="font-semibold text-ink">Deadline as the source words it:</span> {task.deadline.label}. The
               date counts from your planned move date.
             </p>
           )}
 
-          <div className="mt-6 flex flex-wrap items-center gap-x-4 gap-y-3 rounded-2xl bg-white px-4 py-3 ring-1 ring-hair">
+          <div className="mt-6 flex flex-wrap items-center gap-x-4 gap-y-3 rounded-2xl bg-card px-4 py-3 ring-1 ring-line">
             <a
               href={task.source.url}
               target="_blank"
               rel="noreferrer"
-              className="inline-flex items-center gap-1.5 text-sm font-semibold text-moss underline-offset-4 hover:underline"
+              className="inline-flex items-center gap-1.5 text-sm font-semibold text-brand-ink underline-offset-4 hover:underline"
             >
               {task.source.name} <ArrowUpRight className="size-4" aria-hidden="true" />
             </a>
-            <span className="font-mono text-xs text-muted">
+            <span className="font-mono text-xs text-ink-muted">
               {task.verificationNote?.startsWith("Civio has no")
                 ? "directory link, rule not verified"
                 : `checked ${formatDate(task.source.lastVerified)}`}
               {task.source.effectiveDate ? ` · in effect since ${formatDate(task.source.effectiveDate)}` : ""}
             </span>
-            <span className="font-mono text-xs text-muted sm:ml-auto">{task.ruleId}</span>
+            <span className="font-mono text-xs text-ink-muted sm:ml-auto">{task.ruleId}</span>
           </div>
 
           <div className="mt-4 flex flex-wrap gap-2">
-            <button type="button" onClick={onToggleDone} className="btn btn-ink">
+            <button type="button" onClick={onToggleDone} className="btn btn-primary">
               {done ? "Mark as not done" : "Mark as done"}
             </button>
             <button type="button" onClick={onAsk} className="btn btn-quiet">
@@ -279,7 +279,7 @@ function TaskRow({
 
 function Skeleton() {
   return (
-    <div className="min-h-dvh bg-mist px-5 py-10 sm:px-8" aria-busy="true" aria-label="Loading your plan">
+    <div className="min-h-dvh bg-panel px-5 py-10 sm:px-8" aria-busy="true" aria-label="Loading your plan">
       <div className="mx-auto max-w-6xl">
         <div className="skeleton h-4 w-40" />
         <div className="skeleton mt-4 h-10 w-80 max-w-full" />
@@ -296,15 +296,15 @@ function Skeleton() {
 
 function NoPlan({ onDemo }: { onDemo: () => void }) {
   return (
-    <div className="grid min-h-dvh place-items-center bg-mist px-5">
+    <div className="grid min-h-dvh place-items-center bg-panel px-5">
       <div className="tile max-w-md p-8 text-center">
-        <span className="mx-auto grid size-12 place-items-center rounded-full bg-mist text-ink">
+        <span className="mx-auto grid size-12 place-items-center rounded-full bg-panel text-ink">
           <LayoutGrid className="size-5" aria-hidden="true" />
         </span>
         <h1 className="mt-5 text-2xl font-semibold tracking-tight">No plan yet</h1>
-        <p className="mt-2 text-muted">Answer a few questions about your move and Civio builds your checklist.</p>
+        <p className="mt-2 text-ink-muted">Answer a few questions about your move and Civio builds your checklist.</p>
         <div className="mt-6 flex flex-wrap justify-center gap-2">
-          <Link href="/onboarding" className="btn btn-ink">
+          <Link href="/onboarding" className="btn btn-primary">
             Get Started <ArrowRight className="size-4" aria-hidden="true" />
           </Link>
           <button type="button" onClick={onDemo} className="btn btn-quiet">
@@ -455,33 +455,33 @@ export default function DashboardPage() {
   const nextDue = next ? dueText(next) : null;
 
   return (
-    <div className="min-h-dvh bg-mist lg:grid lg:grid-cols-[17rem_minmax(0,1fr)]">
+    <div className="min-h-dvh bg-panel lg:grid lg:grid-cols-[17rem_minmax(0,1fr)]">
       {/* ── Sidebar ── */}
-      <aside className="hidden border-r border-hair bg-white/70 lg:block">
+      <aside className="hidden border-r border-line bg-card/70 lg:block">
         <div className="sticky top-0 flex h-dvh flex-col gap-4 p-4">
           <div className="flex items-center gap-3 rounded-2xl px-2 py-1.5">
-            <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-ink font-mono text-sm font-semibold text-white">
+            <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-stage font-mono text-sm font-semibold text-on-stage">
               {profile.destinationState}
             </span>
             <span className="min-w-0 flex-1">
               <span className="block truncate text-[0.9375rem] font-semibold">
                 {stateName(profile.currentState)} → {stateName(profile.destinationState)}
               </span>
-              <span className="block text-xs text-muted">
+              <span className="block text-xs text-ink-muted">
                 {counts.total} {counts.total === 1 ? "task" : "tasks"}
               </span>
             </span>
-            <ChevronsUpDown className="size-4 text-taupe" aria-hidden="true" />
+            <ChevronsUpDown className="size-4 text-ink-faint" aria-hidden="true" />
           </div>
 
           <button
             type="button"
             onClick={() => setPaletteOpen(true)}
-            className="flex min-h-10 items-center gap-2 rounded-xl bg-white px-3 text-left shadow-soft ring-1 ring-hair"
+            className="flex min-h-10 items-center gap-2 rounded-xl bg-card px-3 text-left shadow-soft ring-1 ring-line"
           >
-            <Search className="size-4 shrink-0 text-taupe" aria-hidden="true" />
-            <span className="flex-1 text-sm text-muted">Search tasks…</span>
-            <kbd className="rounded-md bg-mist px-1.5 py-0.5 font-mono text-[0.6875rem] text-muted">Ctrl K</kbd>
+            <Search className="size-4 shrink-0 text-ink-faint" aria-hidden="true" />
+            <span className="flex-1 text-sm text-ink-muted">Search tasks…</span>
+            <kbd className="rounded-md bg-panel px-1.5 py-0.5 font-mono text-[0.6875rem] text-ink-muted">Ctrl K</kbd>
           </button>
 
           <nav aria-label="Main" className="grid gap-0.5 text-[0.9375rem]">
@@ -495,30 +495,30 @@ export default function DashboardPage() {
             <button
               type="button"
               onClick={() => setAssistantOpen(true)}
-              className="flex min-h-10 items-center gap-2.5 rounded-xl px-3 text-left text-muted hover:text-ink"
+              className="flex min-h-10 items-center gap-2.5 rounded-xl px-3 text-left text-ink-muted hover:text-ink"
             >
               <MessageCircle className="size-4" strokeWidth={1.75} aria-hidden="true" /> Ask AI
             </button>
-            <Link href="/onboarding" className="flex min-h-10 items-center gap-2.5 rounded-xl px-3 text-muted hover:text-ink">
+            <Link href="/onboarding" className="flex min-h-10 items-center gap-2.5 rounded-xl px-3 text-ink-muted hover:text-ink">
               <UserRoundPen className="size-4" strokeWidth={1.75} aria-hidden="true" /> Edit profile
             </Link>
           </nav>
 
           <div>
-            <p className="mono-label px-3 text-muted">Modules</p>
+            <p className="mono-label px-3 text-ink-muted">Modules</p>
             <div className="mt-2 grid gap-0.5 text-[0.9375rem]">
               <button
                 type="button"
                 aria-pressed={category === "all"}
                 onClick={() => setCategory("all")}
                 className={`flex min-h-10 items-center gap-2 rounded-xl px-3 text-left ${
-                  category === "all" ? "bg-white font-semibold shadow-soft ring-1 ring-hair" : "text-muted hover:text-ink"
+                  category === "all" ? "bg-card font-semibold shadow-soft ring-1 ring-line" : "text-ink-muted hover:text-ink"
                 }`}
               >
-                <ChevronDown className="size-3.5 text-taupe" aria-hidden="true" />
+                <ChevronDown className="size-3.5 text-ink-faint" aria-hidden="true" />
                 <Folder className="size-4" fill="currentColor" strokeWidth={0} aria-hidden="true" />
                 <span className="flex-1">All tasks</span>
-                <span className="font-mono text-xs tabular-nums text-muted">{counts.total}</span>
+                <span className="font-mono text-xs tabular-nums text-ink-muted">{counts.total}</span>
               </button>
               {CATEGORIES.map((c) => (
                 <button
@@ -527,12 +527,12 @@ export default function DashboardPage() {
                   aria-pressed={category === c}
                   onClick={() => setCategory(c)}
                   className={`ml-5 flex min-h-10 items-center gap-2 rounded-xl px-3 text-left ${
-                    category === c ? "bg-white font-semibold shadow-soft ring-1 ring-hair" : "text-muted hover:text-ink"
+                    category === c ? "bg-card font-semibold shadow-soft ring-1 ring-line" : "text-ink-muted hover:text-ink"
                   }`}
                 >
                   <Folder className="size-4" style={{ color: TINT[c] }} fill="currentColor" strokeWidth={0} aria-hidden="true" />
                   <span className="flex-1 whitespace-nowrap">{CATEGORY_LABEL[c]}</span>
-                  <span className="font-mono text-xs tabular-nums text-muted">{counts.byCategory[c]}</span>
+                  <span className="font-mono text-xs tabular-nums text-ink-muted">{counts.byCategory[c]}</span>
                 </button>
               ))}
             </div>
@@ -541,7 +541,7 @@ export default function DashboardPage() {
           <button
             type="button"
             onClick={() => setConfirmReset(true)}
-            className="mt-auto flex min-h-10 items-center gap-2.5 rounded-xl px-3 text-left text-[0.9375rem] text-muted hover:text-ink"
+            className="mt-auto flex min-h-10 items-center gap-2.5 rounded-xl px-3 text-left text-[0.9375rem] text-ink-muted hover:text-ink"
           >
             <RotateCcw className="size-4" strokeWidth={1.75} aria-hidden="true" /> Start over
           </button>
@@ -552,7 +552,7 @@ export default function DashboardPage() {
       <main className="min-w-0 px-4 pb-16 pt-4 sm:px-6 lg:px-8 lg:pt-5">
         <div className="mx-auto max-w-6xl">
           <div className="flex items-center justify-between gap-3">
-            <div className="flex items-center gap-2 text-sm text-muted">
+            <div className="flex items-center gap-2 text-sm text-ink-muted">
               <span className="lg:hidden">
                 <Logo />
               </span>
@@ -565,7 +565,7 @@ export default function DashboardPage() {
               <Link href="/onboarding" className="btn btn-quiet lg:hidden" aria-label="Edit profile">
                 <UserRoundPen className="size-4" aria-hidden="true" />
               </Link>
-              <button type="button" onClick={() => setAssistantOpen(true)} className="btn btn-ink">
+              <button type="button" onClick={() => setAssistantOpen(true)} className="btn btn-primary">
                 <MessageCircle className="size-4" aria-hidden="true" /> Ask Civio
               </button>
             </div>
@@ -575,11 +575,11 @@ export default function DashboardPage() {
             <h1 className="text-[clamp(1.75rem,3vw,2.375rem)] font-semibold leading-tight tracking-[-0.03em]">
               Your moving plan
             </h1>
-            <p className="mt-1 flex flex-wrap items-center gap-2 text-muted">
+            <p className="mt-1 flex flex-wrap items-center gap-2 text-ink-muted">
               {stateName(profile.currentState)} <ArrowRight className="size-4" aria-hidden="true" />{" "}
               {stateName(profile.destinationState)}
               {profile.moveDate && <span>· moving {formatDate(profile.moveDate)}</span>}
-              {isDemo && <span className="rounded-full bg-ink px-2.5 py-0.5 text-xs font-semibold text-white">Demo</span>}
+              {isDemo && <span className="rounded-full bg-stage px-2.5 py-0.5 text-xs font-semibold text-on-stage">Demo</span>}
             </p>
           </div>
 
@@ -587,16 +587,15 @@ export default function DashboardPage() {
           <div className="mt-6 grid gap-4 xl:grid-cols-3">
             {/* Progress */}
             <section aria-labelledby="progress" className="tile relative flex flex-col overflow-hidden p-6">
-              <div className="iris pointer-events-none absolute -right-10 -top-12 size-44 rounded-full opacity-70 blur-2xl" aria-hidden="true" />
               <h2 id="progress" className="relative font-sans text-[0.9375rem] font-semibold">
                 Progress
               </h2>
               <p className="relative mt-6 flex items-baseline gap-2">
                 <span className="font-display text-5xl font-semibold tabular-nums">{counts.done}</span>
-                <span className="text-muted">of {counts.total} completed</span>
+                <span className="text-ink-muted">of {counts.total} completed</span>
               </p>
               <div
-                className="relative mb-8 mt-4 h-2.5 overflow-hidden rounded-full bg-mist"
+                className="relative mb-8 mt-4 h-2.5 overflow-hidden rounded-full bg-panel"
                 role="progressbar"
                 aria-valuemin={0}
                 aria-valuemax={100}
@@ -604,22 +603,22 @@ export default function DashboardPage() {
                 aria-label="Plan progress"
               >
                 <div
-                  className="h-full origin-left rounded-full bg-linear-to-r from-lilac to-rose transition-transform duration-500 ease-(--ease-out)"
+                  className="h-full origin-left rounded-full bg-brand transition-transform duration-500 ease-(--ease-out)"
                   style={{ transform: `scaleX(${Math.max(percent, 2) / 100})` }}
                 />
               </div>
-              <dl className="relative mt-auto grid grid-cols-3 gap-3 border-t border-hair pt-4">
+              <dl className="relative mt-auto grid grid-cols-3 gap-3 border-t border-line pt-4">
                 <div>
-                  <dt className="text-xs text-muted">Tasks</dt>
+                  <dt className="text-xs text-ink-muted">Tasks</dt>
                   <dd className="font-display text-2xl font-semibold tabular-nums">{counts.total}</dd>
                 </div>
                 <div>
-                  <dt className="text-xs text-muted">To review</dt>
-                  <dd className="font-display text-2xl font-semibold tabular-nums text-amber">{counts.review}</dd>
+                  <dt className="text-xs text-ink-muted">To review</dt>
+                  <dd className="font-display text-2xl font-semibold tabular-nums text-warn">{counts.review}</dd>
                 </div>
                 <div>
-                  <dt className="text-xs text-muted">Money at stake</dt>
-                  <dd className="font-display text-2xl font-semibold tabular-nums text-oxblood">{counts.money}</dd>
+                  <dt className="text-xs text-ink-muted">Money at stake</dt>
+                  <dd className="font-display text-2xl font-semibold tabular-nums text-risk">{counts.money}</dd>
                 </div>
               </dl>
             </section>
@@ -634,7 +633,7 @@ export default function DashboardPage() {
                   <ModuleDonut counts={counts.byCategory} total={counts.total} />
                   <div className="absolute inset-0 grid place-items-center text-center">
                     <div>
-                      <p className="text-xs text-muted">Total</p>
+                      <p className="text-xs text-ink-muted">Total</p>
                       <p className="font-display text-2xl font-semibold tabular-nums">{counts.total}</p>
                     </div>
                   </div>
@@ -643,7 +642,7 @@ export default function DashboardPage() {
                   {CATEGORIES.map((c) => (
                     <li key={c} className="flex items-center gap-2">
                       <span className="size-2.5 shrink-0 rounded-full" style={{ background: TINT[c] }} aria-hidden="true" />
-                      <span className="flex-1 truncate text-muted">{CATEGORY_LABEL[c]}</span>
+                      <span className="flex-1 truncate text-ink-muted">{CATEGORY_LABEL[c]}</span>
                       <span className="font-mono text-xs tabular-nums">{counts.byCategory[c]}</span>
                     </li>
                   ))}
@@ -660,37 +659,36 @@ export default function DashboardPage() {
                 <button
                   type="button"
                   onClick={() => reveal(next.id)}
-                  className="iris relative overflow-hidden rounded-panel p-6 text-left text-ink shadow-soft"
+                  className="on-stage stage-glow relative overflow-hidden rounded-panel p-6 text-left text-on-stage shadow-lift"
                 >
-                  <span className="absolute inset-0 bg-white/35" aria-hidden="true" />
                   <span className="relative flex items-center justify-between text-sm font-semibold">
                     Next up
-                    <span className="inline-flex items-center gap-1.5 rounded-full bg-white/70 px-2.5 py-1 text-xs">
+                    <span className="inline-flex items-center gap-1.5 rounded-full border border-stage-line px-2.5 py-1 text-xs text-on-stage-muted">
                       <CategoryIcon category={next.category} className="size-3.5" /> {CATEGORY_SHORT[next.category]}
                     </span>
                   </span>
                   <span className="relative mt-8 block font-display text-2xl font-semibold leading-tight tracking-tight">
                     {next.title}
                   </span>
-                  <span className="relative mt-2 block text-sm">{nextDue ? nextDue.text : "No deadline recorded"}</span>
+                  <span className="relative mt-2 block text-sm text-on-stage-muted">{nextDue ? nextDue.text : "No deadline recorded"}</span>
                 </button>
               ) : (
                 <div className="tile p-6">
                   <p className="font-semibold">Everything is done</p>
-                  <p className="mt-1 text-sm text-muted">Nothing left on this plan.</p>
+                  <p className="mt-1 text-sm text-ink-muted">Nothing left on this plan.</p>
                 </div>
               )}
               {later.length > 0 && (
-                <ul className="tile divide-y divide-hair px-5">
+                <ul className="tile divide-y divide-line px-5">
                   {later.map((task) => (
                     <li key={task.id}>
                       <button type="button" onClick={() => reveal(task.id)} className="flex w-full items-center gap-3 py-3.5 text-left">
-                        <span className="grid size-9 shrink-0 place-items-center rounded-full bg-mist">
+                        <span className="grid size-9 shrink-0 place-items-center rounded-full bg-panel">
                           <CategoryIcon category={task.category} />
                         </span>
                         <span className="min-w-0 flex-1">
                           <span className="block truncate text-sm font-semibold">{task.title}</span>
-                          <span className="block text-xs text-muted">{CATEGORY_SHORT[task.category]}</span>
+                          <span className="block text-xs text-ink-muted">{CATEGORY_SHORT[task.category]}</span>
                         </span>
                         {task.deadline?.date && (
                           <span className="shrink-0 font-mono text-xs tabular-nums">{formatShortDate(task.deadline.date)}</span>
@@ -715,12 +713,12 @@ export default function DashboardPage() {
                   aria-pressed={active}
                   onClick={() => setCategory(active ? "all" : c)}
                   className={`rounded-panel p-4 text-left transition-colors duration-150 ${
-                    active ? "bg-white shadow-soft ring-1 ring-hair" : "hover:bg-white/60"
+                    active ? "bg-card shadow-soft ring-1 ring-line" : "hover:bg-card/60"
                   }`}
                 >
                   <FolderArt tint={TINT[c]} sheets={counts.byCategory[c]} />
                   <p className="mt-3 text-center font-semibold">{CATEGORY_LABEL[c]}</p>
-                  <p className="text-center text-sm text-muted">
+                  <p className="text-center text-sm text-ink-muted">
                     {counts.byCategory[c]} {counts.byCategory[c] === 1 ? "task" : "tasks"} · {counts.doneByCategory[c]} done
                   </p>
                 </button>
@@ -741,7 +739,7 @@ export default function DashboardPage() {
                   aria-pressed={status === s.value}
                   onClick={() => setStatus(s.value)}
                   className={`min-h-10 rounded-full px-4 text-sm font-semibold transition-colors duration-150 ${
-                    status === s.value ? "bg-ink text-white" : "bg-white text-muted shadow-soft"
+                    status === s.value ? "bg-brand-soft text-brand-ink ring-1 ring-brand-tint" : "bg-card text-ink-muted shadow-soft"
                   }`}
                 >
                   {s.label}
@@ -752,7 +750,7 @@ export default function DashboardPage() {
                 aria-pressed={moneyOnly}
                 onClick={() => setMoneyOnly((v) => !v)}
                 className={`inline-flex min-h-10 items-center gap-1.5 rounded-full px-4 text-sm font-semibold transition-colors duration-150 ${
-                  moneyOnly ? "bg-oxblood text-on-oxblood" : "bg-white text-muted shadow-soft"
+                  moneyOnly ? "bg-brand-soft text-brand-ink ring-1 ring-brand-tint" : "bg-card text-ink-muted shadow-soft"
                 }`}
               >
                 <CircleDollarSign className="size-4" aria-hidden="true" /> Money
@@ -761,15 +759,15 @@ export default function DashboardPage() {
           </div>
 
           <div className="mt-3 lg:hidden">
-            <label className="flex min-h-11 items-center gap-2 rounded-full bg-white px-4 shadow-soft">
-              <Search className="size-4 shrink-0 text-taupe" aria-hidden="true" />
+            <label className="flex min-h-11 items-center gap-2 rounded-full bg-card px-4 shadow-soft">
+              <Search className="size-4 shrink-0 text-ink-faint" aria-hidden="true" />
               <span className="sr-only">Search tasks</span>
               <input
                 type="search"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Search tasks…"
-                className="min-w-0 flex-1 bg-transparent text-base placeholder:text-muted focus-visible:outline-none"
+                className="min-w-0 flex-1 bg-transparent text-base placeholder:text-ink-muted focus-visible:outline-none"
               />
             </label>
           </div>
@@ -777,7 +775,7 @@ export default function DashboardPage() {
           {visible.length === 0 ? (
             <div className="tile mt-4 p-8 text-center">
               <p className="font-semibold">No tasks match</p>
-              <p className="mt-1 text-sm text-muted">
+              <p className="mt-1 text-sm text-ink-muted">
                 {filtered ? "Try a different search, status or module." : "The rules found nothing for this profile."}
               </p>
               {filtered && (
@@ -788,7 +786,7 @@ export default function DashboardPage() {
             </div>
           ) : (
             <div className="tile mt-4 overflow-hidden">
-              <div className="hidden grid-cols-[1.75rem_minmax(0,1fr)_7.5rem_13rem_10.5rem_1.25rem] items-center gap-4 bg-mist/60 px-5 py-3 text-sm text-muted md:grid">
+              <div className="hidden grid-cols-[1.75rem_minmax(0,1fr)_7.5rem_13rem_10.5rem_1.25rem] items-center gap-4 bg-panel/60 px-5 py-3 text-sm text-ink-muted md:grid">
                 <span />
                 <span className="-ml-1">Name</span>
                 <span>Module</span>
@@ -812,7 +810,7 @@ export default function DashboardPage() {
             </div>
           )}
 
-          <p className="mt-8 text-sm text-muted">
+          <p className="mt-8 text-sm text-ink-muted">
             Civio gives general information from official sources. It is not legal, tax or insurance advice, and it does
             not estimate savings.
           </p>

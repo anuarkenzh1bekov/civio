@@ -42,7 +42,7 @@ export default function LandingPage() {
       {/* ── Nav ── */}
       <header className="mx-auto flex max-w-[88rem] items-center justify-between gap-4 px-5 py-4 sm:px-8">
         <Logo />
-        <nav aria-label="Primary" className="hidden items-center gap-8 text-[0.9375rem] text-muted md:flex">
+        <nav aria-label="Primary" className="hidden items-center gap-8 text-[0.9375rem] text-ink-muted md:flex">
           <a href="#how" className="hover:text-ink">
             How it works
           </a>
@@ -53,23 +53,23 @@ export default function LandingPage() {
             Sources
           </a>
         </nav>
-        <Link href="/dashboard?demo=1" className="btn btn-ink">
+        <Link href="/dashboard?demo=1" className="btn btn-primary">
           Open demo
         </Link>
       </header>
 
       {/* ── Hook ── */}
       <section className="px-3 sm:px-5">
-        <div className="hero-stage relative mx-auto max-w-[88rem] overflow-hidden rounded-shell text-white">
-          <div className="hero-beams pointer-events-none absolute inset-0" aria-hidden="true" />
-          <div className="hero-dots pointer-events-none absolute inset-0" aria-hidden="true" />
+        <div className="stage-glow relative mx-auto max-w-[88rem] overflow-hidden rounded-shell text-on-stage">
+          <div className="stage-beams pointer-events-none absolute inset-0" aria-hidden="true" />
+          <div className="stage-dots pointer-events-none absolute inset-0" aria-hidden="true" />
 
           <Reveal immediate className="relative px-5 pt-16 text-center sm:px-8 sm:pt-24">
             <p
               data-reveal
-              className="mono-label mx-auto inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3.5 py-2 text-white/80"
+              className="mono-label mx-auto inline-flex items-center gap-2 rounded-full border border-stage-line bg-stage-raised/60 px-3.5 py-2 text-on-stage-muted"
             >
-              <span className="size-1.5 rounded-full bg-lime" aria-hidden="true" />
+              <span className="size-1.5 rounded-full bg-brand-bright" aria-hidden="true" />
               For moves between US states
             </p>
             <h1
@@ -80,23 +80,23 @@ export default function LandingPage() {
               <br />
               Civio makes it <span className="serif-accent text-[1.06em]">simple.</span>
             </h1>
-            <p data-reveal className="mx-auto mt-6 max-w-lg text-lg text-white/70">
+            <p data-reveal className="mx-auto mt-6 max-w-lg text-lg text-on-stage-muted">
               Manage taxes, insurance, paperwork, and life changes — all in one place.
             </p>
             <div data-reveal className="mt-9 flex flex-wrap items-center justify-center gap-3">
-              <Link href="/onboarding" className="btn bg-white text-ink">
+              <Link href="/onboarding" className="btn btn-stage">
                 Get Started <ArrowRight className="size-4" aria-hidden="true" />
               </Link>
-              <Link href="/dashboard?demo=1" className="btn border border-white/20 text-white">
+              <Link href="/dashboard?demo=1" className="btn btn-stage-quiet">
                 See a sample plan
               </Link>
             </div>
 
             {/* The product itself, rising out of the stage */}
             <div data-reveal className="relative mx-auto mt-16 max-w-5xl sm:mt-20">
-              <div className="h-56 overflow-hidden rounded-t-[1.75rem] border border-b-0 border-white/15 bg-white/5 p-2 pb-0 sm:h-[30rem]">
+              <div className="h-56 overflow-hidden rounded-t-[1.75rem] border border-b-0 border-stage-line bg-stage-raised/60 p-2 pb-0 sm:h-[30rem]">
                 <Image
-                  src="/landing/dashboard.png"
+                  src="/landing/dashboard-harbor.png"
                   alt="Civio dashboard for a move from Texas to California: progress, tasks by module, the next deadline and the task list"
                   width={2880}
                   height={1720}
@@ -106,7 +106,7 @@ export default function LandingPage() {
                 />
               </div>
               <div
-                className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-linear-to-t from-[#171c0e] to-transparent"
+                className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-linear-to-t from-stage to-transparent"
                 aria-hidden="true"
               />
             </div>
@@ -116,8 +116,8 @@ export default function LandingPage() {
 
       {/* ── Whose rules these are ── */}
       <section aria-label="Sources" className="mx-auto max-w-6xl px-5 pt-12 sm:px-8">
-        <p className="text-center text-sm text-muted">Rules copied from the agencies that set them</p>
-        <ul className="mt-5 flex flex-wrap items-center justify-center gap-x-8 gap-y-3 text-[0.9375rem] font-medium text-taupe">
+        <p className="text-center text-sm text-ink-muted">Rules copied from the agencies that set them</p>
+        <ul className="mt-5 flex flex-wrap items-center justify-center gap-x-8 gap-y-3 text-[0.9375rem] font-medium text-ink-faint">
           {AGENCIES.map((agency) => (
             <li key={agency} className="whitespace-nowrap">
               {agency}
@@ -129,11 +129,11 @@ export default function LandingPage() {
       {/* ── How it works: three steps ── */}
       <section id="how" className="mx-auto max-w-6xl scroll-mt-8 px-5 py-24 sm:px-8 lg:py-32">
         <Reveal>
-          <p data-reveal className="mono-label text-center text-moss">
+          <p data-reveal className="mono-label text-center text-ink-muted">
             How it works
           </p>
           <h2 data-reveal className={`mx-auto mt-4 max-w-3xl text-center ${H2}`}>
-            From a move to a plan, <span className="serif-accent text-taupe">in three steps.</span>
+            From a move to a plan, <span className="serif-accent text-ink-faint">in three steps.</span>
           </h2>
 
           <div className="mt-16 grid items-center gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.9fr)_minmax(0,1fr)]">
@@ -141,49 +141,49 @@ export default function LandingPage() {
               {STEPS.map((step) => (
                 <li key={step.n} className="border-t border-line pt-4">
                   <p className="flex items-baseline gap-3 font-semibold">
-                    <span className="font-mono text-sm text-taupe">{step.n}/</span>
+                    <span className="font-mono text-sm text-ink-faint">{step.n}/</span>
                     {step.title}
                   </p>
-                  <p className="mt-1 pl-9 text-sm text-muted">{step.body}</p>
+                  <p className="mt-1 pl-9 text-sm text-ink-muted">{step.body}</p>
                 </li>
               ))}
             </ol>
 
             {/* Collage of real interface pieces */}
             <div data-reveal className="relative mx-auto h-80 w-full max-w-xs" aria-hidden="true">
-              <div className="hero-stage absolute left-0 top-0 grid size-28 place-items-center rounded-panel text-white shadow-lift">
-                <span className="grid size-14 place-items-center rounded-2xl border border-white/20 bg-white/10">
+              <div className="stage-glow absolute left-0 top-0 grid size-28 place-items-center rounded-panel text-on-stage shadow-lift">
+                <span className="grid size-14 place-items-center rounded-2xl border border-stage-line bg-stage-raised">
                   <CategoryIcon category="vehicle" className="size-6" />
                 </span>
               </div>
-              <div className="absolute left-12 top-16 w-56 rounded-panel bg-night p-4 text-white shadow-lift">
+              <div className="absolute left-12 top-16 w-56 rounded-panel bg-stage p-4 text-on-stage shadow-lift">
                 <div className="flex gap-1">
-                  <span className="h-1 w-6 rounded-full bg-white" />
-                  <span className="h-1 w-1.5 rounded-full bg-night-line" />
-                  <span className="h-1 w-1.5 rounded-full bg-night-line" />
+                  <span className="h-1 w-6 rounded-full bg-on-stage" />
+                  <span className="h-1 w-1.5 rounded-full bg-stage-line" />
+                  <span className="h-1 w-1.5 rounded-full bg-stage-line" />
                 </div>
                 <p className="mt-3 text-sm font-semibold">Do you own a vehicle?</p>
-                <div className="mt-3 rounded-xl border border-lime px-3 py-2 text-sm">Yes</div>
-                <div className="mt-1.5 rounded-xl border border-night-line px-3 py-2 text-sm text-night-muted">No</div>
+                <div className="mt-3 rounded-xl border border-brand-bright px-3 py-2 text-sm">Yes</div>
+                <div className="mt-1.5 rounded-xl border border-stage-line px-3 py-2 text-sm text-on-stage-muted">No</div>
               </div>
-              <div className="absolute bottom-0 right-0 w-44 rounded-panel bg-white p-4 shadow-lift">
-                <p className="text-xs text-muted">Due</p>
+              <div className="absolute bottom-0 right-0 w-44 rounded-panel bg-card p-4 shadow-lift">
+                <p className="text-xs text-ink-muted">Due</p>
                 <p className="font-display text-2xl font-semibold">{formatShortDate(first?.deadline?.date)}</p>
-                <div className="iris mt-3 h-10 rounded-xl opacity-80" />
+                <div className="mt-3 h-10 rounded-xl bg-brand-soft" />
               </div>
             </div>
 
             <dl data-reveal className="grid grid-cols-3 gap-4 border-t border-line pt-4 lg:self-start">
               <div>
-                <dt className="text-sm text-muted">rules</dt>
+                <dt className="text-sm text-ink-muted">rules</dt>
                 <dd className="font-display text-3xl font-semibold tabular-nums">{RULES.length}</dd>
               </div>
               <div>
-                <dt className="text-sm text-muted">sourced</dt>
+                <dt className="text-sm text-ink-muted">sourced</dt>
                 <dd className="font-display text-3xl font-semibold tabular-nums">{verified.length}</dd>
               </div>
               <div>
-                <dt className="text-sm text-muted">modules</dt>
+                <dt className="text-sm text-ink-muted">modules</dt>
                 <dd className="font-display text-3xl font-semibold tabular-nums">4</dd>
               </div>
             </dl>
@@ -193,29 +193,29 @@ export default function LandingPage() {
 
       {/* ── Problem: dark band ── */}
       <section className="px-3 sm:px-5">
-        <div className="on-dark mx-auto max-w-[88rem] rounded-shell bg-espresso text-cream">
+        <div className="on-stage mx-auto max-w-[88rem] rounded-shell bg-stage text-on-stage">
           <Reveal className="mx-auto max-w-6xl px-5 py-20 sm:px-8 lg:py-28">
             <h2 data-reveal className={`max-w-3xl ${H2}`}>
               One move resets your paperwork.{" "}
-              <span className="serif-accent text-dark-muted">And every state runs a different clock.</span>
+              <span className="serif-accent text-on-stage-muted">And every state runs a different clock.</span>
             </h2>
 
             <div className="mt-14 grid gap-10 lg:grid-cols-2 lg:gap-16">
               {CLOCKS.map((clock) => (
                 <div key={clock.errand} data-reveal>
-                  <p className="mono-label text-dark-muted">{clock.errand}</p>
+                  <p className="mono-label text-on-stage-muted">{clock.errand}</p>
                   <div className="mt-5 grid gap-5">
                     {clock.rows.map((row) => (
                       <div key={row.state}>
                         <div className="flex items-baseline justify-between">
                           <span className="text-[0.9375rem]">{row.state}</span>
                           <span className="font-display text-3xl font-semibold tabular-nums">
-                            {row.days} <span className="text-base font-normal text-dark-muted">days</span>
+                            {row.days} <span className="text-base font-normal text-on-stage-muted">days</span>
                           </span>
                         </div>
-                        <div className="mt-2 h-2 rounded-full bg-espresso-raised">
+                        <div className="mt-2 h-2 rounded-full bg-stage-raised">
                           <div
-                            className="h-2 rounded-full bg-moss-fill"
+                            className="h-2 rounded-full bg-brand-bright"
                             style={{ width: `${Math.max(4, (row.days / LONGEST) * 100)}%` }}
                           />
                         </div>
@@ -225,7 +225,7 @@ export default function LandingPage() {
                 </div>
               ))}
             </div>
-            <p data-reveal className="mt-10 max-w-xl text-sm text-dark-muted">
+            <p data-reveal className="mt-10 max-w-xl text-sm text-on-stage-muted">
               Time a new resident has after moving, as published by the California DMV and the Texas DMV. Miss one and
               the state adds late fees.
             </p>
@@ -237,9 +237,9 @@ export default function LandingPage() {
       <section id="engine" className="mx-auto max-w-6xl scroll-mt-8 px-5 py-24 sm:px-8 lg:py-32">
         <Reveal>
           <h2 data-reveal className={`max-w-2xl ${H2}`}>
-            Change one answer. <span className="serif-accent text-taupe">Watch the whole plan follow.</span>
+            Change one answer. <span className="serif-accent text-ink-faint">Watch the whole plan follow.</span>
           </h2>
-          <p data-reveal className="mt-5 max-w-xl text-lg text-muted">
+          <p data-reveal className="mt-5 max-w-xl text-lg text-ink-muted">
             This is Civio's rule engine running live. Try it.
           </p>
           <div data-reveal className="mt-12">
@@ -250,23 +250,23 @@ export default function LandingPage() {
 
       {/* ── Proof: where a task comes from ── */}
       <section id="sources" className="scroll-mt-8 px-3 sm:px-5">
-        <div className="mx-auto max-w-[88rem] rounded-shell bg-surface">
+        <div className="mx-auto max-w-[88rem] rounded-shell bg-panel">
           <Reveal className="mx-auto grid max-w-6xl gap-12 px-5 py-20 sm:px-8 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] lg:items-center lg:gap-16 lg:py-28">
             <div>
               <h2 data-reveal className={H2}>
-                Rules decide. <span className="serif-accent text-taupe">AI explains.</span>
+                Rules decide. <span className="serif-accent text-ink-faint">AI explains.</span>
               </h2>
-              <p data-reveal className="mt-5 text-lg text-muted">
+              <p data-reveal className="mt-5 text-lg text-ink-muted">
                 Every deadline comes from a rule copied from an official source, with the link and the date it was
                 checked. The assistant can put it in plain words. It cannot invent one.
               </p>
               <dl data-reveal className="mt-8 grid grid-cols-2 gap-6 border-t border-line pt-6">
                 <div>
-                  <dt className="text-sm text-muted">Rules in the base</dt>
+                  <dt className="text-sm text-ink-muted">Rules in the base</dt>
                   <dd className="font-display text-4xl font-semibold tabular-nums">{RULES.length}</dd>
                 </div>
                 <div>
-                  <dt className="text-sm text-muted">Flagged, not guessed</dt>
+                  <dt className="text-sm text-ink-muted">Flagged, not guessed</dt>
                   <dd className="font-display text-4xl font-semibold tabular-nums">{RULES.length - verified.length}</dd>
                 </div>
               </dl>
@@ -275,48 +275,48 @@ export default function LandingPage() {
             {anatomy && (
               <div data-reveal className="tile p-6 sm:p-8">
                 <div className="flex flex-wrap items-center gap-2">
-                  <span className="inline-flex items-center gap-1.5 rounded-full bg-mist px-2.5 py-1 text-xs font-semibold text-muted">
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-panel px-2.5 py-1 text-xs font-semibold text-ink-muted">
                     <CategoryIcon category={anatomy.category} className="size-3.5" /> Vehicle
                   </span>
-                  <span className="rounded-full bg-oxblood-wash px-2.5 py-1 text-xs font-semibold text-oxblood">High</span>
-                  <span className="ml-auto font-mono text-xs text-muted">{anatomy.ruleId}</span>
+                  <span className="rounded-full bg-risk-soft px-2.5 py-1 text-xs font-semibold text-risk">High</span>
+                  <span className="ml-auto font-mono text-xs text-ink-muted">{anatomy.ruleId}</span>
                 </div>
                 <h3 className="mt-4 text-2xl font-semibold tracking-tight">{anatomy.title}</h3>
-                <p className="mt-2 text-muted">{anatomy.deadline?.label}</p>
+                <p className="mt-2 text-ink-muted">{anatomy.deadline?.label}</p>
 
                 <div className="mt-6 grid gap-5 sm:grid-cols-2">
                   <div>
-                    <p className="mono-label text-muted">Documents</p>
+                    <p className="mono-label text-ink-muted">Documents</p>
                     <ul className="mt-3 grid gap-2 text-sm">
                       {anatomy.documents.slice(0, 4).map((doc) => (
                         <li key={doc} className="flex items-start gap-2">
-                          <FileText className="mt-0.5 size-4 shrink-0 text-taupe" aria-hidden="true" strokeWidth={1.75} />
+                          <FileText className="mt-0.5 size-4 shrink-0 text-ink-faint" aria-hidden="true" strokeWidth={1.75} />
                           {doc}
                         </li>
                       ))}
                     </ul>
                   </div>
                   <div>
-                    <p className="mono-label text-muted">Money impact</p>
+                    <p className="mono-label text-ink-muted">Money impact</p>
                     <p className="mt-3 text-sm">{anatomy.financial?.note}</p>
                   </div>
                 </div>
 
-                <div className="mt-6 flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-moss-wash px-4 py-3">
+                <div className="mt-6 flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-panel px-4 py-3">
                   <a
                     href={anatomy.source.url}
                     target="_blank"
                     rel="noreferrer"
-                    className="inline-flex items-center gap-1.5 text-sm font-semibold text-moss underline-offset-4 hover:underline"
+                    className="inline-flex items-center gap-1.5 text-sm font-semibold text-brand-ink underline-offset-4 hover:underline"
                   >
                     {anatomy.source.name} <ArrowUpRight className="size-4" aria-hidden="true" />
                   </a>
-                  <span className="font-mono text-xs text-moss">checked {formatDate(anatomy.source.lastVerified)}</span>
+                  <span className="font-mono text-xs text-ink-muted">checked {formatDate(anatomy.source.lastVerified)}</span>
                 </div>
 
-                <div className="mt-4 flex items-start gap-3 rounded-2xl border border-hair px-4 py-3">
-                  <MessageCircle className="mt-0.5 size-4 shrink-0 text-oxblood" aria-hidden="true" strokeWidth={1.75} />
-                  <p className="text-sm text-muted">
+                <div className="mt-4 flex items-start gap-3 rounded-2xl border border-line px-4 py-3">
+                  <MessageCircle className="mt-0.5 size-4 shrink-0 text-brand-ink" aria-hidden="true" strokeWidth={1.75} />
+                  <p className="text-sm text-ink-muted">
                     <span className="font-semibold text-ink">Ask Civio:</span> “What if my smog check isn't done in
                     time?”
                   </p>
@@ -329,17 +329,17 @@ export default function LandingPage() {
 
       {/* ── Close: the stage again ── */}
       <section className="px-3 py-24 sm:px-5 lg:py-32">
-        <div className="hero-stage relative mx-auto max-w-[88rem] overflow-hidden rounded-shell text-white">
-          <div className="hero-dots pointer-events-none absolute inset-0" aria-hidden="true" />
+        <div className="stage-glow relative mx-auto max-w-[88rem] overflow-hidden rounded-shell text-on-stage">
+          <div className="stage-dots pointer-events-none absolute inset-0" aria-hidden="true" />
           <Reveal className="relative px-5 py-20 text-center sm:px-8 lg:py-28">
             <h2 data-reveal className={`mx-auto max-w-3xl ${H2}`}>
               Twelve questions. Then you know what's due, <span className="serif-accent">and when.</span>
             </h2>
             <div data-reveal className="mt-9 flex flex-wrap justify-center gap-3">
-              <Link href="/onboarding" className="btn bg-white text-ink">
+              <Link href="/onboarding" className="btn btn-stage">
                 Get Started <ArrowRight className="size-4" aria-hidden="true" />
               </Link>
-              <Link href="/dashboard?demo=1" className="btn border border-white/20 text-white">
+              <Link href="/dashboard?demo=1" className="btn btn-stage-quiet">
                 See a sample plan
               </Link>
             </div>
@@ -348,7 +348,7 @@ export default function LandingPage() {
       </section>
 
       <footer className="border-t border-line">
-        <div className="mx-auto flex max-w-6xl flex-col gap-3 px-5 py-8 text-sm text-muted sm:flex-row sm:items-center sm:justify-between sm:px-8">
+        <div className="mx-auto flex max-w-6xl flex-col gap-3 px-5 py-8 text-sm text-ink-muted sm:flex-row sm:items-center sm:justify-between sm:px-8">
           <Logo />
           <p className="max-w-xl sm:text-right">
             Civio gives general information from official sources. It is not legal, tax or insurance advice.

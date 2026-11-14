@@ -1,63 +1,69 @@
 # Style lock — Civio
 
-Established: 2026-11-14. Source: five reference images from the user (warm fintech landing, green pharmacy hero, dark onboarding cards, soft wallet dashboard, knowledge-base sidebar). Palette extracted with `extract_palette.py` from images 1 and 2, then adjusted and verified with `check_contrast.py --matrix`.
+Established: 2026-11-14. Revised the same day four times; this file is the current state.
+Colour source: generated in OKLCH (palette "Harbor slate"), not taken from the reference images. The user's references set layout and structure only.
 
-## Palette
-- Background (paper): #ECE8DD
-- Surface: #F7F4EC · Raised (cards): #FFFDF8
-- Primary (oxblood): #6B2A27, label #F7F4EC — 9.62:1
-- Text: #2A1513 — 14.12:1 on paper · Muted: #6B5A52 — 5.34:1 on paper
-- Taupe #8A766A: second tone in display headings only (large text)
-- Moss #4B5229 (text, done state) · Moss fill #7D874D (bars, icons; UI-safe only)
-- Amber #7A4E0E on #F1E4C8: needs-verification state
-- Dark sections: espresso #2C1411, raised #3A1D19, text #ECE8DD, muted #B5A598 (7.24:1)
-- Dark mode: not needed. Dark is a section treatment (problem section, onboarding, priorities card), not a theme.
+## Palette: Harbor slate
+One neutral ramp, one accent ramp, three status pairs. Primitives live in `:root` of `src/app/globals.css` (`--slate-*`, `--slate-d*`, `--harbor-*`, `--green-*`, `--amber-*`, `--red-*`). Components use only the semantic tokens below.
 
-## Color contract
-- Never put oxblood, moss or amber text on espresso (all under 3:1). On dark use on-dark, dark-muted or moss fill.
-- Moss fill never carries text.
-- Hairline borders (#D5CFC0) are decorative; state is carried by fill or text color.
+- Neutral `slate`, hue 215, chroma 0.010 (tinted toward the accent so greys and accent read as one family). Dark end `slate-d1…d4` is the stage.
+- Accent `harbor`, hue 205, peak chroma 0.10. Calm teal for a trust and money product.
+- Status: green (done), amber (needs verification), red (deadline close, money at stake).
+
+| Token | Value | Role |
+|---|---|---|
+| canvas | #f0f5f7 | page background |
+| panel | #e9eeef | subtle surface, tracks, chips |
+| card | #ffffff | raised surface |
+| line / line-strong | #d4dddf / #b4bcbe | decorative separator / hover border |
+| ink | #1a2122 | body and headings |
+| ink-muted | #636a6c | secondary text |
+| ink-faint | #7a8284 | display-size second tone and decorative icons only |
+| brand / brand-hover | #016770 / #00555c | the one filled action of a light view |
+| brand-ink | #00555c | links, accent text |
+| brand-soft / brand-tint | #dbf2f4 / #bbe3e8 | selected backgrounds / their ring |
+| stage / stage-raised / stage-line | #071114 / #101a1d / #2c383b | dark surfaces |
+| on-stage / on-stage-muted | #f6fbfd / #b4bcbe | text on dark |
+| brand-bright | #5aadb7 | accent on dark: selection rings, checks, bars, focus ring |
+| ok, warn, risk (+ -soft) | #0a693c, #7a4d04, #9a2929 | status text on its soft background |
+| risk-bright | #f2a49c | error text on the stage |
+| mod-taxes … mod-family | harbor 10, 8, 6, 4 | modules, told apart by lightness inside one hue |
+
+## Color contract (measured)
+- Text pairs: ink/canvas 14.88 · ink-muted/panel 4.71 (lowest) · on-brand/brand 6.61 · brand-ink/canvas 7.79 · brand-ink/brand-soft 7.34 · on-stage/stage 18.32 · on-stage-muted/stage 9.89 · ok/ok-soft 5.92 · warn/warn-soft 6.25 · risk/risk-soft 6.61.
+- UI pairs: brand-bright/stage 7.36 (ring), brand/card 6.61 (fill shows on page).
+- Decorative only, never the sole carrier of state: stage-line/stage 1.58, line-strong/card 1.93, ink-faint on canvas 3.6 (large text only).
+- One meaning per colour: harbor = interactive or selected; red = time or money at risk; amber = needs verification; green = done. Static labels stay neutral.
+- One filled action per view: brand on light surfaces, on-stage (light button) on the stage.
+
+## Astryx
+- Theme `@astryxdesign/theme-neutral`; the unlayered `[data-astryx-theme]` block in `globals.css` maps its accent, focus, text, surface and border tokens to Harbor with `light-dark()`, and sets `--size-element-lg: 3rem`.
+- Civio token names never reuse an Astryx name (checked against core + theme variable lists).
 
 ## Typography
-- Display: Bricolage Grotesque 500–600, tight tracking, two-tone sentences (ink + taupe)
-- Body: Instrument Sans · Data and labels: Geist Mono (dates, rule ids, uppercase section labels)
+- Display: Bricolage Grotesque; section headings weight 400 with one Instrument Serif italic accent phrase (`.serif-accent`), the user's reference style.
+- Body: Instrument Sans · Data and labels: Geist Mono.
 
 ## Shape language
-- Radius: 20px cards, 28px panels, full pills for buttons and badges
-- Shadow: soft and low; borders do most of the separation
+- Radius: 20px cards, 28px panels, 32px stage shells, full pills for buttons and badges.
+- Shadows tinted with the stage hue, soft and low.
 
 ## Structure
-- Landing: long-scroll narrative. hook (split hero + plan card) → problem (dark, real deadline bars) → solution (live rule engine) → proof (task anatomy with source) → close.
-- App shell: left sidebar (categories), main column, assistant column on wide screens and slide-over below 1280px.
-- Onboarding: dark stage, step list left, one question group at a time.
+- Landing: nav on the page (logo, three links, one brand button) → dark stage hero with sentence-case headline, two actions and a real dashboard screenshot → agency row → three steps → dark band with deadline bars → live rule engine → task anatomy with source → stage closing CTA.
+- Onboarding: dark stage, stacked bordered cards, progress dots, light primary button, option rows with a brand-bright ring, "plan so far" card.
+- Dashboard: sidebar (plan switcher, search, module tree) → progress, donut, dark "Next up" card → module folders → task table. Assistant in a drawer.
 
 ## Motion
 - Landing: GSAP reveals on scroll, 0.7s power3.out, off under reduced motion.
-- App: 150–260ms color and opacity transitions, list rows rise 8px with a short stagger.
+- App: 150–260ms colour and opacity transitions, list rows rise 8px with a short stagger.
 
 ## Assets
-- Logo: constructed mark (open route closing on a point) + Bricolage wordmark. `src/app/icon.svg`.
-- Icons: lucide only. No photography or illustration in this pass; visuals are product UI and real rule data.
+- Logo: constructed mark + Bricolage wordmark, mark in brand. `src/app/icon.svg` matches the brand fill.
+- Hero screenshot: `public/landing/dashboard-harbor.png`. Re-capture after any dashboard change and give it a new file name (Next's image cache keys on the URL).
+- Icons: lucide only. No photography.
 
 ## Do not
-- No invented metrics, testimonials or savings claims.
-- No gradients, no emoji icons.
-
-## Revision 2 (2026-11-14): one reference per surface
-The user rejected the first pass for leaning on reference 1 only. Each reference now owns a surface:
-- Reference 2 → landing hero: green atmosphere panel (CSS, no photo), centered glass pill nav, uppercase headline, glass plan card, white cards on the lower band, "3 steps" section.
-- Reference 1 → dark espresso band with deadline bars, two-tone section headings, oxblood accents.
-- Reference 3 → onboarding: night #0F0D0D stage, stacked bordered cards, progress dots, lime primary button, option rows with a lime ring, "plan so far" card.
-- Reference 4 → dashboard body: mist #F1EFF0 background, white 28px tiles, iridescent rose/lilac/sky/peach accents, donut by module, gradient progress bar.
-- Reference 5 → dashboard chrome: sidebar with plan switcher, search, module tree; folder cards per module; tasks as a table.
-Module tints: taxes rose, health moss, vehicle sky, family peach. Tints never carry text.
-
-## Revision 3 (2026-11-14): landing hero
-The user rejected the green hero and sent four more hero references (dark photographic stage, beige fintech, blue gradient with a pixel field). Common ground taken from them:
-- Nav sits on the page, outside the hero frame: logo, three text links, one ink button.
-- Hero is a dark rounded stage (`.hero-stage`): near-black olive, one light source top right, a lime dot field in the lower corners. Built in CSS; there is still no photograph.
-- Headline in sentence case, weight 400, with one word in Instrument Serif italic (`.serif-accent`). The same accent closes each section heading. This is the user's reference style and overrides the "no italic emphasis" default.
-- One white primary button and one outline button. No floating chips, no stat cards in the hero.
-- The hero visual is a real screenshot of the dashboard (`public/landing/dashboard.png`, re-capture after dashboard changes).
-- A row of agency names under the hero comes from the verified rules' sources.
-- The closing call to action reuses the stage.
+- No colours from the reference images. They were for layout only (user, 2026-11-14).
+- No second accent hue, no iridescent or pastel multi-hue decoration.
+- No raw hex or rgb in components; add a role token instead.
+- No invented metrics, testimonials or savings claims. No emoji icons.
