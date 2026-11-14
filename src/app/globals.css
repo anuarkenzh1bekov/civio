@@ -1,0 +1,266 @@
+/* tastemaker · structure: long-scroll narrative · nav: inset pill bar · hero: split statement + plan card · footer: single line
+   mood: warm/premium · palette: extracted from reference images (paper #E7E4D9 / oxblood / moss), contrast matrix passed
+   critique: ShowTell 4 · Phil 4 · Hier 4 · Spec 5 · Restr 4 · Var 5 */
+@import "tailwindcss";
+
+@theme {
+  --color-paper: #ece8dd;
+  --color-surface: #f7f4ec;
+  --color-raised: #fffdf8;
+  --color-ink: #2a1513;
+  --color-muted: #6b5a52;
+  --color-taupe: #8a766a; /* large display text only (3.4:1 on paper) */
+  --color-line: #d5cfc0;
+  --color-oxblood: #6b2a27;
+  --color-oxblood-hover: #7c3531;
+  --color-oxblood-wash: #ebd9d3;
+  --color-on-oxblood: #f7f4ec;
+  --color-moss: #4b5229;
+  --color-moss-fill: #7d874d;
+  --color-moss-wash: #e3e6cf;
+  --color-amber: #7a4e0e;
+  --color-amber-wash: #f1e4c8;
+  --color-espresso: #2c1411;
+  --color-espresso-raised: #3a1d19;
+  --color-espresso-line: #54302b;
+  --color-on-dark: #ece8dd;
+  --color-dark-muted: #b5a598;
+
+  --font-display: var(--font-bricolage), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-instrument), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+
+  --radius-card: 1.25rem;
+  --radius-panel: 1.75rem;
+
+  --shadow-card: 0 1px 0 rgb(42 21 19 / 0.04), 0 12px 32px -18px rgb(42 21 19 / 0.22);
+  --shadow-lift: 0 2px 0 rgb(42 21 19 / 0.04), 0 28px 60px -28px rgb(42 21 19 / 0.38);
+
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+@layer base {
+  html,
+  body {
+    overflow-x: clip;
+  }
+
+  body {
+    background: var(--color-paper);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-display);
+    text-wrap: balance;
+    overflow-wrap: anywhere;
+    min-width: 0;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  /* The ring shows instantly: keyboard users must never wait for it. */
+  :focus-visible {
+    outline: 2px solid var(--color-oxblood);
+    outline-offset: 2px;
+    border-radius: 6px;
+  }
+
+  .on-dark :focus-visible {
+    outline-color: var(--color-on-dark);
+  }
+
+  ::selection {
+    background: var(--color-oxblood);
+    color: var(--color-on-oxblood);
+  }
+
+  button,
+  a,
+  summary,
+  label {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  button:not(:disabled),
+  summary {
+    cursor: pointer;
+  }
+
+  button:disabled {
+    cursor: not-allowed;
+  }
+}
+
+@layer components {
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    min-height: 2.75rem;
+    padding: 0 1.25rem;
+    border-radius: 999px;
+    font-weight: 600;
+    font-size: 0.9375rem;
+    white-space: nowrap;
+    transition:
+      background-color 160ms var(--ease-out),
+      color 160ms var(--ease-out),
+      border-color 160ms var(--ease-out),
+      transform 120ms var(--ease-out);
+  }
+
+  .btn:active:not(:disabled) {
+    transform: scale(0.98);
+  }
+
+  .btn:disabled {
+    opacity: 0.45;
+  }
+
+  .btn-primary {
+    background: var(--color-oxblood);
+    color: var(--color-on-oxblood);
+  }
+
+  .btn-quiet {
+    background: var(--color-raised);
+    color: var(--color-ink);
+    border: 1px solid var(--color-line);
+  }
+
+  .btn-on-dark {
+    background: var(--color-on-dark);
+    color: var(--color-espresso);
+  }
+
+  .btn-ghost-dark {
+    color: var(--color-on-dark);
+    border: 1px solid var(--color-espresso-line);
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .btn-primary:hover:not(:disabled) {
+      background: var(--color-oxblood-hover);
+    }
+    .btn-quiet:hover:not(:disabled) {
+      border-color: var(--color-taupe);
+    }
+    .btn-on-dark:hover:not(:disabled) {
+      background: var(--color-raised);
+    }
+    .btn-ghost-dark:hover:not(:disabled) {
+      border-color: var(--color-dark-muted);
+    }
+  }
+
+  .card {
+    background: var(--color-raised);
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-card);
+    box-shadow: var(--shadow-card);
+  }
+
+  .field {
+    width: 100%;
+    min-height: 3rem;
+    padding: 0 0.875rem;
+    border-radius: 0.875rem;
+    border: 1px solid var(--color-espresso-line);
+    background: var(--color-espresso-raised);
+    color: var(--color-on-dark);
+    font-size: 1rem; /* 16px keeps iOS from zooming the page on focus */
+    transition: border-color 160ms var(--ease-out);
+  }
+
+  .field::placeholder {
+    color: var(--color-dark-muted);
+    opacity: 0.7;
+  }
+
+  .field:focus-visible {
+    outline: 2px solid var(--color-on-dark);
+    outline-offset: 1px;
+    border-radius: 0.875rem;
+  }
+
+  .mono-label {
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+}
+
+/* Entrances: list rows and panels in the app shell. */
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slide-in {
+  from {
+    opacity: 0;
+    transform: translateX(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.rise {
+  animation: rise 260ms var(--ease-out) both;
+  animation-delay: calc(var(--i, 0) * 35ms);
+}
+
+.fade {
+  animation: fade 200ms var(--ease-out) both;
+}
+
+.slide-in {
+  animation: slide-in 260ms var(--ease-out) both;
+}
+
+.skeleton {
+  background: var(--color-line);
+  border-radius: 0.75rem;
+  animation: fade 900ms linear infinite alternate; /* loading pulse, not UI motion */
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rise,
+  .slide-in {
+    animation: fade 120ms linear both;
+    animation-delay: 0ms;
+  }
+  .skeleton {
+    animation: none;
+  }
+  .btn:active:not(:disabled) {
+    transform: none;
+  }
+}
