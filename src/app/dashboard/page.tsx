@@ -435,7 +435,7 @@ function Dashboard({ preview, panel }: { preview: boolean; panel: string | null 
   return (
     <div className="move-workspace min-h-dvh bg-canvas">
       <PlanHeader preview={preview} onSearch={() => setPaletteOpen(true)} />
-      <main className="ledger-shell plan-layout pb-12">
+      <main className="ledger-shell plan-layout pb-24">
         <PlanFolders categories={CATEGORIES} tasks={tasks} selected={checklistOpen ? category : "all"} onSelect={openFolder} />
         <RouteBanner profile={profile} sample={isDemo} />
         {linkError && (
@@ -460,7 +460,6 @@ function Dashboard({ preview, panel }: { preview: boolean; panel: string | null 
           profile={profile}
           sample={isDemo}
           onSave={saveBudget}
-          onAsk={() => setAssistantOpen(true)}
           onChecklist={() => openFolder("all")}
         />
         <section className="destination-invite" aria-labelledby="destination-invite-title">
@@ -613,6 +612,18 @@ function Dashboard({ preview, panel }: { preview: boolean; panel: string | null 
         )}
         {!preview && <button type="button" className="ledger-reset mt-6 text-sm text-ink-muted" onClick={() => setConfirmReset(true)}>Start over</button>}
       </main>
+
+      {!assistantOpen && (
+        <button
+          type="button"
+          className="ask-civio-fab"
+          onClick={() => setAssistantOpen(true)}
+          aria-label="Ask Civio"
+          title="Questions about your move? Ask Civio."
+        >
+          <MessageCircle aria-hidden="true" />
+        </button>
+      )}
 
       {/* ── Assistant in an Astryx drawer: focus handling, Escape and scrim come with it ── */}
       <Drawer isOpen={assistantOpen} onOpenChange={setAssistantOpen} label="Civio assistant" side="end" width={440}>

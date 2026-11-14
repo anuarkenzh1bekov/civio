@@ -1,6 +1,6 @@
 "use client";
 
-import { CheckCheck, ListChecks, MessageCircle, SlidersHorizontal, Truck, type LucideIcon } from "lucide-react";
+import { CheckCheck, ListChecks, SlidersHorizontal, Truck, type LucideIcon } from "lucide-react";
 import { useRef, useState } from "react";
 import { BudgetProjection } from "@/components/BudgetProjection";
 import { compareBudget, dollars, matchingIncome, monthlyRows, type MoveBudget } from "@/lib/budget";
@@ -16,7 +16,6 @@ type BudgetEditorProps = {
   sample: boolean;
   onSave: (budget: MoveBudget) => void;
   onChecklist: () => void;
-  onAsk: () => void;
 };
 
 function QuickAction({ icon: Icon, label, onClick, primary }: {
@@ -33,7 +32,7 @@ function QuickAction({ icon: Icon, label, onClick, primary }: {
   );
 }
 
-export function BudgetEditor({ profile, sample, onSave, onChecklist, onAsk }: BudgetEditorProps) {
+export function BudgetEditor({ profile, sample, onSave, onChecklist }: BudgetEditorProps) {
   const [draft, setDraft] = useState<MoveBudget | null>(null);
   const [version, setVersion] = useState(0);
   const [saved, setSaved] = useState(false);
@@ -79,7 +78,6 @@ export function BudgetEditor({ profile, sample, onSave, onChecklist, onAsk }: Bu
             <QuickAction primary icon={SlidersHorizontal} label="Edit budget" onClick={() => editAmount("incomeNow")} />
             <QuickAction icon={Truck} label="Moving costs" onClick={() => editAmount("moving")} />
             <QuickAction icon={ListChecks} label="Checklist" onClick={onChecklist} />
-            <QuickAction icon={MessageCircle} label="Ask Civio" onClick={onAsk} />
           </div>
         </section>
         <BudgetProjection budget={budget} />
