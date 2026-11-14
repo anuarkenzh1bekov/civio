@@ -378,3 +378,28 @@
     transform: none;
   }
 }
+
+/* Printing from the documents page puts only the letter on paper. */
+.print-sheet {
+  display: none;
+}
+
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  .print-sheet {
+    display: block;
+    visibility: visible;
+    position: absolute;
+    inset: 0 auto auto 0;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    white-space: pre-wrap;
+    font-family: var(--font-sans);
+    font-size: 12pt;
+    line-height: 1.5;
+    color: #000;
+  }
+}

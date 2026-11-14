@@ -1,4 +1,4 @@
-import { ArrowRight, ArrowUpRight, FileText, MessageCircle } from "lucide-react";
+import { ArrowRight, ArrowUpRight, Check, FileText, MessageCircle } from "lucide-react";
 import Link from "next/link";
 import { LiveEngine } from "@/components/landing/LiveEngine";
 import { Logo } from "@/components/Logo";
@@ -26,6 +26,40 @@ const CLOCKS = [
   { errand: "Register your car", rows: [{ state: "California", days: days("CA-VEH-REG") }, { state: "Texas", days: days("TX-VEH-REG") }] },
   { errand: "Swap your driver license", rows: [{ state: "California", days: days("CA-VEH-DL") }, { state: "Texas", days: days("TX-VEH-DL") }] },
 ];
+/** Pricing. The free plan is the whole rule engine; paid plans add generated documents and re-checks. */
+const PLANS = [
+  {
+    name: "Free",
+    price: "$0",
+    cadence: "always",
+    blurb: "The full plan for one move.",
+    features: ["Personal checklist with deadlines and sources", "Assistant that explains each rule", "Cost calculator", "Who-to-notify list"],
+    cta: { label: "Get Started", href: "/onboarding" },
+    featured: false,
+    note: null,
+  },
+  {
+    name: "Move Pack",
+    price: "$19",
+    cadence: "one payment per move",
+    blurb: "The paperwork, written for you.",
+    features: ["Change of address, move-out and insurer letters", "Filled from your profile, tailored by AI", "Copy, download or print", "School records request when you have children"],
+    cta: { label: "See the documents", href: "/documents" },
+    featured: true,
+    note: "Demo checkout in this build. Nothing is charged.",
+  },
+  {
+    name: "Civio Watch",
+    price: "$5",
+    cadence: "per month",
+    blurb: "For people who move again.",
+    features: ["Every plan kept and reusable for the next move", "Notice when a rule in your plan is re-checked and changes", "Deadline reminders by email"],
+    cta: null,
+    featured: false,
+    note: "Planned. Not available yet.",
+  },
+] as const;
+
 const LONGEST = Math.max(...CLOCKS.flatMap((c) => c.rows.map((r) => r.days)));
 
 const MODULES: { category: Category; label: string; className: string }[] = [
@@ -101,6 +135,9 @@ export default function LandingPage() {
                 </a>
                 <a href="#sources" className="rounded-full px-4 py-2">
                   Sources
+                </a>
+                <a href="#pricing" className="rounded-full px-4 py-2">
+                  Pricing
                 </a>
               </nav>
               <Link href="/dashboard?demo=1" className="btn btn-ink">
@@ -386,6 +423,60 @@ export default function LandingPage() {
             )}
           </Reveal>
         </div>
+      </section>
+
+      {/* ── Pricing ── */}
+      <section id="pricing" className="mx-auto max-w-6xl scroll-mt-8 px-5 pt-24 sm:px-8 lg:pt-32">
+        <Reveal>
+          <h2
+            data-reveal
+            className="max-w-3xl text-[clamp(1.875rem,3.6vw,2.875rem)] font-medium leading-[1.1] tracking-[-0.03em]"
+          >
+            The plan is free. <span className="text-taupe">You pay when Civio does the paperwork.</span>
+          </h2>
+          <div className="mt-12 grid gap-4 lg:grid-cols-3">
+            {PLANS.map((plan) => (
+              <div
+                key={plan.name}
+                data-reveal
+                className={`flex flex-col rounded-panel p-6 sm:p-7 ${
+                  plan.featured ? "bg-espresso text-on-dark" : "card"
+                }`}
+              >
+                <p className={`mono-label ${plan.featured ? "text-dark-muted" : "text-muted"}`}>{plan.name}</p>
+                <p className="mt-4 flex items-baseline gap-2">
+                  <span className="font-display text-5xl font-semibold tabular-nums">{plan.price}</span>
+                  <span className={plan.featured ? "text-dark-muted" : "text-muted"}>{plan.cadence}</span>
+                </p>
+                <p className="mt-3 font-medium">{plan.blurb}</p>
+                <ul className="mt-5 grid gap-2.5 text-[0.9375rem]">
+                  {plan.features.map((feature) => (
+                    <li key={feature} className="flex gap-2.5">
+                      <Check
+                        className={`mt-0.5 size-4 shrink-0 ${plan.featured ? "text-leaf" : "text-moss"}`}
+                        strokeWidth={2.5}
+                        aria-hidden="true"
+                      />
+                      {feature}
+                    </li>
+                  ))}
+                </ul>
+                <div className="mt-auto pt-7">
+                  {plan.cta && (
+                    <Link href={plan.cta.href} className={`btn ${plan.featured ? "btn-on-dark" : "btn-quiet"}`}>
+                      {plan.cta.label} <ArrowRight className="size-4" aria-hidden="true" />
+                    </Link>
+                  )}
+                  {plan.note && (
+                    <p className={`text-sm ${plan.cta ? "mt-3" : ""} ${plan.featured ? "text-dark-muted" : "text-muted"}`}>
+                      {plan.note}
+                    </p>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </Reveal>
       </section>
 
       {/* ── Close ── */}

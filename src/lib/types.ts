@@ -20,6 +20,9 @@ export type Profile = {
   insurance?: Insurance;
   hasVehicle?: boolean;
   vehicleRegisteredInCurrentState?: boolean;
+  /** Set when the user confirms they are already in the destination state.
+   *  Deadlines then count from this date instead of the planned move date. */
+  arrivedOn?: string; // yyyy-mm-dd
   /** The user allowed the assistant to read this profile. */
   aiConsent?: boolean;
 };
@@ -78,6 +81,8 @@ export type Rule = {
   /** Which side of the move a state rule is matched against. Default: destination. */
   state_role?: "destination" | "origin";
   conditions: Condition[];
+  /** Rule ids that have to be done first. Only ids present in the same plan count. */
+  depends_on?: string[];
   task_template: TaskTemplate;
   source_name: string;
   source_url: string;
@@ -104,6 +109,10 @@ export type Task = {
   source: { name: string; url: string; lastVerified: string; effectiveDate?: string };
   /** Status decided by the engine. The user's "done" is layered on top. */
   status: Exclude<TaskStatus, "done">;
+  /** Tasks in this plan that come first (ids). Empty when nothing blocks it. */
+  dependsOn: string[];
+  /** Days after the move the rule allows, when the rule has a countable deadline. */
+  daysAfterMove?: number;
   /** Why the task needs verification, in plain words. */
   verificationNote?: string;
 };

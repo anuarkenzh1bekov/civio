@@ -7,7 +7,11 @@
     "build": "next build",
     "start": "next start",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run"
+    "test": "vitest run",
+    "test:rag": "node --test scripts/rag.test.mjs",
+    "rag:ingest": "node scripts/rag-ingest.mjs",
+    "rag:build": "node scripts/rag-build.mjs",
+    "rag:eval": "node scripts/rag-eval.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^1.8.0",

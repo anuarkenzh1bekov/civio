@@ -12,20 +12,26 @@ import {
   Folder,
   House,
   LayoutGrid,
+  Lock,
   MessageCircle,
+  PlaneLanding,
   RotateCcw,
+  ScrollText,
   Search,
   UserRoundPen,
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { ArrivalBanner } from "@/components/dashboard/ArrivalBanner";
 import { AssistantPanel } from "@/components/dashboard/AssistantPanel";
+import { ContinueLink } from "@/components/dashboard/ContinueLink";
+import { CostCalculator } from "@/components/dashboard/CostCalculator";
 import { Logo } from "@/components/Logo";
 import { CATEGORY_SHORT, CategoryIcon, PriorityBadge, StatusBadge } from "@/components/ui";
 import { daysUntil, formatDate, formatShortDate } from "@/lib/format";
 import { stateName } from "@/lib/states";
-import { useCivio, type PlanTask } from "@/lib/store";
+import { adoptSession, useCivio, type PlanTask } from "@/lib/store";
 import { CATEGORY_LABEL, type Category, type TaskStatus } from "@/lib/types";
 
 const CATEGORIES: Category[] = ["taxes", "health", "vehicle", "family"];
@@ -119,6 +125,7 @@ function TaskRow({
   task,
   index,
   open,
+  arrived,
   onToggleOpen,
   onToggleDone,
   onAsk,
@@ -126,6 +133,7 @@ function TaskRow({
   task: PlanTask;
   index: number;
   open: boolean;
+  arrived: boolean;
   onToggleOpen: () => void;
   onToggleDone: () => void;
   onAsk: () => void;
@@ -166,6 +174,11 @@ function TaskRow({
               {task.title}
             </span>
             {!done && <PriorityBadge priority={task.priority} />}
+            {!done && task.waitingOn.length > 0 && (
+              <span className="inline-flex shrink-0 items-center gap-1 whitespace-nowrap rounded-full bg-mist px-2.5 py-1 text-xs font-semibold text-muted">
+                <Lock className="size-3" aria-hidden="true" /> After {task.waitingOn.length === 1 ? "1 task" : `${task.waitingOn.length} tasks`}
+              </span>
+            )}
           </span>
           <span className="inline-flex items-center gap-2 text-sm text-muted">
             <span className="size-2.5 rounded-full" style={{ background: TINT[task.category] }} aria-hidden="true" />
@@ -188,6 +201,14 @@ function TaskRow({
         <div id={panelId} className="fade border-t border-hair bg-mist/60 px-4 py-5 md:px-5">
           {task.verificationNote && !done && (
             <p className="mb-5 rounded-2xl bg-amber-wash px-4 py-3 text-sm text-amber">{task.verificationNote}</p>
+          )}
+          {!done && task.waitingOn.length > 0 && (
+            <p className="mb-5 flex gap-2.5 rounded-2xl bg-white px-4 py-3 text-sm ring-1 ring-hair">
+              <Lock className="mt-0.5 size-4 shrink-0 text-taupe" aria-hidden="true" />
+              <span>
+                <span className="font-semibold">Do this first:</span> {task.waitingOn.join("; ")}.
+              </span>
+            </p>
           )}
           <p className="max-w-prose">{task.description}</p>
 
@@ -227,7 +248,7 @@ function TaskRow({
           {task.deadline?.date && (
             <p className="mt-6 text-sm text-muted">
               <span className="font-semibold text-ink">Deadline as the source words it:</span> {task.deadline.label}. The
-              date counts from your planned move date.
+              date counts from {arrived ? "the day you arrived" : "your planned move date"}.
             </p>
           )}
 
@@ -280,15 +301,19 @@ function Skeleton() {
   );
 }
 
-function NoPlan({ onDemo }: { onDemo: () => void }) {
+function NoPlan({ onDemo, linkError }: { onDemo: () => void; linkError: boolean }) {
   return (
     <div className="grid min-h-dvh place-items-center bg-mist px-5">
       <div className="tile max-w-md p-8 text-center">
         <span className="mx-auto grid size-12 place-items-center rounded-full bg-mist text-ink">
           <LayoutGrid className="size-5" aria-hidden="true" />
         </span>
-        <h1 className="mt-5 text-2xl font-semibold tracking-tight">No plan yet</h1>
-        <p className="mt-2 text-muted">Answer a few questions about your move and Civio builds your checklist.</p>
+        <h1 className="mt-5 text-2xl font-semibold tracking-tight">{linkError ? "That link didn't open a plan" : "No plan yet"}</h1>
+        <p className="mt-2 text-muted">
+          {linkError
+            ? "The plan may have been started on a different server, or the link is incomplete. You can start a new one here."
+            : "Answer a few questions about your move and Civio builds your checklist."}
+        </p>
         <div className="mt-6 flex flex-wrap justify-center gap-2">
           <Link href="/onboarding" className="btn btn-ink">
             Get Started <ArrowRight className="size-4" aria-hidden="true" />
@@ -304,22 +329,38 @@ function NoPlan({ onDemo }: { onDemo: () => void }) {
 
 export default function DashboardPage() {
   const router = useRouter();
-  const { ready, hasPlan, isDemo, profile, tasks, toggleDone, setConsent, loadDemo, reset } = useCivio();
+  const { ready, sid, hasPlan, isDemo, profile, tasks, costs, toggleDone, setConsent, setArrived, setCost, loadDemo, reset } =
+    useCivio();
   const [category, setCategory] = useState<"all" | Category>("all");
   const [status, setStatus] = useState<"all" | TaskStatus>("all");
   const [moneyOnly, setMoneyOnly] = useState(false);
+  const [arrivalOnly, setArrivalOnly] = useState(false);
+  const [linkError, setLinkError] = useState(false);
   const [query, setQuery] = useState("");
   const [openId, setOpenId] = useState<string | null>(null);
   const [assistantOpen, setAssistantOpen] = useState(false);
   const [seed, setSeed] = useState<{ text: string; nonce: number } | null>(null);
   const searchRef = useRef<HTMLInputElement>(null);
 
-  // /dashboard?demo=1 loads the sample plan, then cleans the URL.
+  // /dashboard?demo=1 loads the sample plan and /dashboard?s=<id> opens a plan
+  // from another device. Either one is then removed from the URL.
   useEffect(() => {
     if (!ready) return;
-    if (new URLSearchParams(window.location.search).get("demo") === "1") {
+    const params = new URLSearchParams(window.location.search);
+    const clean = (name: string) => {
+      params.delete(name);
+      const rest = params.toString();
+      router.replace(rest ? `/dashboard?${rest}` : "/dashboard");
+    };
+    const shared = params.get("s");
+    if (shared) {
+      void adoptSession(shared).then((ok) => {
+        setLinkError(!ok);
+        clean("s");
+      });
+    } else if (params.get("demo") === "1") {
       loadDemo();
-      router.replace("/dashboard");
+      clean("demo");
     }
   }, [ready, loadDemo, router]);
 
@@ -356,24 +397,33 @@ export default function DashboardPage() {
 
   const visible = useMemo(() => {
     const needle = query.trim().toLowerCase();
+    // The arrival checklist is every task on a countdown plus whatever those tasks wait on.
+    const arrival = new Set<string>();
+    for (const t of tasks) {
+      if (t.daysAfterMove === undefined) continue;
+      arrival.add(t.id);
+      for (const id of t.dependsOn) arrival.add(id);
+    }
     return tasks.filter(
       (t) =>
         (category === "all" || t.category === category) &&
         (status === "all" || t.displayStatus === status) &&
         (!moneyOnly || t.financial !== null) &&
+        (!arrivalOnly || arrival.has(t.id)) &&
         (!needle || `${t.title} ${t.description} ${CATEGORY_LABEL[t.category]}`.toLowerCase().includes(needle)),
     );
-  }, [tasks, category, status, moneyOnly, query]);
+  }, [tasks, category, status, moneyOnly, arrivalOnly, query]);
 
   if (!ready) return <Skeleton />;
-  if (!hasPlan) return <NoPlan onDemo={loadDemo} />;
+  if (!hasPlan) return <NoPlan onDemo={loadDemo} linkError={linkError} />;
 
   const percent = counts.total ? Math.round((counts.done / counts.total) * 100) : 0;
-  const filtered = category !== "all" || status !== "all" || moneyOnly || query.trim() !== "";
+  const filtered = category !== "all" || status !== "all" || moneyOnly || arrivalOnly || query.trim() !== "";
   const clearFilters = () => {
     setCategory("all");
     setStatus("all");
     setMoneyOnly(false);
+    setArrivalOnly(false);
     setQuery("");
   };
   const reveal = (taskId: string) => {
@@ -440,6 +490,12 @@ export default function DashboardPage() {
             >
               <MessageCircle className="size-4" strokeWidth={1.75} aria-hidden="true" /> Ask AI
             </button>
+            <Link href="/documents" className="flex min-h-10 items-center gap-2.5 rounded-xl px-3 text-muted hover:text-ink">
+              <ScrollText className="size-4" strokeWidth={1.75} aria-hidden="true" /> Documents
+            </Link>
+            <a href="#costs" className="flex min-h-10 items-center gap-2.5 rounded-xl px-3 text-muted hover:text-ink">
+              <CircleDollarSign className="size-4" strokeWidth={1.75} aria-hidden="true" /> Costs
+            </a>
             <Link href="/onboarding" className="flex min-h-10 items-center gap-2.5 rounded-xl px-3 text-muted hover:text-ink">
               <UserRoundPen className="size-4" strokeWidth={1.75} aria-hidden="true" /> Edit profile
             </Link>
@@ -479,13 +535,16 @@ export default function DashboardPage() {
             </div>
           </div>
 
+          <div className="mt-auto">
+            <ContinueLink sid={sid} />
+          </div>
           <button
             type="button"
             onClick={() => {
               reset();
               router.push("/");
             }}
-            className="mt-auto flex min-h-10 items-center gap-2.5 rounded-xl px-3 text-left text-[0.9375rem] text-muted hover:text-ink"
+            className="flex min-h-10 items-center gap-2.5 rounded-xl px-3 text-left text-[0.9375rem] text-muted hover:text-ink"
           >
             <RotateCcw className="size-4" strokeWidth={1.75} aria-hidden="true" /> Start over
           </button>
@@ -506,6 +565,9 @@ export default function DashboardPage() {
               </span>
             </div>
             <div className="flex items-center gap-2">
+              <Link href="/documents" className="btn btn-quiet lg:hidden" aria-label="Documents">
+                <ScrollText className="size-4" aria-hidden="true" />
+              </Link>
               <Link href="/onboarding" className="btn btn-quiet lg:hidden" aria-label="Edit profile">
                 <UserRoundPen className="size-4" aria-hidden="true" />
               </Link>
@@ -522,10 +584,32 @@ export default function DashboardPage() {
             <p className="mt-1 flex flex-wrap items-center gap-2 text-muted">
               {stateName(profile.currentState)} <ArrowRight className="size-4" aria-hidden="true" />{" "}
               {stateName(profile.destinationState)}
-              {profile.moveDate && <span>· moving {formatDate(profile.moveDate)}</span>}
+              {profile.arrivedOn ? (
+                <span>· arrived {formatDate(profile.arrivedOn)}</span>
+              ) : (
+                profile.moveDate && <span>· moving {formatDate(profile.moveDate)}</span>
+              )}
               {isDemo && <span className="rounded-full bg-ink px-2.5 py-0.5 text-xs font-semibold text-white">Demo</span>}
             </p>
           </div>
+
+          {linkError && (
+            <p role="alert" className="mt-4 rounded-2xl bg-amber-wash px-4 py-3 text-sm text-amber">
+              That link didn't open a plan, so this is still the plan saved in this browser.
+            </p>
+          )}
+
+          <ArrivalBanner
+            profile={profile}
+            onArrived={(date) => {
+              setArrived(date);
+              setArrivalOnly(true);
+            }}
+            onUndo={() => {
+              setArrived(undefined);
+              setArrivalOnly(false);
+            }}
+          />
 
           {/* Row of three cards */}
           <div className="mt-6 grid gap-4 xl:grid-cols-3">
@@ -693,6 +777,16 @@ export default function DashboardPage() {
               ))}
               <button
                 type="button"
+                aria-pressed={arrivalOnly}
+                onClick={() => setArrivalOnly((v) => !v)}
+                className={`inline-flex min-h-10 items-center gap-1.5 rounded-full px-4 text-sm font-semibold transition-colors duration-150 ${
+                  arrivalOnly ? "bg-ink text-white" : "bg-white text-muted shadow-soft"
+                }`}
+              >
+                <PlaneLanding className="size-4" aria-hidden="true" /> On arrival
+              </button>
+              <button
+                type="button"
                 aria-pressed={moneyOnly}
                 onClick={() => setMoneyOnly((v) => !v)}
                 className={`inline-flex min-h-10 items-center gap-1.5 rounded-full px-4 text-sm font-semibold transition-colors duration-150 ${
@@ -740,13 +834,14 @@ export default function DashboardPage() {
                 <span>Status</span>
                 <span />
               </div>
-              <ul key={`${category}-${status}-${moneyOnly}`}>
+              <ul key={`${category}-${status}-${moneyOnly}-${arrivalOnly}`}>
                 {visible.map((task, index) => (
                   <TaskRow
                     key={task.id}
                     task={task}
                     index={index}
                     open={openId === task.id}
+                    arrived={Boolean(profile.arrivedOn)}
                     onToggleOpen={() => setOpenId(openId === task.id ? null : task.id)}
                     onToggleDone={() => toggleDone(task.id)}
                     onAsk={() => askAbout(task)}
@@ -755,6 +850,26 @@ export default function DashboardPage() {
               </ul>
             </div>
           )}
+
+          <CostCalculator tasks={tasks} amounts={costs} onChange={setCost} />
+
+          <Link
+            href="/documents"
+            className="tile mt-10 flex flex-wrap items-center gap-x-5 gap-y-3 p-6 transition-colors duration-150 hover:bg-white/70"
+          >
+            <span className="grid size-11 shrink-0 place-items-center rounded-full bg-mist">
+              <ScrollText className="size-5" strokeWidth={1.75} aria-hidden="true" />
+            </span>
+            <span className="min-w-0 flex-1 basis-64">
+              <span className="block font-display text-xl font-semibold tracking-tight">Documents for this move</span>
+              <span className="mt-0.5 block text-sm text-muted">
+                Who to notify, built from your profile, and letters ready to send: change of address, move-out notice and more.
+              </span>
+            </span>
+            <span className="btn btn-ink">
+              Open <ArrowRight className="size-4" aria-hidden="true" />
+            </span>
+          </Link>
 
           <p className="mt-8 text-sm text-muted">
             Civio gives general information from official sources. It is not legal, tax or insurance advice, and it does

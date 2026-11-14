@@ -3,7 +3,9 @@
 import { ArrowLeft, ArrowRight, Check, Plus, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useId, useMemo, useState } from "react";
+import type { IntakeResponse } from "@/app/api/intake/route";
 import { Logo } from "@/components/Logo";
+import { IntakeBox } from "@/components/onboarding/IntakeBox";
 import { formatDate } from "@/lib/format";
 import { RULES } from "@/lib/rules/data";
 import { generatePlan } from "@/lib/rules/engine";
@@ -215,6 +217,7 @@ function Wizard({ initial, onDone }: { initial: Profile; onDone: (profile: Profi
   const [p, setP] = useState<Profile>(initial);
   const [errors, setErrors] = useState<{ currentState?: string; destinationState?: string; zip?: string }>({});
   const set = (patch: Partial<Profile>) => setP((prev) => ({ ...prev, ...patch }));
+  const [intake, setIntake] = useState<IntakeResponse | null>(null);
 
   const matched = useMemo(() => generatePlan(p, RULES), [p]);
   const last = step === STEPS.length - 1;
@@ -228,8 +231,11 @@ function Wizard({ initial, onDone }: { initial: Profile; onDone: (profile: Profi
       setErrors(found);
       if (Object.keys(found).length > 0) return;
     }
-    if (last) onDone(p);
-    else setStep(step + 1);
+    if (last) {
+      // Free-text intake can land here without both states.
+      if (!p.currentState || !p.destinationState) return setStep(0);
+      onDone(p);
+    } else setStep(step + 1);
   };
 
   return (
@@ -275,7 +281,18 @@ function Wizard({ initial, onDone }: { initial: Profile; onDone: (profile: Profi
               <>
                 <h1 className="text-4xl font-medium tracking-[-0.03em]">Where are you moving?</h1>
                 <p className="mt-3 text-night-muted">The two states decide which rules apply. Everything else is optional.</p>
-                <div className="mt-8 grid gap-6 sm:grid-cols-2">
+                <div className="mt-8">
+                  <IntakeBox
+                    onRead={(patch, result) => {
+                      set(patch);
+                      setIntake(result);
+                      setErrors({});
+                      setStep(STEPS.length - 1);
+                    }}
+                  />
+                </div>
+                <p className="mono-label mt-8 text-night-muted">Or answer step by step</p>
+                <div className="mt-4 grid gap-6 sm:grid-cols-2">
                   <StateSelect
                     label="Current state"
                     value={p.currentState}
@@ -457,6 +474,37 @@ function Wizard({ initial, onDone }: { initial: Profile; onDone: (profile: Profi
                 <p className="mt-3 text-night-muted">
                   Skipped answers are fine. Tasks that depend on them are marked “Needs verification”.
                 </p>
+                {intake && (
+                  <div className="mt-6 rounded-2xl border border-lime/40 p-4" aria-live="polite">
+                    <p className="font-medium">
+                      Filled in from your description
+                      <span className="ml-2 font-mono text-xs font-normal text-night-muted">
+                        {intake.mode === "ai" ? "read by AI" : "read by built-in rules"}
+                      </span>
+                    </p>
+                    {intake.notice && <p className="mt-1 text-sm text-night-muted">{intake.notice}</p>}
+                    <ul className="mt-3 grid gap-1.5 text-sm">
+                      {intake.found.map((item) => (
+                        <li key={item.field} className="flex flex-wrap items-baseline gap-x-2">
+                          <span className="text-night-muted">{item.label}:</span>
+                          <span>{TEXT[item.value] ?? item.value}</span>
+                          {item.from && <span className="text-xs text-night-muted">from “{item.from}”</span>}
+                        </li>
+                      ))}
+                    </ul>
+                    <p className="mt-3 text-sm text-night-muted">
+                      Check the answers below. Use Back or the step list to correct anything.
+                    </p>
+                  </div>
+                )}
+                {(!p.currentState || !p.destinationState) && (
+                  <p role="alert" className="mt-6 rounded-2xl border border-night-line p-4 text-sm text-lime">
+                    Civio still needs {!p.currentState && !p.destinationState ? "both states" : !p.currentState ? "the state you live in now" : "the state you are moving to"}.{" "}
+                    <button type="button" onClick={() => setStep(0)} className="underline underline-offset-4">
+                      Add it in step 1
+                    </button>
+                  </p>
+                )}
                 <dl className="mt-8 rounded-2xl border border-night-line px-5">
                   <ReviewRow label="Move" value={`${stateName(p.currentState)} → ${stateName(p.destinationState)}`} />
                   <ReviewRow label="Move date" value={p.moveDate ? formatDate(p.moveDate) : "Skipped"} />
@@ -539,7 +587,7 @@ function Wizard({ initial, onDone }: { initial: Profile; onDone: (profile: Profi
                   <li key={name}>
                     <button
                       type="button"
-                      disabled={index > step}
+                      disabled={index > step && !intake}
                       onClick={() => setStep(index)}
                       aria-current={state === "current" ? "step" : undefined}
                       className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-[0.9375rem] ${

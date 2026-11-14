@@ -287,6 +287,7 @@ export const RULES: readonly Rule[] = [
     rule_id: "CA-VEH-REG",
     state: "CA",
     conditions: [{ fact: "has_vehicle", op: "eq", value: true }],
+    depends_on: ["CA-VEH-INSURANCE"],
     task_template: {
       title: "Register your vehicle in California",
       category: "vehicle",
@@ -319,9 +320,32 @@ export const RULES: readonly Rule[] = [
     verified: true,
   },
   {
+    rule_id: "CA-VEH-RESIDENCY",
+    state: "CA",
+    conditions: [{ fact: "has_vehicle", op: "eq", value: true }],
+    task_template: {
+      title: "Collect proof of your California address",
+      category: "vehicle",
+      priority: "high",
+      description:
+        "The DMV asks for documents that show you live in California when you apply for a driver license. Without them the office visit does not count, so this comes before the license.",
+      steps: [
+        "Open the DMV's list of accepted residency documents.",
+        "Pick documents that show your name and new California address, such as a signed lease or a utility bill.",
+        "Keep the originals together with your identity document for the DMV visit.",
+      ],
+      documents: ["California residency documents from the DMV's accepted list", "Identity document from the DMV's accepted list"],
+    },
+    source_name: "California DMV — Requirements for a California driver's license",
+    source_url: "https://www.dmv.ca.gov/portal/file/fast-facts-5-requirements-for-a-california-drivers-license/",
+    last_verified: CHECKED,
+    verified: true,
+  },
+  {
     rule_id: "CA-VEH-DL",
     state: "CA",
     conditions: [{ fact: "has_vehicle", op: "eq", value: true }],
+    depends_on: ["CA-VEH-RESIDENCY"],
     task_template: {
       title: "Get a California driver license",
       category: "vehicle",

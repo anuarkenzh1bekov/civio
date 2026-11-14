@@ -86,10 +86,10 @@ function buildTask(rule: Rule, profile: Profile, missing: FactKey[]): Task {
 
   let deadline: Task["deadline"] = null;
   if (t.deadline) {
+    // Once the user has confirmed arrival, that date replaces the planned one.
+    const base = profile.arrivedOn ?? profile.moveDate;
     const date =
-      t.deadline.daysAfterMove !== undefined && profile.moveDate
-        ? addDays(profile.moveDate, t.deadline.daysAfterMove)
-        : undefined;
+      t.deadline.daysAfterMove !== undefined && base ? addDays(base, t.deadline.daysAfterMove) : undefined;
     deadline = { label: fill(t.deadline.label, profile), date };
   }
 
@@ -119,6 +119,8 @@ function buildTask(rule: Rule, profile: Profile, missing: FactKey[]): Task {
       lastVerified: rule.last_verified,
       effectiveDate: rule.effective_date,
     },
+    dependsOn: rule.depends_on ?? [],
+    daysAfterMove: t.deadline?.daysAfterMove,
     status: verificationNote ? "needs_verification" : "pending",
     verificationNote,
   };
@@ -154,11 +156,35 @@ export function compareTasks(a: Task, b: Task): number {
   return PRIORITY_RANK[a.priority] - PRIORITY_RANK[b.priority];
 }
 
+/** Keep the deadline order, but never list a task before one it depends on. */
+function orderByDependencies(sorted: Task[]): Task[] {
+  const byId = new Map(sorted.map((task) => [task.id, task]));
+  const placed = new Set<string>();
+  const visiting = new Set<string>();
+  const out: Task[] = [];
+  const place = (task: Task) => {
+    if (placed.has(task.id) || visiting.has(task.id)) return; // a cycle in the data falls back to deadline order
+    visiting.add(task.id);
+    for (const id of task.dependsOn) {
+      const dependency = byId.get(id);
+      if (dependency) place(dependency);
+    }
+    visiting.delete(task.id);
+    placed.add(task.id);
+    out.push(task);
+  };
+  sorted.forEach(place);
+  return out;
+}
+
 export function generatePlan(profile: Profile, rules: readonly Rule[]): Task[] {
   const tasks: Task[] = [];
   for (const rule of rules) {
     const task = evaluateRule(rule, profile);
     if (task) tasks.push(task);
   }
-  return tasks.sort(compareTasks);
+  const ids = new Set(tasks.map((task) => task.id));
+  // A dependency that is not part of this plan does not block anything.
+  for (const task of tasks) task.dependsOn = task.dependsOn.filter((id) => ids.has(id));
+  return orderByDependencies(tasks.sort(compareTasks));
 }

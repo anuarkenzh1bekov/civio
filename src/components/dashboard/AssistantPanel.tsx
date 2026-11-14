@@ -5,7 +5,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { LogoMark } from "@/components/Logo";
 import type { Profile } from "@/lib/types";
 
-type Source = { ruleId: string; name: string; url: string; lastVerified: string; verified: boolean };
+type Source = { ruleId: string; name: string; url: string; lastVerified: string; verified: boolean; citation: string; retrievedAt: string; kind: string };
 
 type Message = {
   id: number;
@@ -13,12 +13,14 @@ type Message = {
   content: string;
   sources?: Source[];
   mode?: "ai" | "rules_only";
+  searchMode?: "hybrid" | "bm25";
+  notice?: string;
   error?: string;
   pending?: boolean;
 };
 
 type ServerEvent =
-  | { type: "sources"; sources: Source[]; mode: "ai" | "rules_only" }
+  | { type: "sources"; sources: Source[]; mode: "ai" | "rules_only"; searchMode: "hybrid" | "bm25"; notice?: string }
   | { type: "text"; delta: string }
   | { type: "error"; message: string }
   | { type: "done" };
@@ -108,7 +110,7 @@ export function AssistantPanel({
             buffer = buffer.slice(newline + 1);
             if (!line) continue;
             const event = JSON.parse(line) as ServerEvent;
-            if (event.type === "sources") patch((m) => ({ ...m, sources: event.sources, mode: event.mode }));
+            if (event.type === "sources") patch((m) => ({ ...m, sources: event.sources, mode: event.mode, searchMode: event.searchMode, notice: event.notice }));
             else if (event.type === "text") patch((m) => ({ ...m, content: m.content + event.delta }));
             else if (event.type === "error") patch((m) => ({ ...m, error: event.message }));
           }
@@ -182,9 +184,10 @@ export function AssistantPanel({
                 <li key={m.id} className="fade mr-4">
                   {m.mode === "rules_only" && (
                     <p className="mb-2 inline-block rounded-full bg-amber-wash px-2.5 py-1 text-xs font-semibold text-amber">
-                      Rules only · no AI key configured
+                      Official source excerpts
                     </p>
                   )}
+                  {m.notice && <p className="mb-2 text-xs text-muted">{m.notice}</p>}
                   {m.pending && !m.content && !m.error ? (
                     <div className="grid gap-2" aria-label="Loading answer">
                       <div className="skeleton h-3.5 w-11/12" />
@@ -202,18 +205,16 @@ export function AssistantPanel({
                     <div className="mt-3">
                       <p className="mono-label text-muted">Sources</p>
                       <ul className="mt-2 flex flex-wrap gap-1.5">
-                        {m.sources.slice(0, 4).map((s) => (
-                          <li key={s.url}>
+                        {m.sources.map((s) => (
+                          <li key={s.ruleId}>
                             <a
                               href={s.url}
                               target="_blank"
                               rel="noreferrer"
-                              className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold ${
-                                s.verified ? "bg-moss-wash text-moss" : "bg-amber-wash text-amber"
-                              }`}
+                              title={`${s.kind === "statute" ? "Statute" : "Agency guidance"} · Retrieved ${s.retrievedAt.slice(0, 10)}`}
+                              className="inline-flex items-center gap-1 rounded-xl bg-moss-wash px-2.5 py-1 text-xs font-semibold text-moss"
                             >
-                              {s.name.split(" — ")[0]}
-                              {!s.verified && " · unverified"}
+                              [{s.citation}] {s.name}
                               <ArrowUpRight className="size-3" aria-hidden="true" />
                             </a>
                           </li>
