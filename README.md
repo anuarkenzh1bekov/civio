@@ -1,6 +1,6 @@
 # Civio
 
-Civio compares the financial impact of staying or moving between US states. Households enter current and expected monthly take-home income, housing, other living costs and one-time moving expenses. A separate checklist covers taxes, health insurance, vehicle paperwork and school enrollment.
+Civio compares the financial impact of staying or moving between US states. Households enter current and expected monthly take-home income, housing, other living costs and one-time moving expenses. A separate checklist covers taxes, health insurance, vehicle paperwork and school enrollment. The app includes light and dark themes and a dedicated page for comparing destination estimates.
 
 MVP scenario: moving from one state to another (demo: Texas → California).
 
@@ -30,12 +30,13 @@ AI is optional. Copy `.env.example` to `.env.local` and set one key:
 |---|---|
 | `/` | Landing page: the budget outlook, the live rule engine and pricing (`#pricing`). |
 | `/onboarding` | Describe the move in free text or with a photo of a document, or answer step by step. Choose two different states and enter a budget; open the plan right away or continue with the household questions. Every route ends on a review step. |
-| `/dashboard` | Editable budget comparison, first-year difference, progress, priorities, filters, task details with dependencies, arrival check, cost calculator, assistant. |
+| `/dashboard` | Editable budget comparison, first-year difference, progress, priorities, filters, task details with dependencies, arrival check, cost calculator, assistant, and a link to destination comparison. |
 | `/documents` | Who-to-notify list (free) and letters (Move Pack). |
+| `/compare` | Compare up to three destinations, edit budget estimates, and view first-year outlooks. Results use entered figures, not state averages. |
 | `/dashboard?demo=1` | An isolated Texas → California example with illustrative amounts. It lives in memory and never overwrites a saved plan. |
 | `/dashboard?s=<id>` | Opens a plan started on another device. |
 
-The profile and task progress are stored in the browser (`localStorage`) and mirrored to the server under an anonymous session id (see "Session without login"). There are no accounts.
+The profile, task progress and theme preference are stored in the browser (`localStorage`). The plan is also mirrored to the server under an anonymous session id (see "Session without login"). There are no accounts.
 
 The first-year estimate uses 12 months of change in cash left after spending, less one-time moving costs. A blank amount stays unknown. The monthly income target shows the take-home pay needed to maintain the current monthly balance. Budget fields stay in the browser when the assistant receives a shared profile.
 
