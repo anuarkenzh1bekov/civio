@@ -122,7 +122,6 @@ export const RULES: readonly Rule[] = [
     state: "US",
     conditions: [
       { fact: "moving_between_states", op: "eq", value: true },
-      { fact: "origin_state", op: "not_in", value: STATE_TAX_COVERED },
     ],
     task_template: {
       title: "Check whether {origin} expects a final state return",
@@ -321,7 +320,7 @@ export const RULES: readonly Rule[] = [
   {
     rule_id: "CA-VEH-DL",
     state: "CA",
-    conditions: [{ fact: "has_vehicle", op: "eq", value: true }],
+    conditions: [{ fact: "drives", op: "eq", value: true }],
     task_template: {
       title: "Get a California driver license",
       category: "vehicle",
@@ -394,7 +393,7 @@ export const RULES: readonly Rule[] = [
   {
     rule_id: "TX-VEH-DL",
     state: "TX",
-    conditions: [{ fact: "has_vehicle", op: "eq", value: true }],
+    conditions: [{ fact: "drives", op: "eq", value: true }],
     task_template: {
       title: "Get a Texas driver license",
       category: "vehicle",
@@ -419,18 +418,18 @@ export const RULES: readonly Rule[] = [
     rule_id: "US-VEH-STATE-CHECK",
     state: "US",
     conditions: [
-      { fact: "has_vehicle", op: "eq", value: true },
+      { fact: "has_vehicle_or_drives", op: "eq", value: true },
       { fact: "destination_state", op: "not_in", value: VEHICLE_COVERED },
     ],
     task_template: {
-      title: "Check {destination} vehicle registration and license deadlines",
+      title: "Check which {destination} DMV deadlines apply to you",
       category: "vehicle",
       priority: "high",
       description:
         "Every state sets its own deadline for new residents to register a vehicle and swap their license. Civio has not verified the rule for {destination}.",
       steps: [
         "Open the {destination} motor vehicle agency from the official directory.",
-        "Find the new-resident page and note both deadlines.",
+        "Check licensing if you will drive and registration if you are bringing a vehicle.",
         "List the documents the agency asks for.",
       ],
       documents: ["Out-of-state title and registration", "Current driver license", "Proof of insurance"],

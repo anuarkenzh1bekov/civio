@@ -3,6 +3,9 @@ import type { Profile } from "@/lib/types";
 /** The demo scenario from the brief: a family moving from Texas to California. */
 export const DEMO_PROFILE: Profile = {
   currentState: "TX",
+  // Illustrative household estimates, independent of regional prices.
+  budget: { incomeNow: 5400, incomeAfter: 5900, housingNow: 1600, housingAfter: 2450, otherNow: 1800, otherAfter: 1950, moving: 3200 },
+  drives: true,
   destinationState: "CA",
   moveDate: "2027-01-15",
   zip: "94110",

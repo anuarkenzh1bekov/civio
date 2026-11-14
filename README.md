@@ -1,6 +1,6 @@
 # Civio
 
-One life change, one plan. Civio turns a move between US states into a personal checklist for taxes, health insurance, vehicle paperwork and school enrollment. Every task carries its deadline, documents and a link to the official source.
+Civio compares the financial impact of staying or moving between US states. Households enter current and expected monthly take-home income, housing, other living costs and one-time moving expenses. A separate checklist covers taxes, health insurance, vehicle paperwork and school enrollment.
 
 MVP scenario: moving from one state to another (demo: Texas → California).
 
@@ -20,11 +20,13 @@ The assistant works without any setup in "rules only" mode: it returns the match
 | Route | What it is |
 |---|---|
 | `/` | Landing page. The "Change one answer" block runs the real rule engine in the browser. |
-| `/onboarding` | Six-step questionnaire with conditional questions. Only the two states are required. |
-| `/dashboard` | Progress, priorities, category and status filters, task details, assistant. |
-| `/dashboard?demo=1` | Loads the Texas → California sample plan. |
+| `/onboarding` | Choose two different states and enter a budget. Open the plan immediately or continue with the household questions. |
+| `/dashboard` | Editable budget comparison, first-year difference, checklist, priorities and assistant. |
+| `/dashboard?demo=1` | Explore an isolated Texas → California example with illustrative amounts. |
 
 The profile and task progress are stored in the browser (`localStorage`). There is no account and no database yet.
+
+The first-year estimate uses 12 months of change in cash left after spending, less one-time moving costs. A blank amount stays unknown. The monthly income target shows the take-home pay needed to maintain the current monthly balance. Budget fields stay in the browser when the assistant receives a shared profile.
 
 ## How it works
 
@@ -58,8 +60,7 @@ The deadlines and amounts were checked on 2026-11-14 against search results rest
 Known limits:
 
 - State coverage: California and Texas for vehicles, California for taxes and schools. Other states fall back to Needs verification.
-- "Owns a vehicle" stands in for "drives" on the driver license rules.
-- Civio gives general information. It is not legal, tax or insurance advice and it does not estimate savings.
+- The budget uses household estimates for income after taxes and expenses. Regional market prices and payroll taxes are not calculated automatically.
 
 ## Stack
 

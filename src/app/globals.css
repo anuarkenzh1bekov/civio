@@ -1,7 +1,3 @@
-/* tastemaker · structure: long-scroll narrative · nav: text links + one button · hero: dark stage + product screenshot · footer: single line
-   palette: "Harbor slate", generated in OKLCH. Neutral hue 215 (chroma 0.010) tinted toward the accent hue 205.
-   One accent ramp, one neutral ramp, three status pairs. Every text pair measured, lowest 4.71:1.
-   critique: ShowTell 4 · Phil 4 · Hier 4 · Spec 5 · Restr 5 · Var 4 */
 /* Layer order for Astryx + Tailwind (from the Astryx Next.js + Tailwind example):
    Astryx reset lowest, Astryx components in the middle, Tailwind utilities on top. */
 @layer reset, theme, base, astryx-base, astryx-theme, components, utilities;
@@ -15,38 +11,23 @@
 
 /* ── Primitives: named by hue, never used in components ── */
 :root {
-  /* Slate: neutral, hue 215. Steps follow Radix roles (1 page … 12 high-contrast text). */
-  --slate-1: #f6fbfd;
-  --slate-2: #f0f5f7;
-  --slate-3: #e9eeef;
-  --slate-4: #e0e6e7;
-  --slate-5: #d4dddf;
-  --slate-6: #c7cfd2;
-  --slate-7: #b4bcbe;
-  --slate-8: #98a0a2;
-  --slate-9: #7a8284;
-  --slate-10: #636a6c;
-  --slate-11: #555c5e;
-  --slate-12: #1a2122;
-  /* Slate, dark end: the stage behind the hero, the onboarding and the dark band. */
-  --slate-d1: #071114;
-  --slate-d2: #101a1d;
-  --slate-d3: #1b2629;
-  --slate-d4: #2c383b;
-
-  /* Harbor: the accent, hue 205. */
-  --harbor-1: #f3fcfd;
-  --harbor-2: #e9f8fa;
-  --harbor-3: #dbf2f4;
-  --harbor-4: #cdebef;
-  --harbor-5: #bbe3e8;
-  --harbor-6: #a6d8de;
-  --harbor-7: #89c7ce;
-  --harbor-8: #5aadb7;
-  --harbor-9: #0f919c;
-  --harbor-10: #016770;
-  --harbor-11: #00555c;
-  --harbor-12: #002528;
+  /* Neutral surfaces, dividers and text. */
+  --slate-1: #ffffff;
+  --slate-2: #f1f1f0;
+  --slate-3: #e8e9eb;
+  --slate-4: #dedfe1;
+  --slate-5: #c7c9cd;
+  --slate-6: #babcc0;
+  --slate-7: #adafb3;
+  --slate-8: #93959a;
+  --slate-9: #737579;
+  --slate-10: #505154;
+  --slate-11: #484b50;
+  --slate-12: #202124;
+  --slate-d1: #151618;
+  --slate-d2: #242527;
+  --slate-d3: #333437;
+  --slate-d4: #55575b;
 
   /* Status: background + text only, the two roles the app renders. */
   --green-soft: #dff5e6;
@@ -54,26 +35,27 @@
   --amber-soft: #feebd7;
   --amber-text: #7a4d04;
   --red-soft: #fee9e6;
-  --red-text: #9a2929;
-  --red-bright: #f2a49c; /* error text on the dark stage */
+  --red-text: #98383c;
+  --red-bright: #ffb8b4;
 }
 
 /* ── Semantic tokens: named by role. Components use only these. ── */
 @theme {
   --color-canvas: var(--slate-2); /* page background */
   --color-panel: var(--slate-3); /* subtle surface, tracks, chips */
+  --color-panel-label: var(--slate-11);
   --color-card: #ffffff; /* raised surface */
   --color-line: var(--slate-5); /* decorative separator */
   --color-line-strong: var(--slate-7); /* hover border */
   --color-ink: var(--slate-12); /* body and headings */
-  --color-ink-muted: var(--slate-10); /* secondary text, 4.71:1 on panel */
+  --color-ink-muted: var(--slate-10); /* secondary text */
   --color-ink-faint: var(--slate-9); /* display-size second tone and decorative icons only */
 
-  --color-brand: var(--harbor-10); /* solid fill, the one primary action */
-  --color-brand-hover: var(--harbor-11);
-  --color-brand-ink: var(--harbor-11); /* links and accent text */
-  --color-brand-soft: var(--harbor-3); /* selected and highlighted backgrounds */
-  --color-brand-tint: var(--harbor-5);
+  --color-brand: var(--slate-12);
+  --color-brand-hover: var(--slate-d1);
+  --color-brand-ink: var(--slate-12);
+  --color-brand-soft: var(--slate-3);
+  --color-brand-tint: var(--slate-6);
   --color-on-brand: #ffffff;
 
   --color-stage: var(--slate-d1); /* dark surfaces */
@@ -81,7 +63,7 @@
   --color-stage-line: var(--slate-d4);
   --color-on-stage: var(--slate-1);
   --color-on-stage-muted: var(--slate-7);
-  --color-brand-bright: var(--harbor-8); /* accent on dark: selection rings, checks, bars */
+  --color-brand-bright: var(--slate-4); /* accent on dark: selection rings, checks, bars */
 
   --color-ok: var(--green-text);
   --color-ok-soft: var(--green-soft);
@@ -91,11 +73,10 @@
   --color-risk-soft: var(--red-soft);
   --color-risk-bright: var(--red-bright);
 
-  /* Four modules, told apart by lightness inside the one accent hue */
-  --color-mod-taxes: var(--harbor-10);
-  --color-mod-health: var(--harbor-8);
-  --color-mod-vehicle: var(--harbor-6);
-  --color-mod-family: var(--harbor-4);
+  --color-mod-taxes: var(--slate-12);
+  --color-mod-health: var(--slate-9);
+  --color-mod-vehicle: var(--slate-6);
+  --color-mod-family: var(--slate-4);
 
   --font-display: var(--font-bricolage), ui-sans-serif, system-ui, sans-serif;
   --font-sans: var(--font-instrument), ui-sans-serif, system-ui, sans-serif;
@@ -403,19 +384,19 @@
 
 /* ── Astryx integration ──
    Unlayered on purpose: these must win over the theme's own layer.
-   Astryx components take Civio's typefaces and the Harbor palette; the theme wrapper does not recolor Civio's own text.
+   Astryx controls share the site's action and focus colors.
    light-dark() follows the mode passed to <Theme>: light in the app, dark in the onboarding. */
 [data-astryx-theme] {
   --font-family-body: var(--font-sans);
   --font-family-heading: var(--font-display);
   --font-family-code: var(--font-mono);
 
-  --color-accent: light-dark(var(--harbor-10), var(--harbor-8));
-  --color-accent-muted: light-dark(var(--harbor-4), var(--slate-d4));
-  --color-text-accent: light-dark(var(--harbor-11), var(--harbor-8));
-  --color-icon-accent: light-dark(var(--harbor-11), var(--harbor-8));
+  --color-accent: light-dark(var(--color-brand), var(--color-brand-bright));
+  --color-accent-muted: light-dark(var(--color-brand-soft), var(--color-stage-line));
+  --color-text-accent: light-dark(var(--color-brand-ink), var(--color-brand-bright));
+  --color-icon-accent: var(--color-text-accent);
   --color-on-accent: light-dark(#ffffff, var(--slate-d1));
-  --focus-outline-color: light-dark(var(--harbor-10), var(--harbor-8));
+  --focus-outline-color: var(--color-accent);
 
   --color-text-primary: light-dark(var(--slate-12), var(--slate-1));
   --color-text-secondary: light-dark(var(--slate-10), var(--slate-7));

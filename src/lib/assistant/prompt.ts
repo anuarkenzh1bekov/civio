@@ -39,7 +39,8 @@ export function renderProfile(profile: Profile): string {
     `Marital status: ${profile.marital ?? "not answered"}`,
     `Children: ${yesNo(profile.hasChildren)}${profile.childAges?.length ? ` (ages ${profile.childAges.join(", ")})` : ""}`,
     `Health insurance: ${pick("insurance", profile.insurance)}`,
-    `Owns a vehicle: ${yesNo(profile.hasVehicle)}`,
+    `Bringing a vehicle: ${yesNo(profile.hasVehicle)}`,
+    `Will drive after moving: ${yesNo(profile.drives)}`,
   ].join("\n");
 }
 

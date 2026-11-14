@@ -34,7 +34,7 @@ const SUGGESTIONS = [
 
 /** Strip everything the assistant has no use for before the profile leaves the browser. */
 function shareable(profile: Profile): Profile {
-  const { zip: _zip, aiConsent: _consent, vehicleRegisteredInCurrentState: _reg, ...rest } = profile;
+  const { budget: _budget, zip: _zip, aiConsent: _consent, vehicleRegisteredInCurrentState: _reg, ...rest } = profile;
   return rest;
 }
 

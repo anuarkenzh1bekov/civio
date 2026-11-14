@@ -21,6 +21,7 @@ const ProfileSchema = z
     childAges: z.array(z.number().int().min(0).max(25)).max(12).optional(),
     insurance: z.enum(["employer", "marketplace", "medicaid", "other", "none"]).optional(),
     hasVehicle: z.boolean().optional(),
+    drives: z.boolean().optional(),
   })
   .strip();
 
@@ -67,7 +68,8 @@ function rulesOnlyAnswer(retrieved: Retrieved[]): string {
     const deadline = task?.deadline ?? (t.deadline ? { label: t.deadline.label, date: undefined } : null);
     const lines = [`**${task?.title ?? t.title}**`, `${task?.description ?? t.description} [${rule.rule_id}]`];
     if (deadline) lines.push(`Deadline: ${deadline.label}${deadline.date ? ` (${deadline.date})` : ""}.`);
-    if (!rule.verified) lines.push("Civio has not verified this for your state. Check the official site.");
+    if (task?.verificationNote) lines.push(task.verificationNote);
+    else if (!rule.verified) lines.push("Civio has not verified this for your state. Check the official site.");
     return lines.join("\n");
   });
   return `These are the rules in Civio that match your question.\n\n${parts.join("\n\n")}`.replaceAll("\n", "  \n");

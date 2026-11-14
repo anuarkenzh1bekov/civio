@@ -1,4 +1,5 @@
 "use client";
+import "./budget.css";
 
 import { AlertDialog } from "@astryxdesign/core/AlertDialog";
 import { CommandPalette } from "@astryxdesign/core/CommandPalette";
@@ -11,26 +12,22 @@ import {
   ArrowUpRight,
   Check,
   ChevronDown,
-  ChevronRight,
-  ChevronsUpDown,
   CircleDollarSign,
   FileText,
-  Folder,
-  House,
   LayoutGrid,
   MessageCircle,
-  RotateCcw,
   Search,
-  UserRoundPen,
 } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Suspense, useEffect, useMemo, useState } from "react";
 import { AssistantPanel } from "@/components/dashboard/AssistantPanel";
-import { Logo } from "@/components/Logo";
+import { BudgetEditor } from "@/components/dashboard/BudgetEditor";
+import { PlanFolders } from "@/components/dashboard/PlanFolders";
+import { PlanHeader } from "@/components/dashboard/PlanHeader";
+import { RouteBanner } from "@/components/dashboard/RouteBanner";
 import { CATEGORY_SHORT, CategoryIcon, PriorityBadge, StatusBadge } from "@/components/ui";
-import { daysUntil, formatDate, formatShortDate } from "@/lib/format";
-import { stateName } from "@/lib/states";
+import { daysUntil, formatDate } from "@/lib/format";
 import { useCivio, type PlanTask } from "@/lib/store";
 import { CATEGORY_LABEL, type Category, type TaskStatus } from "@/lib/types";
 
@@ -42,83 +39,17 @@ const STATUSES: { value: "all" | TaskStatus; label: string }[] = [
   { value: "done", label: "Done" },
 ];
 
-/** One tint per module, used by the donut, the folders and the sidebar tree. */
-const TINT: Record<Category, string> = {
-  taxes: "var(--color-mod-taxes)",
-  health: "var(--color-mod-health)",
-  vehicle: "var(--color-mod-vehicle)",
-  family: "var(--color-mod-family)",
-};
-
 const MONEY_LABEL = { fee: "Fee", penalty: "Penalty risk", tax: "Tax", coverage: "Coverage gap" } as const;
 
 function dueText(task: PlanTask): { text: string; urgent: boolean } | null {
   if (!task.deadline) return null;
   if (!task.deadline.date) return { text: task.deadline.label, urgent: false };
   const days = daysUntil(task.deadline.date);
-  const date = formatDate(task.deadline.date);
+  const date = `Est. ${formatDate(task.deadline.date)}`;
   if (days === null || task.displayStatus === "done") return { text: date, urgent: false };
-  if (days < 0) return { text: `${date} · ${-days} ${days === -1 ? "day" : "days"} overdue`, urgent: true };
+  if (days < 0) return { text: `${date} · ${-days} ${days === -1 ? "day" : "days"} past estimate`, urgent: true };
   if (days === 0) return { text: `Today, ${date}`, urgent: true };
   return { text: `${date} · in ${days} ${days === 1 ? "day" : "days"}`, urgent: days <= 14 };
-}
-
-/** Tasks per module as a donut. Segment length is the module's share of all tasks. */
-function ModuleDonut({ counts, total }: { counts: Record<Category, number>; total: number }) {
-  const radius = 42;
-  const circumference = 2 * Math.PI * radius;
-  const gap = total > 0 ? 5 : 0;
-  let offset = 0;
-  return (
-    <svg viewBox="0 0 120 120" className="size-40 shrink-0 -rotate-90" role="img" aria-label="Tasks by module">
-      <circle cx="60" cy="60" r={radius} fill="none" stroke="var(--color-panel)" strokeWidth="14" />
-      {CATEGORIES.map((category) => {
-        const share = total > 0 ? counts[category] / total : 0;
-        const length = Math.max(0, share * circumference - gap);
-        const start = offset;
-        offset += share * circumference;
-        if (counts[category] === 0) return null;
-        return (
-          <circle
-            key={category}
-            cx="60"
-            cy="60"
-            r={radius}
-            fill="none"
-            stroke={TINT[category]}
-            strokeWidth="14"
-            strokeLinecap="round"
-            strokeDasharray={`${length} ${circumference - length}`}
-            strokeDashoffset={-start}
-          />
-        );
-      })}
-    </svg>
-  );
-}
-
-/** A soft folder, tinted per module. */
-function FolderArt({ tint, sheets }: { tint: string; sheets: number }) {
-  return (
-    <div className="relative h-24" aria-hidden="true">
-      <div className="absolute inset-x-0 bottom-0 top-3 rounded-2xl" style={{ background: tint, opacity: 0.55 }} />
-      <div className="absolute left-0 top-0 h-6 w-2/5 rounded-t-xl" style={{ background: tint, opacity: 0.55 }} />
-      {Array.from({ length: Math.min(sheets, 3) }).map((_, i) => (
-        <div
-          key={i}
-          className="absolute top-1 h-14 w-2/5 rounded-md bg-card shadow-soft"
-          style={{ left: `${14 + i * 20}%`, transform: `rotate(${-6 + i * 6}deg)` }}
-        >
-          <span className="mx-2 mt-2.5 block h-1 rounded-full bg-line" />
-          <span className="mx-2 mt-1.5 block h-1 w-1/2 rounded-full bg-line" />
-        </div>
-      ))}
-      <div
-        className="absolute inset-x-0 bottom-0 h-14 rounded-2xl border border-card/60 backdrop-blur-sm"
-        style={{ background: `linear-gradient(180deg, color-mix(in oklab, ${tint} 70%, white), ${tint})`, opacity: 0.92 }}
-      />
-    </div>
-  );
 }
 
 function TaskRow({
@@ -174,7 +105,7 @@ function TaskRow({
             {!done && <PriorityBadge priority={task.priority} />}
           </span>
           <span className="inline-flex items-center gap-2 text-sm text-ink-muted">
-            <span className="size-2.5 rounded-full" style={{ background: TINT[task.category] }} aria-hidden="true" />
+            <CategoryIcon category={task.category} className="size-4" />
             {CATEGORY_SHORT[task.category]}
           </span>
           <span className={`text-sm md:truncate ${due?.urgent ? "font-semibold text-risk" : "text-ink-muted"}`}>
@@ -294,7 +225,7 @@ function Skeleton() {
   );
 }
 
-function NoPlan({ onDemo }: { onDemo: () => void }) {
+function NoPlan() {
   return (
     <div className="grid min-h-dvh place-items-center bg-panel px-5">
       <div className="tile max-w-md p-8 text-center">
@@ -302,14 +233,12 @@ function NoPlan({ onDemo }: { onDemo: () => void }) {
           <LayoutGrid className="size-5" aria-hidden="true" />
         </span>
         <h1 className="mt-5 text-2xl font-semibold tracking-tight">No plan yet</h1>
-        <p className="mt-2 text-ink-muted">Answer a few questions about your move and Civio builds your checklist.</p>
+        <p className="mt-2 text-ink-muted">Compare your budget before and after a move, then build your checklist.</p>
         <div className="mt-6 flex flex-wrap justify-center gap-2">
           <Link href="/onboarding" className="btn btn-primary">
             Get Started <ArrowRight className="size-4" aria-hidden="true" />
           </Link>
-          <button type="button" onClick={onDemo} className="btn btn-quiet">
-            Load the demo
-          </button>
+          <Link href="/dashboard?demo=1" className="btn btn-quiet">View sample budget</Link>
         </div>
       </div>
     </div>
@@ -317,8 +246,18 @@ function NoPlan({ onDemo }: { onDemo: () => void }) {
 }
 
 export default function DashboardPage() {
+  return <Suspense fallback={<Skeleton />}><DashboardRoute /></Suspense>;
+}
+
+function DashboardRoute() {
+  const params = useSearchParams();
+  const preview = params.get("demo") === "1";
+  return <Dashboard key={String(preview)} preview={preview} panel={params.get("panel")} />;
+}
+
+function Dashboard({ preview, panel }: { preview: boolean; panel: string | null }) {
   const router = useRouter();
-  const { ready, hasPlan, isDemo, profile, tasks, toggleDone, setConsent, loadDemo, reset } = useCivio();
+  const { ready, hasPlan, isDemo, profile, tasks, toggleDone, setConsent, saveBudget, reset } = useCivio(preview);
   const [category, setCategory] = useState<"all" | Category>("all");
   const [status, setStatus] = useState<"all" | TaskStatus>("all");
   const [moneyOnly, setMoneyOnly] = useState(false);
@@ -329,21 +268,12 @@ export default function DashboardPage() {
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [confirmReset, setConfirmReset] = useState(false);
   const showToast = useToast();
-  const tasksRef = useRef(tasks);
-  tasksRef.current = tasks;
+  const [checklistOpen, setChecklistOpen] = useState(false);
 
-  // /dashboard?demo=1 loads the sample plan, then cleans the URL.
   useEffect(() => {
-    if (!ready) return;
-    const params = new URLSearchParams(window.location.search);
-    // ?panel=ask and ?panel=search open the assistant or the command palette directly.
-    if (params.get("panel") === "ask") setAssistantOpen(true);
-    if (params.get("panel") === "search") setPaletteOpen(true);
-    if (params.get("demo") === "1") {
-      loadDemo();
-      router.replace("/dashboard");
-    }
-  }, [ready, loadDemo, router]);
+    if (panel === "ask") setAssistantOpen(true);
+    if (panel === "search") setPaletteOpen(true);
+  }, [panel]);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -356,23 +286,8 @@ export default function DashboardPage() {
     return () => window.removeEventListener("keydown", onKey);
   }, []);
 
-  const counts = useMemo(() => {
-    const of = (c: Category) => tasks.filter((t) => t.category === c);
-    const byCategory = Object.fromEntries(CATEGORIES.map((c) => [c, of(c).length])) as Record<Category, number>;
-    const doneByCategory = Object.fromEntries(
-      CATEGORIES.map((c) => [c, of(c).filter((t) => t.displayStatus === "done").length]),
-    ) as Record<Category, number>;
-    return {
-      total: tasks.length,
-      done: tasks.filter((t) => t.displayStatus === "done").length,
-      review: tasks.filter((t) => t.displayStatus === "needs_verification").length,
-      money: tasks.filter((t) => t.financial && t.displayStatus !== "done").length,
-      byCategory,
-      doneByCategory,
-    };
-  }, [tasks]);
-
-  const upcoming = useMemo(() => tasks.filter((t) => t.displayStatus !== "done").slice(0, 3), [tasks]);
+  const completed = tasks.filter(task => task.displayStatus === "done").length;
+  const next = tasks.find(task => task.displayStatus === "pending");
 
   const visible = useMemo(() => {
     const needle = query.trim().toLowerCase();
@@ -397,9 +312,8 @@ export default function DashboardPage() {
   }, [tasks]);
 
   if (!ready) return <Skeleton />;
-  if (!hasPlan) return <NoPlan onDemo={loadDemo} />;
+  if (!hasPlan) return <NoPlan />;
 
-  const percent = counts.total ? Math.round((counts.done / counts.total) * 100) : 0;
   const filtered = category !== "all" || status !== "all" || moneyOnly || query.trim() !== "";
   const clearFilters = () => {
     setCategory("all");
@@ -407,8 +321,20 @@ export default function DashboardPage() {
     setMoneyOnly(false);
     setQuery("");
   };
+  const openFolder = (folder: Category | "all") => {
+    clearFilters();
+    setCategory(folder);
+    setOpenId(null);
+    setChecklistOpen(true);
+    requestAnimationFrame(() => {
+      const title = document.getElementById("checklist-title");
+      title?.focus({ preventScroll: true });
+      title?.scrollIntoView({ block: "start" });
+    });
+  };
   const reveal = (taskId: string) => {
     clearFilters();
+    setChecklistOpen(true);
     setOpenId(taskId);
     requestAnimationFrame(() =>
       document.getElementById(`row-${taskId}`)?.scrollIntoView({ behavior: "smooth", block: "center" }),
@@ -440,9 +366,11 @@ export default function DashboardPage() {
     else if (id === "action:profile") router.push("/onboarding");
     else if (id === "action:money") {
       clearFilters();
+      setChecklistOpen(true);
       setMoneyOnly(true);
     } else if (id === "action:review") {
       clearFilters();
+      setChecklistOpen(true);
       setStatus("needs_verification");
     } else if (id.startsWith("task:")) reveal(id.slice(5));
   };
@@ -451,284 +379,33 @@ export default function DashboardPage() {
     setAssistantOpen(true);
   };
 
-  const [next, ...later] = upcoming;
-  const nextDue = next ? dueText(next) : null;
-
   return (
-    <div className="min-h-dvh bg-panel lg:grid lg:grid-cols-[17rem_minmax(0,1fr)]">
-      {/* ── Sidebar ── */}
-      <aside className="hidden border-r border-line bg-card/70 lg:block">
-        <div className="sticky top-0 flex h-dvh flex-col gap-4 p-4">
-          <div className="flex items-center gap-3 rounded-2xl px-2 py-1.5">
-            <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-stage font-mono text-sm font-semibold text-on-stage">
-              {profile.destinationState}
-            </span>
-            <span className="min-w-0 flex-1">
-              <span className="block truncate text-[0.9375rem] font-semibold">
-                {stateName(profile.currentState)} → {stateName(profile.destinationState)}
-              </span>
-              <span className="block text-xs text-ink-muted">
-                {counts.total} {counts.total === 1 ? "task" : "tasks"}
-              </span>
-            </span>
-            <ChevronsUpDown className="size-4 text-ink-faint" aria-hidden="true" />
-          </div>
-
-          <button
-            type="button"
-            onClick={() => setPaletteOpen(true)}
-            className="flex min-h-10 items-center gap-2 rounded-xl bg-card px-3 text-left shadow-soft ring-1 ring-line"
-          >
-            <Search className="size-4 shrink-0 text-ink-faint" aria-hidden="true" />
-            <span className="flex-1 text-sm text-ink-muted">Search tasks…</span>
-            <kbd className="rounded-md bg-panel px-1.5 py-0.5 font-mono text-[0.6875rem] text-ink-muted">Ctrl K</kbd>
-          </button>
-
-          <nav aria-label="Main" className="grid gap-0.5 text-[0.9375rem]">
-            <button
-              type="button"
-              onClick={clearFilters}
-              className="flex min-h-10 items-center gap-2.5 rounded-xl px-3 text-left font-medium"
-            >
-              <House className="size-4" strokeWidth={1.75} aria-hidden="true" /> Home
+    <div className="move-workspace min-h-dvh bg-canvas">
+      <PlanHeader preview={preview} onSearch={() => setPaletteOpen(true)} />
+      <main className="ledger-shell plan-layout pb-12">
+        <PlanFolders categories={CATEGORIES} tasks={tasks} selected={checklistOpen ? category : "all"} onSelect={openFolder} />
+        <RouteBanner profile={profile} sample={isDemo} />
+        <BudgetEditor
+          profile={profile}
+          sample={isDemo}
+          onSave={saveBudget}
+          onAsk={() => setAssistantOpen(true)}
+          onChecklist={() => openFolder("all")}
+        />
+        <section className="ledger-checklist" id="folders" aria-label="Moving checklist">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <h2>Moving checklist</h2>
+            <button className="ledger-link" type="button" aria-expanded={checklistOpen} aria-controls="checklist-content" onClick={() => setChecklistOpen(!checklistOpen)}>
+              {checklistOpen ? "Hide checklist" : "View checklist"} · {completed}/{tasks.length} done
             </button>
-            <button
-              type="button"
-              onClick={() => setAssistantOpen(true)}
-              className="flex min-h-10 items-center gap-2.5 rounded-xl px-3 text-left text-ink-muted hover:text-ink"
-            >
-              <MessageCircle className="size-4" strokeWidth={1.75} aria-hidden="true" /> Ask AI
-            </button>
-            <Link href="/onboarding" className="flex min-h-10 items-center gap-2.5 rounded-xl px-3 text-ink-muted hover:text-ink">
-              <UserRoundPen className="size-4" strokeWidth={1.75} aria-hidden="true" /> Edit profile
-            </Link>
-          </nav>
-
-          <div>
-            <p className="mono-label px-3 text-ink-muted">Modules</p>
-            <div className="mt-2 grid gap-0.5 text-[0.9375rem]">
-              <button
-                type="button"
-                aria-pressed={category === "all"}
-                onClick={() => setCategory("all")}
-                className={`flex min-h-10 items-center gap-2 rounded-xl px-3 text-left ${
-                  category === "all" ? "bg-card font-semibold shadow-soft ring-1 ring-line" : "text-ink-muted hover:text-ink"
-                }`}
-              >
-                <ChevronDown className="size-3.5 text-ink-faint" aria-hidden="true" />
-                <Folder className="size-4" fill="currentColor" strokeWidth={0} aria-hidden="true" />
-                <span className="flex-1">All tasks</span>
-                <span className="font-mono text-xs tabular-nums text-ink-muted">{counts.total}</span>
-              </button>
-              {CATEGORIES.map((c) => (
-                <button
-                  key={c}
-                  type="button"
-                  aria-pressed={category === c}
-                  onClick={() => setCategory(c)}
-                  className={`ml-5 flex min-h-10 items-center gap-2 rounded-xl px-3 text-left ${
-                    category === c ? "bg-card font-semibold shadow-soft ring-1 ring-line" : "text-ink-muted hover:text-ink"
-                  }`}
-                >
-                  <Folder className="size-4" style={{ color: TINT[c] }} fill="currentColor" strokeWidth={0} aria-hidden="true" />
-                  <span className="flex-1 whitespace-nowrap">{CATEGORY_LABEL[c]}</span>
-                  <span className="font-mono text-xs tabular-nums text-ink-muted">{counts.byCategory[c]}</span>
-                </button>
-              ))}
-            </div>
           </div>
-
-          <button
-            type="button"
-            onClick={() => setConfirmReset(true)}
-            className="mt-auto flex min-h-10 items-center gap-2.5 rounded-xl px-3 text-left text-[0.9375rem] text-ink-muted hover:text-ink"
-          >
-            <RotateCcw className="size-4" strokeWidth={1.75} aria-hidden="true" /> Start over
-          </button>
-        </div>
-      </aside>
-
-      {/* ── Main ── */}
-      <main className="min-w-0 px-4 pb-16 pt-4 sm:px-6 lg:px-8 lg:pt-5">
-        <div className="mx-auto max-w-6xl">
-          <div className="flex items-center justify-between gap-3">
-            <div className="flex items-center gap-2 text-sm text-ink-muted">
-              <span className="lg:hidden">
-                <Logo />
-              </span>
-              <span className="hidden items-center gap-2 lg:flex">
-                Civio <ChevronRight className="size-3.5" aria-hidden="true" />
-                <span className="font-medium text-ink">My dashboard</span>
-              </span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Link href="/onboarding" className="btn btn-quiet lg:hidden" aria-label="Edit profile">
-                <UserRoundPen className="size-4" aria-hidden="true" />
-              </Link>
-              <button type="button" onClick={() => setAssistantOpen(true)} className="btn btn-primary">
-                <MessageCircle className="size-4" aria-hidden="true" /> Ask Civio
-              </button>
-            </div>
-          </div>
-
-          <div className="mt-6">
-            <h1 className="text-[clamp(1.75rem,3vw,2.375rem)] font-semibold leading-tight tracking-[-0.03em]">
-              Your moving plan
-            </h1>
-            <p className="mt-1 flex flex-wrap items-center gap-2 text-ink-muted">
-              {stateName(profile.currentState)} <ArrowRight className="size-4" aria-hidden="true" />{" "}
-              {stateName(profile.destinationState)}
-              {profile.moveDate && <span>· moving {formatDate(profile.moveDate)}</span>}
-              {isDemo && <span className="rounded-full bg-stage px-2.5 py-0.5 text-xs font-semibold text-on-stage">Demo</span>}
-            </p>
-          </div>
-
-          {/* Row of three cards */}
-          <div className="mt-6 grid gap-4 xl:grid-cols-3">
-            {/* Progress */}
-            <section aria-labelledby="progress" className="tile relative flex flex-col overflow-hidden p-6">
-              <h2 id="progress" className="relative font-sans text-[0.9375rem] font-semibold">
-                Progress
-              </h2>
-              <p className="relative mt-6 flex items-baseline gap-2">
-                <span className="font-display text-5xl font-semibold tabular-nums">{counts.done}</span>
-                <span className="text-ink-muted">of {counts.total} completed</span>
-              </p>
-              <div
-                className="relative mb-8 mt-4 h-2.5 overflow-hidden rounded-full bg-panel"
-                role="progressbar"
-                aria-valuemin={0}
-                aria-valuemax={100}
-                aria-valuenow={percent}
-                aria-label="Plan progress"
-              >
-                <div
-                  className="h-full origin-left rounded-full bg-brand transition-transform duration-500 ease-(--ease-out)"
-                  style={{ transform: `scaleX(${Math.max(percent, 2) / 100})` }}
-                />
-              </div>
-              <dl className="relative mt-auto grid grid-cols-3 gap-3 border-t border-line pt-4">
-                <div>
-                  <dt className="text-xs text-ink-muted">Tasks</dt>
-                  <dd className="font-display text-2xl font-semibold tabular-nums">{counts.total}</dd>
-                </div>
-                <div>
-                  <dt className="text-xs text-ink-muted">To review</dt>
-                  <dd className="font-display text-2xl font-semibold tabular-nums text-warn">{counts.review}</dd>
-                </div>
-                <div>
-                  <dt className="text-xs text-ink-muted">Money at stake</dt>
-                  <dd className="font-display text-2xl font-semibold tabular-nums text-risk">{counts.money}</dd>
-                </div>
-              </dl>
-            </section>
-
-            {/* By module */}
-            <section aria-labelledby="by-module" className="tile flex flex-col p-6">
-              <h2 id="by-module" className="font-sans text-[0.9375rem] font-semibold">
-                Tasks by module
-              </h2>
-              <div className="mt-4 flex flex-1 items-center gap-5">
-                <div className="relative">
-                  <ModuleDonut counts={counts.byCategory} total={counts.total} />
-                  <div className="absolute inset-0 grid place-items-center text-center">
-                    <div>
-                      <p className="text-xs text-ink-muted">Total</p>
-                      <p className="font-display text-2xl font-semibold tabular-nums">{counts.total}</p>
-                    </div>
-                  </div>
-                </div>
-                <ul className="grid min-w-0 flex-1 gap-2.5 text-sm">
-                  {CATEGORIES.map((c) => (
-                    <li key={c} className="flex items-center gap-2">
-                      <span className="size-2.5 shrink-0 rounded-full" style={{ background: TINT[c] }} aria-hidden="true" />
-                      <span className="flex-1 truncate text-ink-muted">{CATEGORY_LABEL[c]}</span>
-                      <span className="font-mono text-xs tabular-nums">{counts.byCategory[c]}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </section>
-
-            {/* Priorities */}
-            <section aria-labelledby="priorities" className="grid content-start gap-3">
-              <h2 id="priorities" className="sr-only">
-                Your priorities
-              </h2>
-              {next ? (
-                <button
-                  type="button"
-                  onClick={() => reveal(next.id)}
-                  className="on-stage stage-glow relative overflow-hidden rounded-panel p-6 text-left text-on-stage shadow-lift"
-                >
-                  <span className="relative flex items-center justify-between text-sm font-semibold">
-                    Next up
-                    <span className="inline-flex items-center gap-1.5 rounded-full border border-stage-line px-2.5 py-1 text-xs text-on-stage-muted">
-                      <CategoryIcon category={next.category} className="size-3.5" /> {CATEGORY_SHORT[next.category]}
-                    </span>
-                  </span>
-                  <span className="relative mt-8 block font-display text-2xl font-semibold leading-tight tracking-tight">
-                    {next.title}
-                  </span>
-                  <span className="relative mt-2 block text-sm text-on-stage-muted">{nextDue ? nextDue.text : "No deadline recorded"}</span>
-                </button>
-              ) : (
-                <div className="tile p-6">
-                  <p className="font-semibold">Everything is done</p>
-                  <p className="mt-1 text-sm text-ink-muted">Nothing left on this plan.</p>
-                </div>
-              )}
-              {later.length > 0 && (
-                <ul className="tile divide-y divide-line px-5">
-                  {later.map((task) => (
-                    <li key={task.id}>
-                      <button type="button" onClick={() => reveal(task.id)} className="flex w-full items-center gap-3 py-3.5 text-left">
-                        <span className="grid size-9 shrink-0 place-items-center rounded-full bg-panel">
-                          <CategoryIcon category={task.category} />
-                        </span>
-                        <span className="min-w-0 flex-1">
-                          <span className="block truncate text-sm font-semibold">{task.title}</span>
-                          <span className="block text-xs text-ink-muted">{CATEGORY_SHORT[task.category]}</span>
-                        </span>
-                        {task.deadline?.date && (
-                          <span className="shrink-0 font-mono text-xs tabular-nums">{formatShortDate(task.deadline.date)}</span>
-                        )}
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </section>
-          </div>
-
-          {/* Modules as folders */}
-          <h2 className="mt-10 text-xl font-semibold tracking-tight">Modules</h2>
-          <div className="mt-4 grid grid-cols-2 gap-4 lg:grid-cols-4">
-            {CATEGORIES.map((c) => {
-              const active = category === c;
-              return (
-                <button
-                  key={c}
-                  type="button"
-                  aria-pressed={active}
-                  onClick={() => setCategory(active ? "all" : c)}
-                  className={`rounded-panel p-4 text-left transition-colors duration-150 ${
-                    active ? "bg-card shadow-soft ring-1 ring-line" : "hover:bg-card/60"
-                  }`}
-                >
-                  <FolderArt tint={TINT[c]} sheets={counts.byCategory[c]} />
-                  <p className="mt-3 text-center font-semibold">{CATEGORY_LABEL[c]}</p>
-                  <p className="text-center text-sm text-ink-muted">
-                    {counts.byCategory[c]} {counts.byCategory[c] === 1 ? "task" : "tasks"} · {counts.doneByCategory[c]} done
-                  </p>
-                </button>
-              );
-            })}
-          </div>
-
+          {next && <button className="ledger-next" type="button" onClick={() => reveal(next.id)}>
+            <span>Next step</span><strong>{next.title}</strong><small>{dueText(next)?.text}</small><ArrowRight className="size-4" />
+          </button>}
+          <div id="checklist-content" hidden={!checklistOpen}>
           {/* Tasks */}
           <div className="mt-10 flex flex-wrap items-center justify-between gap-3">
-            <h2 className="text-xl font-semibold tracking-tight">
+            <h2 id="checklist-title" tabIndex={-1} className="text-xl font-semibold tracking-tight">
               {category === "all" ? "Tasks" : CATEGORY_LABEL[category]}
             </h2>
             <div className="flex flex-wrap items-center gap-1.5" role="group" aria-label="Filter by status">
@@ -758,7 +435,11 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          <div className="mt-3 lg:hidden">
+          <div className="mt-3 flex flex-wrap gap-3">
+            <select aria-label="Task category" className="rounded-lg border border-line bg-card px-3 py-2" value={category} onChange={e => setCategory(e.target.value as typeof category)}>
+              <option value="all">All categories</option>
+              {CATEGORIES.map(c => <option key={c} value={c}>{CATEGORY_LABEL[c]}</option>)}
+            </select>
             <label className="flex min-h-11 items-center gap-2 rounded-full bg-card px-4 shadow-soft">
               <Search className="size-4 shrink-0 text-ink-faint" aria-hidden="true" />
               <span className="sr-only">Search tasks</span>
@@ -810,11 +491,9 @@ export default function DashboardPage() {
             </div>
           )}
 
-          <p className="mt-8 text-sm text-ink-muted">
-            Civio gives general information from official sources. It is not legal, tax or insurance advice, and it does
-            not estimate savings.
-          </p>
-        </div>
+          </div>
+        </section>
+        {!preview && <button type="button" className="ledger-reset mt-6 text-sm text-ink-muted" onClick={() => setConfirmReset(true)}>Start over</button>}
       </main>
 
       {/* ── Assistant in an Astryx drawer: focus handling, Escape and scrim come with it ── */}

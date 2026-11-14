@@ -1,6 +1,7 @@
 "use client";
 
-import { useCallback, useMemo, useSyncExternalStore } from "react";
+import { useCallback, useMemo, useState, useSyncExternalStore } from "react";
+import type { MoveBudget } from "./budget";
 import { DEMO_DONE, DEMO_PROFILE } from "@/lib/demo";
 import { RULES } from "@/lib/rules/data";
 import { generatePlan } from "@/lib/rules/engine";
@@ -62,9 +63,15 @@ function subscribe(fn: () => void) {
 
 export type PlanTask = Task & { displayStatus: TaskStatus };
 
-export function useCivio() {
+export function useCivio(preview = false) {
   // `null` on the server and during hydration, so nothing renders from stale markup.
-  const saved = useSyncExternalStore<Saved | null>(subscribe, read, () => null);
+  const personal = useSyncExternalStore<Saved | null>(subscribe, read, () => null);
+  const [sample, setSample] = useState<Saved>({ profile: DEMO_PROFILE, done: DEMO_DONE, demo: true });
+  const saved = preview ? sample : personal;
+  const update = useCallback((modify: (current: Saved) => Saved) => {
+    if (preview) setSample(modify);
+    else write(modify(read()));
+  }, [preview]);
 
   const tasks: PlanTask[] = useMemo(() => {
     if (!saved) return [];
@@ -80,21 +87,21 @@ export function useCivio() {
   }, []);
 
   const toggleDone = useCallback((taskId: string) => {
-    const current = read();
-    const done = current.done.includes(taskId)
-      ? current.done.filter((id) => id !== taskId)
-      : [...current.done, taskId];
-    write({ ...current, done });
-  }, []);
+    update(current => {
+      const done = current.done.includes(taskId)
+        ? current.done.filter((id) => id !== taskId)
+        : [...current.done, taskId];
+      return { ...current, done };
+    });
+  }, [update]);
 
   const setConsent = useCallback((aiConsent: boolean) => {
-    const current = read();
-    write({ ...current, profile: { ...current.profile, aiConsent } });
-  }, []);
+    update(current => ({ ...current, profile: { ...current.profile, aiConsent } }));
+  }, [update]);
 
-  const loadDemo = useCallback(() => {
-    write({ profile: DEMO_PROFILE, done: DEMO_DONE, demo: true });
-  }, []);
+  const saveBudget = useCallback((budget: MoveBudget) => {
+    update(current => ({ ...current, profile: { ...current.profile, budget } }));
+  }, [update]);
 
   const reset = useCallback(() => write(EMPTY), []);
 
@@ -107,7 +114,7 @@ export function useCivio() {
     saveProfile,
     toggleDone,
     setConsent,
-    loadDemo,
+    saveBudget,
     reset,
   };
 }

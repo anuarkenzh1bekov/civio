@@ -8,6 +8,8 @@ export type Insurance = "employer" | "marketplace" | "medicaid" | "other" | "non
 /** Everything the questionnaire can collect. Every field is optional: a skipped
  *  answer stays undefined and the rule engine treats it as unknown, never as "no". */
 export type Profile = {
+  budget?: import("./budget").MoveBudget;
+  drives?: boolean;
   currentState?: StateCode;
   destinationState?: StateCode;
   moveDate?: string; // yyyy-mm-dd
@@ -37,6 +39,8 @@ export type FactKey =
   | "has_school_age_child"
   | "insurance"
   | "has_vehicle"
+  | "drives"
+  | "has_vehicle_or_drives"
   | "destination_state"
   | "origin_state";
 

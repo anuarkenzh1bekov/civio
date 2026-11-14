@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Bricolage_Grotesque, Geist_Mono, Instrument_Sans, Instrument_Serif } from "next/font/google";
 import "./globals.css";
+import "./atlas.css";
 import { Providers } from "./providers";
 
 const display = Bricolage_Grotesque({ subsets: ["latin"], variable: "--font-bricolage", display: "swap" });
@@ -15,12 +16,12 @@ const serif = Instrument_Serif({
 const mono = Geist_Mono({ subsets: ["latin"], variable: "--font-geist-mono", display: "swap" });
 
 export const metadata: Metadata = {
-  title: { default: "Civio — one move, one plan", template: "%s · Civio" },
+  title: { default: "Civio — what would a move cost you?", template: "%s · Civio" },
   description:
-    "Manage taxes, insurance, paperwork, and life changes in one place. Civio turns a move between states into a sourced, dated checklist.",
+    "Compare take-home income, living costs and moving expenses for your first year in a new state, then plan the paperwork.",
 };
 
-export const viewport: Viewport = { themeColor: "#f0f5f7" };
+export const viewport: Viewport = { themeColor: "#f1f1f0" };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
