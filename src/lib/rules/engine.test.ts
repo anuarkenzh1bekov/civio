@@ -52,9 +52,18 @@ describe("rule engine", () => {
     expect(plan).not.toContain("CA-FAM-SCHOOL");
   });
 
-  it("drops vehicle tasks when there is no vehicle", () => {
-    const plan = ids({ ...DEMO_PROFILE, hasVehicle: false });
-    expect(plan.filter((id) => id.includes("VEH"))).toEqual([]);
+  it("keeps the license task for a driver without a vehicle", () => {
+    const plan = ids({ ...DEMO_PROFILE, hasVehicle: false, drives: true });
+    // The proof-of-address task is a prerequisite of the license, so it comes with it.
+    expect(plan.filter((id) => id.includes("VEH"))).toEqual(["CA-VEH-RESIDENCY", "CA-VEH-DL"]);
+  });
+
+  it("provides a DMV lookup for a driver moving to an uncovered state without a car", () => {
+    expect(ids({ ...DEMO_PROFILE, destinationState: "OR", hasVehicle: false })).toContain("US-VEH-STATE-CHECK");
+  });
+
+  it("does not create interstate tasks for the same state", () => {
+    expect(ids({ ...DEMO_PROFILE, destinationState: "TX" })).toEqual([]);
   });
 
   it("marks a task as needs verification when a required answer was skipped", () => {

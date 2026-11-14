@@ -3,6 +3,7 @@ import { isStateCode } from "@/lib/states";
 
 const state = z.string().refine(isStateCode).optional();
 const date = z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional();
+const dollars = z.number().min(0).max(10_000_000).optional();
 
 /** The profile as the server accepts it. Unknown keys are dropped. */
 export const ProfileSchema = z
@@ -19,6 +20,15 @@ export const ProfileSchema = z
     childAges: z.array(z.number().int().min(0).max(25)).max(12).optional(),
     insurance: z.enum(["employer", "marketplace", "medicaid", "other", "none"]).optional(),
     hasVehicle: z.boolean().optional(),
+    drives: z.boolean().optional(),
+    /** The move budget planner: monthly figures before and after, and one-off moving cost. */
+    budget: z
+      .object({
+        incomeNow: dollars, incomeAfter: dollars, housingNow: dollars, housingAfter: dollars,
+        otherNow: dollars, otherAfter: dollars, moving: dollars,
+      })
+      .strip()
+      .optional(),
     vehicleRegisteredInCurrentState: z.boolean().optional(),
     aiConsent: z.boolean().optional(),
   })

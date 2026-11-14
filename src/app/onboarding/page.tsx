@@ -7,8 +7,10 @@ import { ArrowLeft, ArrowRight, Check, Plus, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useId, useMemo, useState } from "react";
 import type { IntakeResponse } from "@/app/api/intake/route";
+import { BudgetFields, BudgetSummary } from "@/components/MoveBudget";
 import { Logo } from "@/components/Logo";
 import { IntakeBox } from "@/components/onboarding/IntakeBox";
+import { ThemeToggle, useThemeMode } from "@/components/ThemeMode";
 import { formatDate } from "@/lib/format";
 import { RULES } from "@/lib/rules/data";
 import { generatePlan } from "@/lib/rules/engine";
@@ -16,7 +18,7 @@ import { stateName, US_STATES } from "@/lib/states";
 import { useCivio } from "@/lib/store";
 import type { Profile } from "@/lib/types";
 
-const STEPS = ["Your move", "Work & income", "Family", "Health insurance", "Vehicle", "Review"] as const;
+const STEPS = ["Your move", "Move budget", "Work & income", "Family", "Health insurance", "Vehicle", "Review"] as const;
 
 type Option<T extends string | boolean> = { value: T; label: string; hint?: string };
 
@@ -206,13 +208,14 @@ const show = (value: string | undefined) => (value ? (TEXT[value] ?? value) : "S
 const yesNo = (value: boolean | undefined) => (value === undefined ? "Skipped" : value ? "Yes" : "No");
 
 function Wizard({ initial, onDone }: { initial: Profile; onDone: (profile: Profile) => void }) {
+  const { mode } = useThemeMode();
   const [step, setStep] = useState(0);
   const [p, setP] = useState<Profile>(initial);
-  const [errors, setErrors] = useState<{ currentState?: string; destinationState?: string; zip?: string }>({});
+  const [errors, setErrors] = useState<{ currentState?: string; destinationState?: string }>({});
   const set = (patch: Partial<Profile>) => setP((prev) => ({ ...prev, ...patch }));
   const [intake, setIntake] = useState<IntakeResponse | null>(null);
 
-  const matched = useMemo(() => generatePlan(p, RULES), [p]);
+  const matched = useMemo(() => p.currentState && p.destinationState ? generatePlan(p, RULES).filter(task => task.status === "pending") : [], [p]);
   const last = step === STEPS.length - 1;
 
   const next = () => {
@@ -220,11 +223,11 @@ function Wizard({ initial, onDone }: { initial: Profile; onDone: (profile: Profi
       const found: typeof errors = {};
       if (!p.currentState) found.currentState = "Choose the state you live in now.";
       if (!p.destinationState) found.destinationState = "Choose the state you are moving to.";
-      if (p.zip && !/^\d{5}$/.test(p.zip)) found.zip = "A ZIP code has 5 digits. Leave it blank if you don't know it yet.";
+      if (p.currentState && p.currentState === p.destinationState) found.destinationState = "Choose a different state for an interstate move.";
       setErrors(found);
       if (Object.keys(found).length > 0) return;
     }
-    if (last) {
+    if (last || step === 1) {
       // Free-text intake can land here without both states.
       if (!p.currentState || !p.destinationState) return setStep(0);
       onDone(p);
@@ -232,11 +235,14 @@ function Wizard({ initial, onDone }: { initial: Profile; onDone: (profile: Profi
   };
 
   return (
-    <Theme theme={neutralTheme} mode="dark">
-    <div className="on-stage min-h-dvh bg-stage text-on-stage">
-      <div className="mx-auto max-w-6xl px-5 py-6 sm:px-8 lg:py-8">
-        <Logo tone="dark" />
-        <div className="mt-8 grid items-start gap-5 lg:grid-cols-[minmax(0,1fr)_22rem]">
+    <Theme theme={neutralTheme} mode={mode}>
+    <div className="atlas-wizard on-stage min-h-dvh bg-stage text-on-stage">
+      <div className="mx-auto max-w-5xl px-4 py-5 sm:px-8 lg:py-8">
+        <div className="flex items-center justify-between gap-4">
+          <Logo tone="dark" />
+          <ThemeToggle />
+        </div>
+        <div className="mt-8 grid items-start gap-5 lg:grid-cols-[minmax(0,1fr)_17rem]">
           <div className="rounded-panel border border-stage-line bg-stage-raised p-5 sm:p-8">
             <div className="flex items-center justify-between gap-4">
               <div className="flex items-center gap-1.5" aria-hidden="true">
@@ -315,35 +321,22 @@ function Wizard({ initial, onDone }: { initial: Profile; onDone: (profile: Profi
                     />
                     <p className="mt-2 text-sm text-on-stage-muted">Used to turn “within 20 days” into a calendar date.</p>
                   </div>
-                  <div>
-                    <div className="flex items-baseline justify-between">
-                      <label htmlFor="zip" className="font-medium">
-                        New ZIP code
-                      </label>
-                      <span className="text-xs text-on-stage-muted">Optional</span>
-                    </div>
-                    <input
-                      id="zip"
-                      inputMode="numeric"
-                      autoComplete="postal-code"
-                      placeholder="e.g. 94110…"
-                      value={p.zip ?? ""}
-                      onChange={(e) => set({ zip: e.target.value.replace(/\D/g, "").slice(0, 5) || undefined })}
-                      aria-invalid={Boolean(errors.zip)}
-                      aria-describedby={errors.zip ? "zip-error" : undefined}
-                      className="stage-field mt-3"
-                    />
-                    {errors.zip && (
-                      <p id="zip-error" role="alert" className="mt-2 text-sm text-risk-bright">
-                        {errors.zip}
-                      </p>
-                    )}
-                  </div>
                 </div>
+                {p.currentState && p.destinationState && p.currentState !== p.destinationState && (
+                  <p className="mt-4 text-sm text-on-stage-muted">Your budget uses your own estimates. {p.destinationState === "CA" ? "California has detailed vehicle, state tax and school tasks." : p.destinationState === "TX" ? "Texas has detailed vehicle tasks. For state tax and school requirements, follow the agency links." : "For local vehicle, state tax and school requirements, your checklist links to the relevant agencies."}</p>
+                )}
               </>
             )}
 
             {step === 1 && (
+              <>
+                <h1 className="text-4xl font-medium tracking-tight">How would your budget change?</h1>
+                <div className="mt-5"><BudgetFields budget={p.budget ?? {}} before={p.currentState ?? "Now"} after={p.destinationState ?? "After"} onChange={budget => set({ budget })} /></div>
+                <div className="mt-6" aria-live="polite"><BudgetSummary budget={p.budget} /></div>
+              </>
+            )}
+
+            {step === 2 && (
               <>
                 <h1 className="text-4xl font-medium tracking-[-0.03em]">How do you earn?</h1>
                 <p className="mt-3 text-on-stage-muted">This decides withholding forms and estimated tax payments.</p>
@@ -374,7 +367,7 @@ function Wizard({ initial, onDone }: { initial: Profile; onDone: (profile: Profi
               </>
             )}
 
-            {step === 2 && (
+            {step === 3 && (
               <>
                 <h1 className="text-4xl font-medium tracking-[-0.03em]">Who is moving with you?</h1>
                 <p className="mt-3 text-on-stage-muted">Children of school age add enrollment tasks.</p>
@@ -408,7 +401,7 @@ function Wizard({ initial, onDone }: { initial: Profile; onDone: (profile: Profi
               </>
             )}
 
-            {step === 3 && (
+            {step === 4 && (
               <>
                 <h1 className="text-4xl font-medium tracking-[-0.03em]">How are you insured today?</h1>
                 <p className="mt-3 text-on-stage-muted">Each kind of coverage reacts differently to a change of state.</p>
@@ -429,13 +422,13 @@ function Wizard({ initial, onDone }: { initial: Profile; onDone: (profile: Profi
               </>
             )}
 
-            {step === 4 && (
+            {step === 5 && (
               <>
                 <h1 className="text-4xl font-medium tracking-[-0.03em]">Are you bringing a vehicle?</h1>
                 <p className="mt-3 text-on-stage-muted">Registration and license deadlines are usually the first to hit.</p>
                 <div className="mt-8 grid gap-8">
                   <Choice
-                    label="Do you own a vehicle?"
+                    label="Are you bringing a vehicle from another state?"
                     value={p.hasVehicle}
                     onChange={(v) =>
                       set({ hasVehicle: v, vehicleRegisteredInCurrentState: v ? p.vehicleRegisteredInCurrentState : undefined })
@@ -445,24 +438,22 @@ function Wizard({ initial, onDone }: { initial: Profile; onDone: (profile: Profi
                       { value: false, label: "No" },
                     ]}
                   />
-                  {p.hasVehicle === true && (
-                    <div className="rise">
+                  <div className="rise">
                       <Choice
-                        label={`Is it registered in ${stateName(p.currentState)}?`}
-                        value={p.vehicleRegisteredInCurrentState}
-                        onChange={(v) => set({ vehicleRegisteredInCurrentState: v })}
+                        label="Will you drive after moving?"
+                        value={p.drives}
+                        onChange={(v) => set({ drives: v })}
                         options={[
                           { value: true, label: "Yes" },
                           { value: false, label: "No" },
                         ]}
                       />
                     </div>
-                  )}
                 </div>
               </>
             )}
 
-            {step === 5 && (
+            {step === 6 && (
               <>
                 <h1 className="text-4xl font-medium tracking-[-0.03em]">Check your answers</h1>
                 <p className="mt-3 text-on-stage-muted">
@@ -499,6 +490,7 @@ function Wizard({ initial, onDone }: { initial: Profile; onDone: (profile: Profi
                     </button>
                   </p>
                 )}
+                <div className="mt-5"><BudgetSummary budget={p.budget} /></div>
                 <dl className="mt-8 rounded-2xl border border-stage-line px-5">
                   <ReviewRow label="Move" value={`${stateName(p.currentState)} → ${stateName(p.destinationState)}`} />
                   <ReviewRow label="Move date" value={p.moveDate ? formatDate(p.moveDate) : "Skipped"} />
@@ -522,9 +514,9 @@ function Wizard({ initial, onDone }: { initial: Profile; onDone: (profile: Profi
                     className="mt-1 size-4 accent-(--color-brand-bright)"
                   />
                   <span>
-                    <span className="font-medium">Let the assistant use these answers</span>
+                    <span className="font-medium">Share my move details with the assistant</span>
                     <span className="mt-1 block text-sm text-on-stage-muted">
-                      They are sent with your questions so answers fit your states and situation. You can turn this off
+                      Your budget stays in this browser. Other move details can be sent with your questions. You can turn this off
                       any time.
                     </span>
                   </span>
@@ -534,9 +526,10 @@ function Wizard({ initial, onDone }: { initial: Profile; onDone: (profile: Profi
 
             <div className="mt-10 grid gap-2">
               <button type="submit" className="btn btn-stage w-full">
-                {last ? "Build my plan" : "Continue"} <ArrowRight className="size-4" aria-hidden="true" />
+                {last ? "Build my plan" : step === 1 ? "Open my financial plan" : "Continue"} <ArrowRight className="size-4" aria-hidden="true" />
               </button>
-              {step > 0 && !last && (
+              {step === 1 && <button type="button" onClick={(e) => { if (e.currentTarget.form?.reportValidity()) setStep(2); }} className="btn btn-stage-quiet w-full">Personalize my checklist first</button>}
+              {step > 1 && !last && (
                 <button type="button" onClick={() => setStep(step + 1)} className="btn btn-stage-quiet w-full">
                   Skip
                 </button>
@@ -545,9 +538,9 @@ function Wizard({ initial, onDone }: { initial: Profile; onDone: (profile: Profi
           </form>
           </div>
 
-          <aside className="grid gap-5">
-            <div className="rounded-panel border border-stage-line bg-stage-raised p-5" aria-live="polite">
-              <p className="text-sm text-on-stage-muted">Your plan so far</p>
+          <aside className="wizard-rail grid gap-4">
+            <div className="wizard-preview rounded-panel border border-stage-line bg-stage-raised p-5" aria-live="polite">
+              <p className="text-sm text-on-stage-muted">Your checklist</p>
               <p className="mt-1 flex items-baseline gap-2">
                 <span className="font-display text-5xl font-semibold tabular-nums">{matched.length}</span>
                 <span className="text-on-stage-muted">{matched.length === 1 ? "task" : "tasks"} matched</span>
@@ -570,11 +563,11 @@ function Wizard({ initial, onDone }: { initial: Profile; onDone: (profile: Profi
                   )}
                 </ul>
               ) : (
-                <p className="mt-4 text-sm text-on-stage-muted">Pick your two states and the rules start matching.</p>
+                <p className="mt-4 text-sm text-on-stage-muted">Choose two different states and add details to see confirmed tasks.</p>
               )}
             </div>
 
-            <ol className="hidden rounded-panel border border-stage-line bg-stage-raised p-3 lg:grid">
+            <ol className="wizard-steps hidden rounded-panel border border-stage-line bg-stage-raised p-3 lg:grid">
               {STEPS.map((name, index) => {
                 const state = index === step ? "current" : index < step ? "done" : "todo";
                 return (
@@ -618,7 +611,7 @@ export default function OnboardingPage() {
   const { ready, profile, saveProfile } = useCivio();
 
   if (!ready) {
-    return <div className="min-h-dvh bg-stage" aria-busy="true" />;
+    return <div className="min-h-dvh bg-canvas" aria-busy="true" />;
   }
 
   return (

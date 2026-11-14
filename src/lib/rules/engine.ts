@@ -19,6 +19,8 @@ const FACT_QUESTION: Record<FactKey, string> = {
   has_school_age_child: "your children's ages",
   insurance: "your health insurance type",
   has_vehicle: "whether you own a vehicle",
+  drives: "whether you will drive after the move",
+  has_vehicle_or_drives: "whether you will bring a vehicle or drive after the move",
   destination_state: "your destination state",
   origin_state: "your current state",
 };
@@ -49,6 +51,9 @@ export function deriveFacts(profile: Profile): Record<FactKey, FactValue> {
     has_school_age_child: schoolAge,
     insurance: profile.insurance,
     has_vehicle: profile.hasVehicle,
+    drives: profile.drives,
+    has_vehicle_or_drives: profile.hasVehicle || profile.drives ? true
+      : profile.hasVehicle === false && profile.drives === false ? false : undefined,
     destination_state: destinationState,
     origin_state: currentState,
   };
@@ -128,6 +133,7 @@ function buildTask(rule: Rule, profile: Profile, missing: FactKey[]): Task {
 
 /** Evaluate one rule. Returns a task, or null when the rule does not apply. */
 export function evaluateRule(rule: Rule, profile: Profile): Task | null {
+  if (profile.currentState && profile.currentState === profile.destinationState) return null;
   // A state-scoped rule only ever applies to a known, matching state.
   if (rule.state !== "US") {
     const side = rule.state_role === "origin" ? profile.currentState : profile.destinationState;

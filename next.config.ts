@@ -5,6 +5,7 @@ const nextConfig: NextConfig = {
   outputFileTracingIncludes: {
     '/api/assistant': ['./data/rag/corpus.json', './data/rag/index.json'],
   },
+  images: { qualities: [75, 90] },
   experimental: { optimizePackageImports: ["@astryxdesign/core"] },
 };
 

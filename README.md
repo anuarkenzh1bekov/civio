@@ -1,6 +1,6 @@
 # Civio
 
-One life change, one plan. Civio turns a move between US states into a personal checklist for taxes, health insurance, vehicle paperwork and school enrollment. Every task carries its deadline, documents and a link to the official source.
+Civio compares the financial impact of staying or moving between US states. Households enter current and expected monthly take-home income, housing, other living costs and one-time moving expenses. A separate checklist covers taxes, health insurance, vehicle paperwork and school enrollment.
 
 MVP scenario: moving from one state to another (demo: Texas → California).
 
@@ -28,13 +28,16 @@ AI is optional. Copy `.env.example` to `.env.local` and set one key:
 
 | Route | What it is |
 |---|---|
-| `/` | Landing page. The "Change one answer" block runs the real rule engine in the browser. Pricing at `#pricing`. |
-| `/onboarding` | Describe the move in free text or with a photo of a document, or answer six steps. Either way it ends on a review step. Only the two states are required. |
-| `/dashboard` | Progress, priorities, filters, task details with dependencies, arrival check, cost calculator, assistant. |
+| `/` | Landing page: the budget outlook, the live rule engine and pricing (`#pricing`). |
+| `/onboarding` | Describe the move in free text or with a photo of a document, or answer step by step. Choose two different states and enter a budget; open the plan right away or continue with the household questions. Every route ends on a review step. |
+| `/dashboard` | Editable budget comparison, first-year difference, progress, priorities, filters, task details with dependencies, arrival check, cost calculator, assistant. |
 | `/documents` | Who-to-notify list (free) and letters (Move Pack). |
-| `/dashboard?demo=1` | Loads the Texas → California sample plan. |
-| `/dashboard?demo=1&loc=CA` | Same, with a simulated location in California to show the arrival check. |
+| `/dashboard?demo=1` | An isolated Texas → California example with illustrative amounts. It lives in memory and never overwrites a saved plan. |
 | `/dashboard?s=<id>` | Opens a plan started on another device. |
+
+The profile and task progress are stored in the browser (`localStorage`) and mirrored to the server under an anonymous session id (see "Session without login"). There are no accounts.
+
+The first-year estimate uses 12 months of change in cash left after spending, less one-time moving costs. A blank amount stays unknown. The monthly income target shows the take-home pay needed to maintain the current monthly balance. Budget fields stay in the browser when the assistant receives a shared profile.
 
 ## How it works
 
@@ -93,8 +96,8 @@ The deadlines and amounts in the rules were checked on 2026-11-14 against search
 Known limits:
 
 - State coverage: California and Texas for vehicles, California for taxes and schools. Other states fall back to Needs verification.
-- "Owns a vehicle" stands in for "drives" on the driver license rules.
-- No fee table. Agency fees could not be verified from the build environment, so the calculator takes the user's numbers.
+- The budget uses household estimates for income after taxes and expenses. Regional market prices and payroll taxes are not calculated automatically.
+- No fee table. Agency fees could not be verified from the build environment, so the cost calculator takes the user's numbers.
 - The two task dependencies are practical ordering (documents before the DMV visit, insurance before registration), written from the rule text.
 - Location is matched with bounding boxes, which overlap near state borders. The user always confirms.
 - Civio gives general information. It is not legal, tax or insurance advice and it does not estimate savings.

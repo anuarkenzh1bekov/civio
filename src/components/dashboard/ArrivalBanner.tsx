@@ -33,8 +33,11 @@ export function ArrivalBanner({
   profile,
   onArrived,
   onUndo,
+  auto = true,
 }: {
   profile: Profile;
+  /** Ask the browser for its location when the page opens. Off for the demo, which only reacts to ?loc= or the button. */
+  auto?: boolean;
   onArrived: (date: string) => void;
   onUndo: () => void;
 }) {
@@ -65,6 +68,7 @@ export function ArrivalBanner({
       apply({ best: simulated, candidates: [simulated] }, true, true);
       return;
     }
+    if (!auto) return;
     try {
       if (window.sessionStorage.getItem(ASKED)) return;
       window.sessionStorage.setItem(ASKED, "1");
@@ -74,7 +78,7 @@ export function ArrivalBanner({
     locate(false);
     // Runs once per open; the profile's states are read at that moment.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [arrivedOn, destinationState]);
+  }, [arrivedOn, destinationState, auto]);
 
   if (!destinationState) return null;
   const destination = stateName(destinationState);

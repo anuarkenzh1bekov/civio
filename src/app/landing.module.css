@@ -1,0 +1,320 @@
+.home {
+  --gutter: clamp(1.25rem, 5vw, 5.5rem);
+  --rule: var(--color-line);
+  background: var(--color-canvas);
+  color: var(--color-ink);
+}
+
+.header { --header-surface: var(--color-canvas); }
+
+.cover {
+  background: var(--color-canvas);
+}
+
+.headerInner, .sceneInner, .summaryInner, .outlook, .checklist, .footerInner {
+  width: min(100% - 2 * var(--gutter), 82rem);
+  margin-inline: auto;
+}
+
+.headerInner {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  min-height: 4.7rem;
+  border-bottom: 1px solid var(--rule);
+}
+
+.header nav, .actions, .planLink, .primary, .secondary, .textLink, .sources a {
+  display: inline-flex;
+  align-items: center;
+}
+
+.header nav {
+  gap: clamp(1.2rem, 3vw, 2.8rem);
+  font-size: .92rem;
+}
+
+.planLink {
+  justify-self: end;
+  gap: .6rem;
+  min-height: 2.6rem;
+  padding-inline: 1.05rem;
+  border: 1px solid var(--color-line);
+  border-radius: 5px;
+  font-size: .9rem;
+  font-weight: 550;
+}
+
+.headerActions {
+  justify-self: end;
+  display: flex;
+  align-items: center;
+  gap: .6rem;
+}
+
+.scene {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+}
+
+.backdrop {
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  background: var(--color-canvas) url("/landing/california-poster.webp") center 46% / cover no-repeat;
+}
+
+.backdrop video {
+  display: block;
+  height: 100%;
+  width: 100%;
+  object-fit: cover;
+  object-position: center 46%;
+}
+
+.backdrop::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, color-mix(in srgb, var(--color-canvas) 94%, transparent), color-mix(in srgb, var(--color-canvas) 83%, transparent) 35%, color-mix(in srgb, var(--color-canvas) 54%, transparent) 70%, color-mix(in srgb, var(--color-canvas) 43%, transparent));
+}
+
+.motionControl {
+  position: absolute;
+  z-index: 2;
+  right: var(--gutter);
+  bottom: 1rem;
+  display: grid;
+  place-items: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 50%;
+  isolation: isolate;
+  color: var(--color-ink);
+}
+
+.motionControl::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: .32rem;
+  border: 1px solid rgb(32 33 36 / .22);
+  border-radius: inherit;
+  background: color-mix(in srgb, var(--color-card) 90%, transparent);
+}
+
+.motionControl:hover::before, .motionControl:focus-visible::before { background: var(--color-card); }
+
+.sceneInner {
+  display: flex;
+  align-items: center;
+  min-height: clamp(31rem, 41vw, 42rem);
+}
+
+.copy {
+  position: relative;
+  z-index: 1;
+  width: 52%;
+  padding-block: 3.5rem;
+}
+
+.copy h1 {
+  font: 530 clamp(3.5rem, 7.25vw, 7.3rem)/.94 var(--font-sans);
+  letter-spacing: -.06em;
+  text-wrap: initial;
+}
+
+.copy h1 span {
+  display: block;
+}
+
+.copy > p {
+  max-width: 26rem;
+  margin-top: 1.45rem;
+  color: var(--color-ink-muted);
+  font-size: clamp(1rem, 1.25vw, 1.18rem);
+  line-height: 1.5;
+}
+
+.actions {
+  flex-wrap: wrap;
+  gap: 1.55rem;
+  margin-top: 1.7rem;
+}
+
+.primary, .secondary, .textLink {
+  gap: .7rem;
+  min-height: 2.75rem;
+  font-weight: 580;
+  font-size: .95rem;
+}
+
+.primary {
+  padding: .85rem 1.15rem;
+  background: var(--color-brand);
+  border-radius: 5px;
+  color: var(--color-on-brand);
+}
+
+.primary:hover { background: var(--color-brand-hover); }
+.planLink:hover { background: var(--color-panel); }
+.header nav a:hover, .secondary:hover, .textLink:hover, .sources a:hover {
+  text-decoration: underline;
+  text-underline-offset: .25em;
+}
+
+.photograph {
+  position: absolute;
+  top: 50%;
+  right: 0;
+  width: clamp(0px, 49vw, 57rem);
+  max-height: 100%;
+  aspect-ratio: 1878 / 1494;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+.photograph img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: right center;
+  transform: scaleX(-1);
+  transform-origin: center;
+}
+
+.summary {
+  background: var(--color-panel);
+  color: var(--color-ink);
+}
+
+.summaryInner {
+  display: grid;
+  grid-template-columns: 1.3fr 3fr;
+  align-items: center;
+  padding-block: clamp(1.55rem, 2.65vw, 2.4rem);
+}
+
+.route p, .metrics dt {
+  color: var(--color-panel-label);
+  font-size: .86rem;
+  line-height: 1.4;
+}
+
+.route p { margin-bottom: .45rem; }
+.route h2 {
+  font: 500 clamp(1.1rem, 1.75vw, 1.6rem)/1.25 var(--font-sans);
+  letter-spacing: -.04em;
+}
+
+.metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.metrics > div {
+  display: flex;
+  flex-direction: column;
+  padding-inline: clamp(1.15rem, 2.1vw, 2.2rem) .25rem;
+  border-left: 1px solid var(--color-line);
+}
+
+.metrics dt { flex: 1; }
+
+.metrics dd {
+  margin-top: .4rem;
+  font: 500 clamp(1.6rem, 2.8vw, 2.65rem)/1 var(--font-sans);
+  letter-spacing: -.065em;
+  font-variant-numeric: tabular-nums;
+}
+
+.metrics dd[data-sign="loss"] { color: var(--color-risk); }
+.metrics dd[data-sign="gain"] { color: var(--color-ok); }
+
+.outlook {
+  display: grid;
+  grid-template-columns: .88fr 1.12fr;
+  align-items: center;
+  gap: clamp(2.5rem, 7vw, 7rem);
+  padding-block: clamp(3.5rem, 6vw, 6.5rem);
+  border-bottom: 1px solid var(--rule);
+}
+
+.explanation h2, .checklist > h2 {
+  font: 520 clamp(2.3rem, 3.7vw, 3.8rem)/1.03 var(--font-sans);
+  letter-spacing: -.06em;
+}
+
+.explanation > p, .checklist > p {
+  max-width: 35rem;
+  color: var(--color-ink-muted);
+  line-height: 1.55;
+  margin-block: 1rem;
+}
+
+.textLink { color: var(--color-brand-ink); }
+.checklist { padding-block: clamp(3.5rem, 6vw, 6.5rem); }
+.checklist > p { margin-bottom: 2rem; }
+.footer { border-top: 1px solid var(--rule); }
+.footerInner { padding-block: 2.3rem; }
+
+.sourceRow {
+  display: grid;
+  grid-template-columns: 1fr 1.4fr;
+  align-items: center;
+  gap: 2rem;
+}
+
+.sourceRow p, .credits { color: var(--color-ink-muted); font-size: .8rem; }
+.sourceRow p { margin-top: .5rem; }
+.sources, .credits { display: flex; gap: .8rem 1.25rem; flex-wrap: wrap; }
+.sources { justify-content: flex-end; }
+.sources a { gap: .25rem; font-size: .86rem; }
+.credits { border-top: 1px solid var(--color-line); margin-top: 1.6rem; padding-top: 1rem; }
+.credits a { text-decoration: underline; text-underline-offset: 2px; }
+
+@media (min-width: 1820px) {
+  .cover { max-width: 112rem; margin-inline: auto; }
+}
+
+@media (max-width: 760px) {
+  .headerInner { min-height: 3.9rem; }
+  .header nav { gap: 1rem; }
+  .sceneInner { min-height: 24rem; }
+  .copy { padding-block: 2.3rem; }
+  .copy h1 { font-size: clamp(2.9rem, 7.4vw, 3.6rem); }
+  .actions { gap: .85rem; }
+  .summaryInner { grid-template-columns: 1fr; gap: 1.15rem; }
+  .route { display: flex; align-items: baseline; gap: .65rem; }
+  .route p { margin: 0; }
+  .metrics > div { padding-inline: .9rem 0; }
+  .metrics > div:first-child { padding: 0; border: 0; }
+  .outlook, .sourceRow { grid-template-columns: 1fr; gap: 1.5rem; }
+  .sources { justify-content: flex-start; }
+}
+
+@media (max-width: 580px) {
+  .backdrop::after {
+    background: linear-gradient(180deg, color-mix(in srgb, var(--color-canvas) 94%, transparent), color-mix(in srgb, var(--color-canvas) 87%, transparent) 39%, color-mix(in srgb, var(--color-canvas) 54%, transparent) 73%, color-mix(in srgb, var(--color-canvas) 52%, transparent));
+  }
+  .motionControl { bottom: .45rem; right: .65rem; }
+  .headerInner { display: flex; justify-content: space-between; }
+  .header nav { display: none; }
+  .sceneInner { display: block; min-height: auto; }
+  .copy { width: 100%; padding-block: 2.3rem 0; text-align: center; }
+  .copy h1 { font-size: clamp(3rem, 11.8vw, 4.25rem); }
+  .copy > p { max-width: 23rem; margin: .9rem auto 0; }
+  .actions { margin-top: 1.1rem; justify-content: center; gap: 1.1rem; }
+  .photograph { position: relative; inset: auto; margin: .9rem 0 .65rem auto; width: min(88%, 23rem); max-height: none; transform: none; }
+  .summaryInner { padding-block: 1.15rem 1.4rem; }
+  .metrics dt { font-size: .75rem; }
+  .metrics dd { font-size: clamp(1.3rem, 5.3vw, 1.7rem); }
+  .metrics > div { padding-inline: .65rem .25rem; }
+  .route h2 { font-size: 1.06rem; }
+  .primary, .secondary { font-size: .9rem; }
+  .credits { flex-direction: column; }
+}

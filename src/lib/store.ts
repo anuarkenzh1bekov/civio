@@ -1,6 +1,7 @@
 "use client";
 
-import { useCallback, useMemo, useSyncExternalStore } from "react";
+import { useCallback, useMemo, useState, useSyncExternalStore } from "react";
+import type { MoveBudget } from "./budget";
 import { DEMO_DONE, DEMO_PROFILE } from "@/lib/demo";
 import { RULES } from "@/lib/rules/data";
 import { generatePlan } from "@/lib/rules/engine";
@@ -122,9 +123,22 @@ export type PlanTask = Task & {
   waitingOn: string[];
 };
 
-export function useCivio() {
+/**
+ * `preview` runs the Texas to California sample in memory only: nothing is read from or
+ * written to the browser's saved plan, so looking at the demo never overwrites a real one.
+ */
+export function useCivio(preview = false) {
   // `null` on the server and during hydration, so nothing renders from stale markup.
-  const saved = useSyncExternalStore<Saved | null>(subscribe, read, () => null);
+  const personal = useSyncExternalStore<Saved | null>(subscribe, read, () => null);
+  const [sample, setSample] = useState<Saved>({ ...EMPTY, profile: DEMO_PROFILE, done: DEMO_DONE, demo: true });
+  const saved = preview ? sample : personal;
+  const update = useCallback(
+    (modify: (current: Saved) => Saved) => {
+      if (preview) setSample(modify);
+      else write(modify(read()));
+    },
+    [preview],
+  );
 
   const tasks: PlanTask[] = useMemo(() => {
     if (!saved) return [];
@@ -142,35 +156,45 @@ export function useCivio() {
     write({ ...read(), profile, demo: false });
   }, []);
 
-  const toggleDone = useCallback((taskId: string) => {
-    const current = read();
-    const done = current.done.includes(taskId)
-      ? current.done.filter((id) => id !== taskId)
-      : [...current.done, taskId];
-    write({ ...current, done });
-  }, []);
+  const toggleDone = useCallback(
+    (taskId: string) => {
+      update((current) => {
+        const done = current.done.includes(taskId)
+          ? current.done.filter((id) => id !== taskId)
+          : [...current.done, taskId];
+        return { ...current, done };
+      });
+    },
+    [update],
+  );
 
-  const setConsent = useCallback((aiConsent: boolean) => {
-    const current = read();
-    write({ ...current, profile: { ...current.profile, aiConsent } });
-  }, []);
+  const setConsent = useCallback(
+    (aiConsent: boolean) => update((current) => ({ ...current, profile: { ...current.profile, aiConsent } })),
+    [update],
+  );
 
-  const setArrived = useCallback((arrivedOn: string | undefined) => {
-    const current = read();
-    write({ ...current, profile: { ...current.profile, arrivedOn } });
-  }, []);
+  const saveBudget = useCallback(
+    (budget: MoveBudget) => update((current) => ({ ...current, profile: { ...current.profile, budget } })),
+    [update],
+  );
 
-  const setCost = useCallback((id: string, amount: number | null) => {
-    const current = read();
-    const costs = { ...current.costs };
-    if (amount === null) delete costs[id];
-    else costs[id] = amount;
-    write({ ...current, costs });
-  }, []);
+  const setArrived = useCallback(
+    (arrivedOn: string | undefined) => update((current) => ({ ...current, profile: { ...current.profile, arrivedOn } })),
+    [update],
+  );
 
-  const setPack = useCallback((pack: boolean) => {
-    write({ ...read(), pack });
-  }, []);
+  const setCost = useCallback(
+    (id: string, amount: number | null) =>
+      update((current) => {
+        const costs = { ...current.costs };
+        if (amount === null) delete costs[id];
+        else costs[id] = amount;
+        return { ...current, costs };
+      }),
+    [update],
+  );
+
+  const setPack = useCallback((pack: boolean) => update((current) => ({ ...current, pack })), [update]);
 
   const loadDemo = useCallback(() => {
     write({ ...EMPTY, profile: DEMO_PROFILE, done: DEMO_DONE, demo: true });
@@ -180,7 +204,7 @@ export function useCivio() {
 
   return {
     ready: saved !== null,
-    sid: saved?.sid,
+    sid: preview ? undefined : saved?.sid,
     profile: saved?.profile ?? {},
     isDemo: saved?.demo ?? false,
     hasPlan: Boolean(saved?.profile.currentState && saved.profile.destinationState),
@@ -190,6 +214,7 @@ export function useCivio() {
     saveProfile,
     toggleDone,
     setConsent,
+    saveBudget,
     setArrived,
     setCost,
     setPack,

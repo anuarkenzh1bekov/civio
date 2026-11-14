@@ -1,5 +1,6 @@
 import { RULES } from "@/lib/rules/data";
 import { evaluateRule } from "@/lib/rules/engine";
+import { US_STATES } from "@/lib/states";
 import { CATEGORY_LABEL, type Profile, type Rule, type Task } from "@/lib/types";
 
 export type Retrieved = { rule: Rule; task: Task | null; score: number };
@@ -37,17 +38,23 @@ export function retrieveRules(question: string, profile: Profile | null, limit =
   const words = new Set(tokens(question));
   const asksAboutOrder = /first|priorit|urgent|order|start|deadline|soon/i.test(question);
 
-  const scored: Retrieved[] = RULES.map((rule) => {
-    const task = profile ? evaluateRule(rule, profile) : null;
+  const mentioned = US_STATES.filter(({ code, name }) =>
+    new RegExp(`\\b${name}\\b`, "i").test(question) || new RegExp(`\\b${code}\\b`).test(question)
+  );
+  // A state named in a question can supply context even without a shared profile.
+  const context = mentioned.length === 1 && mentioned[0]?.code !== profile?.destinationState
+    ? { destinationState: mentioned[0]?.code }
+    : profile;
+  const scored: Retrieved[] = RULES.flatMap((rule) => {
+    const task = context ? evaluateRule(rule, context) : null;
+    if ((context && !task) || (!context && rule.state !== "US")) return [];
     let score = 0;
     for (const word of tokens(ruleText(rule))) if (words.has(word)) score += 1;
     const topic = SYNONYMS[rule.task_template.category] ?? [];
     if (topic.some((word) => words.has(word))) score += 4;
-    if (task) score += asksAboutOrder ? 6 : 3;
+    if (task && (asksAboutOrder || score > 0)) score += asksAboutOrder ? 6 : 3;
     if (task && asksAboutOrder && task.deadline?.date) score += 3;
-    // Without a profile, a rule for some other state is noise unless the question names it.
-    if (!profile && rule.state !== "US" && !words.has(rule.state.toLowerCase())) score -= 2;
-    return { rule, task, score };
+    return [{ rule, task, score }];
   });
 
   return scored

@@ -1,0 +1,33 @@
+/* Shared budget projection and onboarding controls. */
+.projection, .budget-brief { padding: clamp(1rem,2vw,1.6rem); border: 1px solid var(--color-line); background: var(--color-card); border-radius: 1rem; min-width: 0; }
+.projection-head, .period-switch { display: flex; align-items: center; justify-content: space-between; gap: .35rem; }
+.projection h2, .budget-brief h2 { font-size: 1.08rem; font-weight: 650; letter-spacing: -.025em; }
+.period-switch { padding: .2rem; background: var(--color-panel); border-radius: 99px; }
+.period-switch button { min-height: 1.9rem; padding: .25rem .7rem; font-size: .8rem; border-radius: inherit; }
+.period-switch button[aria-pressed="true"] { background: var(--color-ink); color: var(--color-on-brand); }
+.projection-value { margin-top: .6rem; font: 530 clamp(2.5rem,4vw,3.6rem)/1.05 var(--font-display); letter-spacing: -.065em; font-variant-numeric: tabular-nums; }
+.projection-caption, .projection-axis, .budget-brief dt, .budget-brief small { color: var(--color-ink-muted); font-size: .84rem; }
+.projection-plot { margin-top: 1rem; }
+.projection-bars { height: 5rem; position: relative; display: flex; gap: 2%; background: repeating-linear-gradient(to bottom,var(--color-panel) 0 1px, transparent 1px 33%); }
+.projection-zero { position: absolute; left: 0; right: 0; border-top: 1px solid var(--color-line-strong); }
+.projection-column { flex: 1; position: relative; }
+.projection-column > span { position: absolute; width: 100%; border-radius: 0 0 3px 3px; background: color-mix(in srgb, var(--color-risk) 60%, white); }
+.projection-column:last-child > span { background: var(--color-risk); }
+.projection-axis { display: flex; justify-content: space-between; margin-top: .45rem; font-size: .72rem; }
+.budget-overview { display: grid; grid-template-columns: 1.65fr 1fr; gap: .9rem; margin: 1rem 0; }
+.budget-brief dl { margin-top: .35rem; }
+.budget-brief dl > div { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: .85rem 0; border-bottom: 1px solid var(--color-line); }
+.budget-brief dl > div:last-child { border-bottom: 0; }
+.budget-brief dt { max-width: 13rem; }
+.budget-brief dd { font: 550 1.4rem/1.2 var(--font-display); letter-spacing: -.04em; white-space: nowrap; }
+
+.atlas-wizard .btn-stage { background: var(--color-brand-bright); color: var(--color-stage); }
+.atlas-wizard .wizard-steps { order: -1; }
+.atlas-wizard .wizard-preview, .atlas-wizard .wizard-steps { border-radius: 1.1rem; }
+.projection-column[data-sign="1"] > span { background: #68a78b; border-radius: 3px 3px 0 0; }
+.projection-column[data-sign="1"]:last-child > span { background: var(--color-ok); }
+@media (max-width: 720px) {
+  .budget-overview { grid-template-columns: 1fr; }
+  .budget-brief dl > div { padding: .5rem 0; }
+  .atlas-wizard .wizard-preview { margin-top: .4rem; }
+}

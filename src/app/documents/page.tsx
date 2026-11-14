@@ -2,7 +2,8 @@
 
 import { ArrowLeft, ArrowRight, ArrowUpRight, Check, Copy, Download, LoaderCircle, Lock, Printer, Sparkles } from "lucide-react";
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useSearchParams } from "next/navigation";
+import { Suspense, useMemo, useState } from "react";
 import type { DocumentResponse } from "@/app/api/documents/route";
 import { Logo } from "@/components/Logo";
 import {
@@ -17,6 +18,7 @@ import {
 } from "@/lib/documents";
 import { stateName } from "@/lib/states";
 import { useCivio } from "@/lib/store";
+import type { Profile } from "@/lib/types";
 
 const FIELDS_KEY = "civio:letter-fields";
 
@@ -96,8 +98,7 @@ function Field({
   );
 }
 
-function Letters({ unlocked, onUnlock }: { unlocked: boolean; onUnlock: () => void }) {
-  const { profile } = useCivio();
+function Letters({ unlocked, onUnlock, profile }: { unlocked: boolean; onUnlock: () => void; profile: Profile }) {
   const kinds = useMemo(() => availableLetters(profile), [profile]);
   const [kind, setKind] = useState<LetterKind>("address_change");
   const [fields, setFieldsState] = useState<LetterFields>(loadFields);
@@ -284,7 +285,21 @@ function Letters({ unlocked, onUnlock }: { unlocked: boolean; onUnlock: () => vo
 }
 
 export default function DocumentsPage() {
-  const { ready, hasPlan, profile, tasks, pack, setPack } = useCivio();
+  return (
+    <Suspense fallback={<div className="min-h-dvh bg-panel" aria-busy="true" />}>
+      <DocumentsRoute />
+    </Suspense>
+  );
+}
+
+function DocumentsRoute() {
+  // ?demo=1 shows the sample plan in memory, the same as the dashboard does.
+  const preview = useSearchParams().get("demo") === "1";
+  return <Documents key={String(preview)} preview={preview} />;
+}
+
+function Documents({ preview }: { preview: boolean }) {
+  const { ready, hasPlan, profile, tasks, pack, setPack } = useCivio(preview);
   const notify = useMemo(() => buildNotifyList(profile, tasks), [profile, tasks]);
 
   if (!ready) return <div className="min-h-dvh bg-panel" aria-busy="true" />;
@@ -299,7 +314,7 @@ export default function DocumentsPage() {
             <Link href="/onboarding" className="btn btn-primary">
               Get Started <ArrowRight className="size-4" aria-hidden="true" />
             </Link>
-            <Link href="/dashboard?demo=1" className="btn btn-quiet">
+            <Link href="/documents?demo=1" className="btn btn-quiet">
               Load the demo
             </Link>
           </div>
@@ -313,7 +328,7 @@ export default function DocumentsPage() {
       <main className="mx-auto max-w-6xl px-4 pb-16 pt-5 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between gap-3 print:hidden">
           <Logo />
-          <Link href="/dashboard" className="btn btn-quiet">
+          <Link href={preview ? "/dashboard?demo=1" : "/dashboard"} className="btn btn-quiet">
             <ArrowLeft className="size-4" aria-hidden="true" /> Back to the plan
           </Link>
         </div>
@@ -362,7 +377,7 @@ export default function DocumentsPage() {
         </section>
 
         <div className="mt-6">
-          <Letters unlocked={pack} onUnlock={() => setPack(true)} />
+          <Letters unlocked={pack} onUnlock={() => setPack(true)} profile={profile} />
         </div>
 
         <p className="mt-8 text-sm text-ink-muted print:hidden">
