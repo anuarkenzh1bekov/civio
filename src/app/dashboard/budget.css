@@ -200,6 +200,16 @@
   .move-workspace .projection-bars { min-height: 5rem; }
 }
 
+@media (prefers-reduced-motion: no-preference) {
+  html:has(.move-workspace) {
+    scroll-behavior: smooth;
+  }
+
+  .plan-sections a {
+    transition: color 200ms ease, background-color 200ms ease;
+  }
+}
+
 @media (max-width: 650px) {
   .move-workspace { --plan-header-height: 6.75rem; }
   .plan-header-inner { grid-template-columns: 1fr auto; gap: .35rem 1rem; padding-block: .4rem .5rem; }
