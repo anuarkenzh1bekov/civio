@@ -43,11 +43,8 @@ export type AssistantEvent =
   | { type: "done" };
 
 function toSources(retrieved: Retrieved[]): AssistantSource[] {
-  const seen = new Set<string>();
   const sources: AssistantSource[] = [];
   for (const { rule } of retrieved) {
-    if (seen.has(rule.source_url)) continue;
-    seen.add(rule.source_url);
     sources.push({
       ruleId: rule.rule_id,
       name: rule.source_name,
@@ -68,12 +65,12 @@ function rulesOnlyAnswer(retrieved: Retrieved[]): string {
   const parts = top.map(({ rule, task }) => {
     const t = rule.task_template;
     const deadline = task?.deadline ?? (t.deadline ? { label: t.deadline.label, date: undefined } : null);
-    const lines = [`${task?.title ?? t.title}`, task?.description ?? t.description];
+    const lines = [`**${task?.title ?? t.title}**`, `${task?.description ?? t.description} [${rule.rule_id}]`];
     if (deadline) lines.push(`Deadline: ${deadline.label}${deadline.date ? ` (${deadline.date})` : ""}.`);
     if (!rule.verified) lines.push("Civio has not verified this for your state. Check the official site.");
     return lines.join("\n");
   });
-  return `These are the rules in Civio that match your question.\n\n${parts.join("\n\n")}`;
+  return `These are the rules in Civio that match your question.\n\n${parts.join("\n\n")}`.replaceAll("\n", "  \n");
 }
 
 export async function POST(request: Request) {

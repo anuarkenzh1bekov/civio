@@ -1,7 +1,16 @@
 /* tastemaker · structure: long-scroll narrative · nav: inset pill bar · hero: split statement + plan card · footer: single line
    mood: warm/premium · palette: extracted from reference images (paper #E7E4D9 / oxblood / moss), contrast matrix passed
    critique: ShowTell 4 · Phil 4 · Hier 4 · Spec 5 · Restr 4 · Var 5 */
-@import "tailwindcss";
+/* Layer order for Astryx + Tailwind (from the Astryx Next.js + Tailwind example):
+   Astryx reset lowest, Astryx components in the middle, Tailwind utilities on top. */
+@layer reset, theme, base, astryx-base, astryx-theme, components, utilities;
+
+@import "tailwindcss/theme.css" layer(theme);
+@import "tailwindcss/preflight.css" layer(base);
+@import "@astryxdesign/core/reset.css";
+@import "@astryxdesign/core/astryx.css";
+@import "@astryxdesign/theme-matcha/theme.css";
+@import "tailwindcss/utilities.css" layer(utilities);
 
 @theme {
   --color-paper: #ece8dd;
@@ -23,7 +32,7 @@
   --color-espresso: #2c1411;
   --color-espresso-raised: #3a1d19;
   --color-espresso-line: #54302b;
-  --color-on-dark: #ece8dd;
+  --color-cream: #ece8dd;
   --color-dark-muted: #b5a598;
 
   /* Green hero (reference 2) */
@@ -79,6 +88,18 @@
     text-rendering: optimizeLegibility;
   }
 
+  /* Astryx's reset colors headings and paragraphs with its theme text color; Civio's inherit. */
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6,
+  p,
+  small {
+    color: inherit;
+  }
+
   h1,
   h2,
   h3 {
@@ -100,7 +121,7 @@
   }
 
   .on-dark :focus-visible {
-    outline-color: var(--color-on-dark);
+    outline-color: var(--color-cream);
   }
 
   ::selection {
@@ -164,12 +185,12 @@
   }
 
   .btn-on-dark {
-    background: var(--color-on-dark);
+    background: var(--color-cream);
     color: var(--color-espresso);
   }
 
   .btn-ghost-dark {
-    color: var(--color-on-dark);
+    color: var(--color-cream);
     border: 1px solid var(--color-espresso-line);
   }
 
@@ -205,7 +226,7 @@
     border-radius: 0.875rem;
     border: 1px solid var(--color-espresso-line);
     background: var(--color-espresso-raised);
-    color: var(--color-on-dark);
+    color: var(--color-cream);
     font-size: 1rem; /* 16px keeps iOS from zooming the page on focus */
     transition: border-color 160ms var(--ease-out);
   }
@@ -216,7 +237,7 @@
   }
 
   .field:focus-visible {
-    outline: 2px solid var(--color-on-dark);
+    outline: 2px solid var(--color-cream);
     outline-offset: 1px;
     border-radius: 0.875rem;
   }
@@ -377,4 +398,15 @@
   .btn:active:not(:disabled) {
     transform: none;
   }
+}
+
+/* ── Astryx integration ──
+   Unlayered on purpose: these must win over the theme's own layer.
+   Astryx components use Civio's typefaces, and the theme wrapper does not recolor Civio's own text. */
+[data-astryx-theme] {
+  --font-family-body: var(--font-sans);
+  --font-family-heading: var(--font-display);
+  --font-family-code: var(--font-mono);
+  color: inherit;
+  font-family: var(--font-sans);
 }

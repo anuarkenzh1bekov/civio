@@ -245,7 +245,7 @@ export default function LandingPage() {
 
       {/* ── Problem: dark band ── */}
       <section className="px-3 sm:px-5">
-        <div className="on-dark mx-auto max-w-[88rem] rounded-shell bg-espresso text-on-dark">
+        <div className="on-dark mx-auto max-w-[88rem] rounded-shell bg-espresso text-cream">
           <Reveal className="mx-auto max-w-6xl px-5 py-20 sm:px-8 lg:py-28">
             <h2
               data-reveal

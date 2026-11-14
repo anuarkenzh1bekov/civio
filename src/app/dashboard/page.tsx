@@ -1,5 +1,11 @@
 "use client";
 
+import { AlertDialog } from "@astryxdesign/core/AlertDialog";
+import { CommandPalette } from "@astryxdesign/core/CommandPalette";
+import { Drawer, DrawerHeader } from "@astryxdesign/core/Drawer";
+import { useToast } from "@astryxdesign/core/Toast";
+import { Tooltip } from "@astryxdesign/core/Tooltip";
+import { createStaticSource, type SearchableItem } from "@astryxdesign/core/Typeahead";
 import {
   ArrowRight,
   ArrowUpRight,
@@ -175,7 +181,15 @@ function TaskRow({
             {due ? due.text : "No deadline recorded"}
           </span>
           <span>
-            <StatusBadge status={task.displayStatus} />
+            {task.displayStatus === "needs_verification" && task.verificationNote ? (
+              <Tooltip content={task.verificationNote}>
+                <span className="inline-flex">
+                  <StatusBadge status={task.displayStatus} />
+                </span>
+              </Tooltip>
+            ) : (
+              <StatusBadge status={task.displayStatus} />
+            )}
           </span>
           <ChevronDown
             className={`hidden size-5 text-muted transition-transform duration-200 md:block ${open ? "rotate-180" : ""}`}
@@ -312,12 +326,20 @@ export default function DashboardPage() {
   const [openId, setOpenId] = useState<string | null>(null);
   const [assistantOpen, setAssistantOpen] = useState(false);
   const [seed, setSeed] = useState<{ text: string; nonce: number } | null>(null);
-  const searchRef = useRef<HTMLInputElement>(null);
+  const [paletteOpen, setPaletteOpen] = useState(false);
+  const [confirmReset, setConfirmReset] = useState(false);
+  const showToast = useToast();
+  const tasksRef = useRef(tasks);
+  tasksRef.current = tasks;
 
   // /dashboard?demo=1 loads the sample plan, then cleans the URL.
   useEffect(() => {
     if (!ready) return;
-    if (new URLSearchParams(window.location.search).get("demo") === "1") {
+    const params = new URLSearchParams(window.location.search);
+    // ?panel=ask and ?panel=search open the assistant or the command palette directly.
+    if (params.get("panel") === "ask") setAssistantOpen(true);
+    if (params.get("panel") === "search") setPaletteOpen(true);
+    if (params.get("demo") === "1") {
       loadDemo();
       router.replace("/dashboard");
     }
@@ -327,9 +349,7 @@ export default function DashboardPage() {
     const onKey = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
         e.preventDefault();
-        searchRef.current?.focus();
-      } else if (e.key === "Escape") {
-        setAssistantOpen(false);
+        setPaletteOpen(true);
       }
     };
     window.addEventListener("keydown", onKey);
@@ -365,6 +385,17 @@ export default function DashboardPage() {
     );
   }, [tasks, category, status, moneyOnly, query]);
 
+  const commands = useMemo(() => {
+    const items: SearchableItem<{ group: string }>[] = [
+      { id: "action:ask", label: "Ask Civio a question", auxiliaryData: { group: "Actions" } },
+      { id: "action:profile", label: "Edit profile", auxiliaryData: { group: "Actions" } },
+      { id: "action:money", label: "Show tasks with money at stake", auxiliaryData: { group: "Actions" } },
+      { id: "action:review", label: "Show tasks to review", auxiliaryData: { group: "Actions" } },
+      ...tasks.map((t) => ({ id: `task:${t.id}`, label: t.title, auxiliaryData: { group: CATEGORY_LABEL[t.category] } })),
+    ];
+    return createStaticSource(items);
+  }, [tasks]);
+
   if (!ready) return <Skeleton />;
   if (!hasPlan) return <NoPlan onDemo={loadDemo} />;
 
@@ -382,6 +413,38 @@ export default function DashboardPage() {
     requestAnimationFrame(() =>
       document.getElementById(`row-${taskId}`)?.scrollIntoView({ behavior: "smooth", block: "center" }),
     );
+  };
+  /** Mark a task done or not done, with a toast that can undo it. */
+  const toggleWithUndo = (task: PlanTask) => {
+    const wasDone = task.displayStatus === "done";
+    toggleDone(task.id);
+    const dismiss = showToast({
+      uniqueID: `done-${task.id}`,
+      body: wasDone ? `“${task.title}” is open again` : `“${task.title}” marked as done`,
+      endContent: (
+        <button
+          type="button"
+          className="rounded-full px-3 py-1 text-sm font-semibold underline underline-offset-4"
+          onClick={() => {
+            toggleDone(task.id);
+            dismiss();
+          }}
+        >
+          Undo
+        </button>
+      ),
+    });
+  };
+  const runCommand = (id: string) => {
+    if (id === "action:ask") setAssistantOpen(true);
+    else if (id === "action:profile") router.push("/onboarding");
+    else if (id === "action:money") {
+      clearFilters();
+      setMoneyOnly(true);
+    } else if (id === "action:review") {
+      clearFilters();
+      setStatus("needs_verification");
+    } else if (id.startsWith("task:")) reveal(id.slice(5));
   };
   const askAbout = (task: PlanTask) => {
     setSeed({ text: `Explain this task in plain words: “${task.title}”. What should I do first?`, nonce: Date.now() });
@@ -411,19 +474,15 @@ export default function DashboardPage() {
             <ChevronsUpDown className="size-4 text-taupe" aria-hidden="true" />
           </div>
 
-          <label className="flex min-h-10 items-center gap-2 rounded-xl bg-white px-3 shadow-soft ring-1 ring-hair">
+          <button
+            type="button"
+            onClick={() => setPaletteOpen(true)}
+            className="flex min-h-10 items-center gap-2 rounded-xl bg-white px-3 text-left shadow-soft ring-1 ring-hair"
+          >
             <Search className="size-4 shrink-0 text-taupe" aria-hidden="true" />
-            <span className="sr-only">Search tasks</span>
-            <input
-              ref={searchRef}
-              type="search"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search tasks…"
-              className="min-w-0 flex-1 bg-transparent text-sm placeholder:text-muted focus-visible:outline-none"
-            />
+            <span className="flex-1 text-sm text-muted">Search tasks…</span>
             <kbd className="rounded-md bg-mist px-1.5 py-0.5 font-mono text-[0.6875rem] text-muted">Ctrl K</kbd>
-          </label>
+          </button>
 
           <nav aria-label="Main" className="grid gap-0.5 text-[0.9375rem]">
             <button
@@ -481,10 +540,7 @@ export default function DashboardPage() {
 
           <button
             type="button"
-            onClick={() => {
-              reset();
-              router.push("/");
-            }}
+            onClick={() => setConfirmReset(true)}
             className="mt-auto flex min-h-10 items-center gap-2.5 rounded-xl px-3 text-left text-[0.9375rem] text-muted hover:text-ink"
           >
             <RotateCcw className="size-4" strokeWidth={1.75} aria-hidden="true" /> Start over
@@ -748,7 +804,7 @@ export default function DashboardPage() {
                     index={index}
                     open={openId === task.id}
                     onToggleOpen={() => setOpenId(openId === task.id ? null : task.id)}
-                    onToggleDone={() => toggleDone(task.id)}
+                    onToggleDone={() => toggleWithUndo(task)}
                     onAsk={() => askAbout(task)}
                   />
                 ))}
@@ -763,29 +819,49 @@ export default function DashboardPage() {
         </div>
       </main>
 
-      {/* ── Assistant: one panel, kept mounted so the conversation survives closing ── */}
-      <div
-        className={assistantOpen ? "fixed inset-0 z-40" : "hidden"}
-        role="dialog"
-        aria-modal="true"
-        aria-label="Civio assistant"
-      >
-        <button
-          type="button"
-          aria-label="Close assistant"
-          onClick={() => setAssistantOpen(false)}
-          className="fade absolute inset-0 cursor-default bg-ink/40"
-        />
-        <div className="slide-in absolute inset-y-0 right-0 w-full max-w-md p-3">
-          <AssistantPanel
-            profile={profile}
-            consent={profile.aiConsent === true}
-            onConsentChange={setConsent}
-            seed={seed}
-            onClose={() => setAssistantOpen(false)}
+      {/* ── Assistant in an Astryx drawer: focus handling, Escape and scrim come with it ── */}
+      <Drawer isOpen={assistantOpen} onOpenChange={setAssistantOpen} label="Civio assistant" side="end" width={440}>
+        <div className="flex h-full min-h-0 flex-col">
+          <DrawerHeader
+            title="Ask Civio"
+            subtitle="Explains your rules. Doesn't set deadlines."
+            onOpenChange={setAssistantOpen}
           />
+          <div className="min-h-0 flex-1">
+            <AssistantPanel
+              profile={profile}
+              consent={profile.aiConsent === true}
+              onConsentChange={setConsent}
+              seed={seed}
+            />
+          </div>
         </div>
-      </div>
+      </Drawer>
+
+      <CommandPalette
+        isOpen={paletteOpen}
+        onOpenChange={setPaletteOpen}
+        searchSource={commands}
+        label="Search tasks and actions"
+        value=""
+        onValueChange={(id) => {
+          if (id) runCommand(id);
+        }}
+        emptySearchText="No task or action matches."
+      />
+
+      <AlertDialog
+        isOpen={confirmReset}
+        onOpenChange={setConfirmReset}
+        title="Start over?"
+        description="This clears your answers and task progress from this browser. It cannot be undone."
+        actionLabel="Clear my plan"
+        onAction={() => {
+          setConfirmReset(false);
+          reset();
+          router.push("/");
+        }}
+      />
     </div>
   );
 }

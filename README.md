@@ -63,4 +63,21 @@ Known limits:
 
 ## Stack
 
-Next.js 16 (App Router), React 19, TypeScript, Tailwind CSS 4, GSAP for landing reveals, lucide icons, Anthropic SDK, Vitest.
+Next.js 16 (App Router), React 19, TypeScript, Tailwind CSS 4, Astryx (`@astryxdesign/core` with the matcha theme), GSAP for landing reveals, lucide icons, Anthropic SDK, Vitest.
+
+### Where Astryx is used
+
+Layout and visuals are Tailwind. Astryx supplies the interactive pieces that are hard to get right by hand:
+
+| Component | Where |
+|---|---|
+| `Drawer`, `DrawerHeader` | Assistant side panel (focus handling, Escape, scrim) |
+| `Markdown`, `Citation` | Assistant answers; a rule id like `[CA-VEH-REG]` becomes a link to its official source |
+| `CommandPalette` | Ctrl/⌘ K on the dashboard: jump to a task or run an action |
+| `AlertDialog` | Confirmation before "Start over" clears the plan |
+| `useToast` | "Marked as done" with Undo |
+| `Tooltip` | Why a task needs verification |
+| `Selector` | Searchable state pickers in the questionnaire |
+| `Switch` | Profile sharing with the assistant |
+
+`/dashboard?panel=ask` and `/dashboard?panel=search` open the assistant and the palette directly. The CSS layer order in `src/app/globals.css` follows the Astryx Next.js + Tailwind example; the overrides at the end of that file keep Civio's typefaces and text colors.

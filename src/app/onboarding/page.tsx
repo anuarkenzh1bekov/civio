@@ -1,5 +1,8 @@
 "use client";
 
+import { Selector } from "@astryxdesign/core/Selector";
+import { Theme } from "@astryxdesign/core/theme";
+import { matchaTheme } from "@astryxdesign/theme-matcha/built";
 import { ArrowLeft, ArrowRight, Check, Plus, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useId, useMemo, useState } from "react";
@@ -79,6 +82,9 @@ function Choice<T extends string | boolean>({
   );
 }
 
+const STATE_OPTIONS = US_STATES.map((state) => ({ value: state.code, label: state.name }));
+
+/** Searchable state picker (Astryx Selector): 51 options are too many to scroll. */
 function StateSelect({
   label,
   value,
@@ -90,33 +96,20 @@ function StateSelect({
   onChange: (value: string | undefined) => void;
   error?: string;
 }) {
-  const id = useId();
   return (
-    <div>
-      <label htmlFor={id} className="font-medium">
-        {label}
-      </label>
-      <select
-        id={id}
-        value={value ?? ""}
-        onChange={(e) => onChange(e.target.value || undefined)}
-        aria-invalid={Boolean(error)}
-        aria-describedby={error ? `${id}-error` : undefined}
-        className={`night-field mt-3 appearance-none ${error ? "border-lime" : ""}`}
-      >
-        <option value="">Select a state…</option>
-        {US_STATES.map((s) => (
-          <option key={s.code} value={s.code}>
-            {s.name}
-          </option>
-        ))}
-      </select>
-      {error && (
-        <p id={`${id}-error`} className="mt-2 text-sm text-lime" role="alert">
-          {error}
-        </p>
-      )}
-    </div>
+    <Selector
+      label={label}
+      options={STATE_OPTIONS}
+      value={value}
+      onChange={(next) => onChange(next || undefined)}
+      hasSearch
+      searchPlaceholder="Type a state…"
+      placeholder="Select a state…"
+      isRequired
+      size="lg"
+      width="100%"
+      status={error ? { type: "error", message: error } : undefined}
+    />
   );
 }
 
@@ -233,6 +226,7 @@ function Wizard({ initial, onDone }: { initial: Profile; onDone: (profile: Profi
   };
 
   return (
+    <Theme theme={matchaTheme} mode="dark">
     <div className="on-night min-h-dvh bg-night text-white">
       <div className="mx-auto max-w-6xl px-5 py-6 sm:px-8 lg:py-8">
         <Logo tone="dark" />
@@ -567,6 +561,7 @@ function Wizard({ initial, onDone }: { initial: Profile; onDone: (profile: Profi
         </div>
       </div>
     </div>
+    </Theme>
   );
 }
 

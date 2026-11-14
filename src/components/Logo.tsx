@@ -15,10 +15,10 @@ export function Logo({ tone = "ink" }: { tone?: "ink" | "dark" }) {
     <Link
       href="/"
       className={`inline-flex items-center gap-2 font-display text-xl font-semibold tracking-tight ${
-        tone === "dark" ? "text-on-dark" : "text-ink"
+        tone === "dark" ? "text-cream" : "text-ink"
       }`}
     >
-      <LogoMark className={`size-6 ${tone === "dark" ? "text-on-dark" : "text-oxblood"}`} />
+      <LogoMark className={`size-6 ${tone === "dark" ? "text-cream" : "text-oxblood"}`} />
       Civio
     </Link>
   );
