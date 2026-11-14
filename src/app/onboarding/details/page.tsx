@@ -9,7 +9,7 @@ import { useId, useMemo, useState } from "react";
 import type { IntakeResponse } from "@/app/api/intake/route";
 import { BudgetFields, BudgetSummary } from "@/components/MoveBudget";
 import { Logo } from "@/components/Logo";
-import { IntakeBox } from "@/components/onboarding/IntakeBox";
+import { ChatIntake } from "@/components/onboarding/ChatIntake";
 import { ThemeToggle, useThemeMode } from "@/components/ThemeMode";
 import { formatDate } from "@/lib/format";
 import { RULES } from "@/lib/rules/data";
@@ -282,11 +282,14 @@ function Wizard({ initial, onDone }: { initial: Profile; onDone: (profile: Profi
                 <h1 className="text-4xl font-medium tracking-[-0.03em]">Where are you moving?</h1>
                 <p className="mt-3 text-on-stage-muted">The two states decide which rules apply. Everything else is optional.</p>
                 <div className="mt-8">
-                  <IntakeBox
-                    onRead={(patch, result) => {
+                  <ChatIntake
+                    profile={p}
+                    onPatch={(patch) => {
                       set(patch);
-                      setIntake(result);
                       setErrors({});
+                    }}
+                    onReview={(result) => {
+                      setIntake(result);
                       setStep(STEPS.length - 1);
                     }}
                   />
@@ -462,7 +465,7 @@ function Wizard({ initial, onDone }: { initial: Profile; onDone: (profile: Profi
                 {intake && (
                   <div className="mt-6 rounded-2xl border border-brand-bright/40 p-4" aria-live="polite">
                     <p className="font-medium">
-                      Filled in from your description
+                      Filled in from our chat
                       <span className="ml-2 font-mono text-xs font-normal text-on-stage-muted">
                         {intake.mode === "ai" ? "read by AI" : "read by built-in rules"}
                       </span>
@@ -471,8 +474,14 @@ function Wizard({ initial, onDone }: { initial: Profile; onDone: (profile: Profi
                     <ul className="mt-3 grid gap-1.5 text-sm">
                       {intake.found.map((item) => (
                         <li key={item.field} className="flex flex-wrap items-baseline gap-x-2">
-                          <span className="text-on-stage-muted">{item.label}:</span>
-                          <span>{TEXT[item.value] ?? item.value}</span>
+                          {item.value ? (
+                            <>
+                              <span className="text-on-stage-muted">{item.label}:</span>
+                              <span>{TEXT[item.value] ?? item.value}</span>
+                            </>
+                          ) : (
+                            <span>{item.label}</span>
+                          )}
                           {item.from && <span className="text-xs text-on-stage-muted">from “{item.from}”</span>}
                         </li>
                       ))}

@@ -54,13 +54,13 @@ export function evidenceContext(hits: Hit[]): string {
 }
 
 export function evidenceFallback(hits: Hit[]): string {
-  if (!hits.length) return "Civio's Texas / California source collection does not contain a sufficiently relevant passage for this question. Please check the responsible state agency.";
+  if (!hits.length) return "Civio's source collection (Texas, California, Florida, Washington and New York) does not contain a sufficiently relevant passage for this question. Please check the responsible state agency.";
   return 'Relevant official-source excerpts (not an AI answer):\n\n' + hits.slice(0, 3)
     .map(({ chunk }, i) => `[S${i + 1}] ${chunk.title}\n${chunk.text}`).join('\n\n');
 }
 
 export const RAG_SYSTEM_PROMPT = `You are Civio's relocation assistant. Always answer in English, in 2–6 sentences, even when the question is written in another language.
-The evidence is a small curated collection for a move between Texas and California: selected statute sections (driver licenses, vehicle registration, auto insurance, income tax residency, schools, rental deposits and notices, voter registration) and official agency guidance. It is not the complete law of either state.
+The evidence is a small curated collection for moves between Texas, California, Florida, Washington and New York: selected statute sections (driver licenses, vehicle registration, auto insurance, income tax residency, schools, rental deposits and notices, voter registration) and official agency guidance. It is not the complete law of any state. For any other state, say the collection does not cover it.
 Use only the supplied evidence for legal requirements, fees, forms and deadlines. Distinguish statutes from agency guidance.
 Every paragraph asserting a requirement must cite its supporting passage using [S1], [S2], etc. Never invent a source ID or a URL. Links are supplied by the application.
 If passages do not answer the actual question, explicitly say the collection does not cover it. Do not fill gaps from memory or infer a universal requirement from a narrow exception.
@@ -72,6 +72,6 @@ Do not answer unrelated questions or claim the corpus covers all laws. When a po
 
 Format the answer for someone who will skim it, in Markdown:
 - The first sentence is the direct answer. Then give the conditions, exceptions and what to do next.
-- Put **bold** on the few phrases the reader must not miss: deadlines and periods (**21 calendar days**), dollar amounts, form and section names (**Form 8822**, **Vehicle Code §12505**), and a state name only when the answer contrasts Texas and California. Three to six bold phrases in a whole answer is plenty. Never bold a full sentence, a citation marker or a common word.
+- Put **bold** on the few phrases the reader must not miss: deadlines and periods (**21 calendar days**), dollar amounts, form and section names (**Form 8822**, **Vehicle Code §12505**), and a state name only when the answer contrasts two or more states. Three to six bold phrases in a whole answer is plenty. Never bold a full sentence, a citation marker or a common word.
 - Use a short bulleted list when three or more parallel items appear, such as coverage limits or required documents. Otherwise write short paragraphs.
 - Put the citation marker after the sentence it supports, outside the bold, like "**10 days** after you become a resident [S1]."`;

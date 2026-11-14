@@ -1,8 +1,8 @@
-# Law RAG: Texas and California
+# Law RAG: Texas, California, Florida, Washington and New York
 
-A small, curated collection for one scenario: a move between Texas and California. It holds the statute sections and agency pages behind the tasks in a moving plan, and nothing else. It is **not** the complete law of either state.
+A small, curated collection for one scenario: moves between five states: Texas, California, Florida, Washington and New York. It holds the statute sections and agency pages behind the tasks in a moving plan, and nothing else. It is **not** the complete law of either state.
 
-36 documents, 110 overlapping chunks, every chunk embedded. `corpus.json` holds the text and provenance, `index.json` the Gemini vectors. Both are committed and deployed with the app; together they are about 2 MB.
+51 documents, 191 overlapping chunks, every chunk embedded. `corpus.json` holds the text and provenance, `index.json` the Gemini vectors. Both are committed and deployed with the app; together they are about 2 MB.
 
 ## What is in it
 
@@ -22,6 +22,18 @@ Statutes marked `retrievalMethod: "bulk-archive"` were copied once from the offi
 
 Not covered: Texas school and immunization sections (missing from the archive import), federal law, regulations, local ordinances, case law, and anything unrelated to moving.
 
+## Added for the five-state MVP
+
+| Topic | Florida | Washington | New York |
+|---|---|---|---|
+| Driver license | Stat. §322.031 (30 days) | RCW 46.20.021 (30 days) | DMV "Driving in New York State" (30 days) |
+| Vehicle registration | Stat. §§320.02, 320.38 (10 days) | RCW 46.16A.140 (30 days) | DMV "Register an out-of-state vehicle" (30 days) |
+| Auto insurance | Stat. §§324.022, 627.733 | RCW 46.30.020 | (inside the DMV registration page) |
+| Rental deposit | Stat. §83.49 (15 / 30 days) | RCW 59.18.280 (30 days) | Attorney General tenants' rights guide (14 days) |
+| Income tax | not covered | not covered | Tax Dept IT-203 page |
+
+Florida and Washington statutes and the New York pages were fetched from official sites on the retrieval date (`retrievalMethod: "web-extract"`, text in `raw/`). The New York GOL §7-108 text could not be fetched (the site blocks automated requests), so the deposit rule comes from the Attorney General's guide. Not covered for these three states: schools, voter registration, health coverage, state income tax rules for Florida and Washington.
+
 ## Retrieval
 
 - Chunks of 280 words with 45-word overlap, stable content-hashed IDs.
@@ -36,7 +48,7 @@ Not covered: Texas school and immunization sections (missing from the archive im
 ```sh
 npm run rag:ingest  # re-download the directly fetchable pages; other snapshots are kept
 npm run rag:build   # embed new or changed chunks only
-npm run rag:eval    # 15 real English questions, including off-topic ones
+npm run rag:eval    # 25 real English questions, including off-topic and unsupported-state ones
 npm run test:rag    # unit tests for BM25, fusion, chunking, ingestion
 ```
 
