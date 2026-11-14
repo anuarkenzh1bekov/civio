@@ -392,6 +392,16 @@ function Dashboard({ preview, panel }: { preview: boolean; panel: string | null 
           onAsk={() => setAssistantOpen(true)}
           onChecklist={() => openFolder("all")}
         />
+        <section className="destination-invite" aria-labelledby="destination-invite-title">
+          <div>
+            <p className="mono-label text-ink-muted">Still deciding?</p>
+            <h2 id="destination-invite-title">Compare a few destinations</h2>
+            <p>See your monthly and first-year budget estimates side by side.</p>
+          </div>
+          <Link className="btn btn-quiet" href="/compare">
+            Compare options <ArrowUpRight className="size-4" aria-hidden="true" />
+          </Link>
+        </section>
         <section className="ledger-checklist" id="folders" aria-label="Moving checklist">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <h2>Moving checklist</h2>

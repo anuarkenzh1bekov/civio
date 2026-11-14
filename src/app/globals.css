@@ -272,15 +272,15 @@
 }
 
 ::view-transition-group(root) {
-  animation-duration: 140ms;
+  animation-duration: 190ms;
 }
 
 ::view-transition-old(root) {
-  animation: theme-fade-out 140ms ease-out both;
+  animation: theme-fade-out 190ms ease-in-out both;
 }
 
 ::view-transition-new(root) {
-  animation: theme-fade-in 140ms ease-in both;
+  animation: theme-fade-in 190ms ease-in-out both;
 }
 
 :root.theme-view-transition *,

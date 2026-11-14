@@ -180,7 +180,9 @@
 .ledger-next { width: 100%; margin-top: .75rem; padding: 1rem 0; border-block: 1px solid var(--color-line); display: flex; align-items: center; gap: 1rem; text-align: left; }
 .ledger-next span { color: var(--color-ink-muted); font-size: .85rem; }
 .ledger-next small { margin-left: auto; }
-
+.destination-invite { display: flex; align-items: center; justify-content: space-between; gap: 1.5rem; margin-top: 1rem; padding: 1.25rem 1.4rem; border: 1px solid var(--color-line); border-radius: 1rem; background: var(--color-panel); }
+.destination-invite h2 { margin-top: .25rem; font-size: 1.15rem; font-weight: 600; letter-spacing: -.025em; }
+.destination-invite p:last-child { margin-top: .3rem; color: var(--color-ink-muted); font-size: .875rem; }
 @media (max-width: 1023px) {
   .ledger-shell { max-width: 54rem; }
   .plan-layout { grid-template-columns: minmax(0,1fr); }
@@ -233,4 +235,5 @@
   .ledger-next span, .ledger-next small { grid-column: 1; margin: 0; }
   .ledger-next strong { grid-row: 2; }
   .ledger-next svg { grid-column: 2; grid-row: 2; }
+  .destination-invite { align-items: stretch; flex-direction: column; padding: 1rem; }
 }
