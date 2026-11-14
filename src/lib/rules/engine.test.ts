@@ -58,6 +58,16 @@ describe("rule engine", () => {
     expect(plan.filter((id) => id.includes("VEH"))).toEqual(["CA-VEH-RESIDENCY", "CA-VEH-DL"]);
   });
 
+  it.each([
+    ["FL", ["FL-VEH-INSURANCE", "FL-VEH-REG", "FL-VEH-DL"]],
+    ["WA", ["WA-VEH-INSURANCE", "WA-VEH-REG", "WA-VEH-DL"]],
+    ["NY", ["NY-VEH-REG", "NY-VEH-DL"]],
+  ])("has verified vehicle rules for %s and no generic DMV lookup", (state, expected) => {
+    const plan = ids({ ...DEMO_PROFILE, destinationState: state, hasVehicle: true, drives: true });
+    expect(plan.filter((id) => id.startsWith(`${state}-VEH`))).toEqual(expected);
+    expect(plan).not.toContain("US-VEH-STATE-CHECK");
+  });
+
   it("provides a DMV lookup for a driver moving to an uncovered state without a car", () => {
     expect(ids({ ...DEMO_PROFILE, destinationState: "OR", hasVehicle: false })).toContain("US-VEH-STATE-CHECK");
   });

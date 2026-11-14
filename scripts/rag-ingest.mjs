@@ -74,7 +74,7 @@ export async function ingest({ fetcher = fetch } = {}) {
     }
   }
   if (!documents.length) throw new Error('No official source could be downloaded');
-  await writeFile(`${target}.tmp`, JSON.stringify({ version: previous.version || 1, scope: previous.scope || 'Curated relocation sources for TX and CA; not complete state codes', documents }, null, 2));
+  await writeFile(`${target}.tmp`, JSON.stringify({ version: previous.version || 1, scope: previous.scope || 'Curated relocation sources for TX, CA, FL, WA and NY; not complete state codes', documents }, null, 2));
   await rename(`${target}.tmp`, target);
   return { documents: documents.length, failures };
 }

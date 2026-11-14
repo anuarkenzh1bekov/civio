@@ -20,7 +20,17 @@ export const CASES = [
   { question: 'Which vaccines does my child need to start school in California?', expected: 'ca-hsc-120335' },
   { question: 'How do I cook pasta carbonara?', expected: null },
   { question: 'Who won the football world cup?', expected: null },
-  { question: 'What are the driver license requirements in New York?', expected: null },
+  { question: 'What are the driver license requirements in Ohio?', expected: null },
+  { question: 'How many days do I have to register my car after moving to Florida?', expected: 'fl-320.38' },
+  { question: 'How long does a Florida landlord have to return my security deposit?', expected: 'fl-83.49' },
+  { question: 'Do I need a Florida driver license if I start a job there?', expected: 'fl-322.031' },
+  { question: 'How soon must I get a Washington driver license after moving?', expected: 'wa-46.20.021' },
+  { question: 'How many days does a Washington landlord have to return a deposit?', expected: 'wa-59.18.280' },
+  { question: 'When do I have to register my vehicle in Washington as a new resident?', expected: 'wa-46.16A.140' },
+  { question: 'How long do I have to register my car after moving to New York?', expected: 'ny-dmv-register-out-of-state' },
+  { question: 'Do I have to get a New York driver license when I move there?', expected: ['ny-dmv-driving', 'ny-dmv-moving'] },
+  { question: 'Which tax return do I file if I move into New York mid-year?', expected: 'ny-tax-it203' },
+  { question: 'How long does a New York landlord have to return the security deposit?', expected: 'ny-ag-deposit' },
 ];
 
 export async function evaluate({ apiKey, progress = console.log } = {}) {

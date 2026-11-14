@@ -14,9 +14,9 @@ import type { Rule } from "@/lib/types";
 const CHECKED = "2026-11-14";
 
 /** States that have verified rules per module. Everything else falls back. */
-const VEHICLE_COVERED = ["CA", "TX"];
+const VEHICLE_COVERED = ["CA", "TX", "FL", "WA", "NY"];
 const SCHOOL_COVERED = ["CA"];
-const STATE_TAX_COVERED = ["CA"];
+const STATE_TAX_COVERED = ["CA", "NY"];
 
 export const RULES: readonly Rule[] = [
   // ───────────────────────── Taxes ─────────────────────────
@@ -463,6 +463,223 @@ export const RULES: readonly Rule[] = [
     source_url: "https://www.usa.gov/state-motor-vehicle-services",
     last_verified: CHECKED,
     verified: false,
+  },
+
+  {
+    rule_id: "FL-VEH-INSURANCE",
+    state: "FL",
+    conditions: [{ fact: "has_vehicle", op: "eq", value: true }],
+    task_template: {
+      title: "Move your auto insurance to a Florida policy",
+      category: "vehicle",
+      priority: "medium",
+      description:
+        "Florida requires a vehicle registered in the state to carry at least $10,000 of property damage liability, and no-fault (PIP) security under the Motor Vehicle No-Fault Law.",
+      steps: [
+        "Tell your insurer your move date and Florida garaging address.",
+        "Confirm the policy has property damage liability of at least $10,000 and the no-fault coverage Florida requires.",
+        "Keep proof of insurance for your registration visit.",
+      ],
+      documents: ["Proof of Florida auto insurance"],
+      financial: { kind: "fee", note: "Your premium is re-rated for the new address." },
+    },
+    source_name: "Florida Statutes §324.022",
+    source_url: "https://www.leg.state.fl.us/statutes/index.cfm?App_mode=Display_Statute&URL=0300-0399/0324/Sections/0324.022.html",
+    last_verified: CHECKED,
+    verified: true,
+  },
+  {
+    rule_id: "FL-VEH-REG",
+    state: "FL",
+    conditions: [{ fact: "has_vehicle", op: "eq", value: true }],
+    depends_on: ["FL-VEH-INSURANCE"],
+    task_template: {
+      title: "Register your vehicle in Florida",
+      category: "vehicle",
+      priority: "high",
+      description:
+        "A nonresident who takes a job or enrolls children in a Florida public school must register motor vehicles in Florida within 10 days after the job or schooling begins.",
+      steps: [
+        "Get a Florida auto insurance policy first.",
+        "Complete the Florida title and registration application for an out-of-state vehicle.",
+        "Take the paperwork, VIN verification and your old title to a county tax collector office.",
+      ],
+      documents: ["Out-of-state title or registration", "Proof of Florida auto insurance", "Vehicle identification number (VIN) verification"],
+      deadline: { label: "Within 10 days of starting work or enrolling children in school in Florida", daysAfterMove: 10 },
+      financial: { kind: "penalty", note: "Registration fees are due. Late registration can add penalties." },
+    },
+    source_name: "Florida Statutes §320.38",
+    source_url: "https://www.leg.state.fl.us/statutes/index.cfm?App_mode=Display_Statute&URL=0300-0399/0320/Sections/0320.38.html",
+    last_verified: CHECKED,
+    verified: true,
+  },
+  {
+    rule_id: "FL-VEH-DL",
+    state: "FL",
+    conditions: [{ fact: "drives", op: "eq", value: true }],
+    task_template: {
+      title: "Get a Florida driver license",
+      category: "vehicle",
+      priority: "high",
+      description:
+        "A nonresident who takes a job or enrolls children in a Florida public school must get a Florida driver license within 30 days if they drive in the state. Their spouse and dependent children are covered by the same 30-day rule.",
+      steps: [
+        "Book an appointment at a driver license office or tax collector office.",
+        "Bring identity, Social Security and Florida residency documents.",
+        "Surrender your out-of-state license.",
+      ],
+      documents: ["Current out-of-state driver license", "Proof of identity", "Proof of Social Security number", "Two proofs of Florida residential address"],
+      deadline: { label: "Within 30 days of starting work or enrolling children in school in Florida", daysAfterMove: 30 },
+      financial: { kind: "fee", note: "A license fee is charged." },
+    },
+    source_name: "Florida Statutes §322.031",
+    source_url: "https://www.leg.state.fl.us/statutes/index.cfm?App_mode=Display_Statute&URL=0300-0399/0322/Sections/0322.031.html",
+    last_verified: CHECKED,
+    verified: true,
+  },
+  {
+    rule_id: "WA-VEH-INSURANCE",
+    state: "WA",
+    conditions: [{ fact: "has_vehicle", op: "eq", value: true }],
+    task_template: {
+      title: "Move your auto insurance to a Washington policy",
+      category: "vehicle",
+      priority: "medium",
+      description:
+        "Washington requires drivers to be able to show financial responsibility for their vehicle, and a driver cited without it can be fined.",
+      steps: [
+        "Tell your insurer your move date and Washington garaging address.",
+        "Ask the insurer for a card or proof of coverage that you can carry in the vehicle.",
+        "Keep proof of insurance for your registration visit.",
+      ],
+      documents: ["Proof of Washington auto insurance"],
+      financial: { kind: "fee", note: "Your premium is re-rated for the new address." },
+    },
+    source_name: "RCW 46.30.020",
+    source_url: "https://app.leg.wa.gov/RCW/default.aspx?cite=46.30.020",
+    last_verified: CHECKED,
+    verified: true,
+  },
+  {
+    rule_id: "WA-VEH-REG",
+    state: "WA",
+    conditions: [{ fact: "has_vehicle", op: "eq", value: true }],
+    depends_on: ["WA-VEH-INSURANCE"],
+    task_template: {
+      title: "Register your vehicle in Washington",
+      category: "vehicle",
+      priority: "high",
+      description:
+        "New Washington residents must register their vehicles within thirty days of becoming residents. Becoming a registered voter or declaring residency to get a state license counts as evidence of residency.",
+      steps: [
+        "Get Washington auto insurance.",
+        "Apply through a county auditor or vehicle licensing office with your out-of-state title and registration.",
+        "Pay the registration fees and surrender your old plates if asked.",
+      ],
+      documents: ["Out-of-state title and registration", "Proof of Washington auto insurance", "Vehicle identification number"],
+      deadline: { label: "Within 30 days of becoming a Washington resident", daysAfterMove: 30 },
+      financial: { kind: "penalty", note: "Fees are due. Late registration can add penalties." },
+    },
+    source_name: "RCW 46.16A.140",
+    source_url: "https://app.leg.wa.gov/RCW/default.aspx?cite=46.16A.140",
+    last_verified: CHECKED,
+    verified: true,
+  },
+  {
+    rule_id: "WA-VEH-DL",
+    state: "WA",
+    conditions: [{ fact: "drives", op: "eq", value: true }],
+    task_template: {
+      title: "Get a Washington driver license",
+      category: "vehicle",
+      priority: "high",
+      description:
+        "New Washington residents must get a Washington driver license within thirty days of becoming residents, and must surrender any licenses issued by another jurisdiction.",
+      steps: [
+        "Start the application with the Washington Department of Licensing.",
+        "Visit a licensing office with your identity and residency documents.",
+        "Surrender your out-of-state license.",
+      ],
+      documents: ["Current out-of-state driver license", "Proof of identity", "Proof of Washington residency"],
+      deadline: { label: "Within 30 days of becoming a Washington resident", daysAfterMove: 30 },
+      financial: { kind: "fee", note: "A license fee is charged." },
+    },
+    source_name: "RCW 46.20.021",
+    source_url: "https://app.leg.wa.gov/RCW/default.aspx?cite=46.20.021",
+    last_verified: CHECKED,
+    verified: true,
+  },
+  {
+    rule_id: "NY-VEH-REG",
+    state: "NY",
+    conditions: [{ fact: "has_vehicle", op: "eq", value: true }],
+    task_template: {
+      title: "Register your vehicle in New York",
+      category: "vehicle",
+      priority: "high",
+      description:
+        "The New York DMV requires you to register a vehicle here within 30 days of becoming a resident. Registration needs proof of ownership, insurance and that sales taxes were paid. Keep your old insurance in place until the new registration is done.",
+      steps: [
+        "Get New York auto insurance.",
+        "Complete the Vehicle Registration/Title Application (MV-82).",
+        "Bring proof of ownership, insurance and identity to a DMV office.",
+      ],
+      documents: ["Vehicle Registration/Title Application (MV-82)", "Proof of ownership", "Proof of New York insurance", "Proof of identity"],
+      deadline: { label: "Within 30 days of becoming a New York resident", daysAfterMove: 30 },
+      financial: { kind: "penalty", note: "Registration fees and sales tax are due. An unregistered vehicle can lead to suspension." },
+    },
+    source_name: "New York DMV — Register an out-of-state vehicle",
+    source_url: "https://dmv.ny.gov/registration/register-an-out-of-state-vehicle",
+    last_verified: CHECKED,
+    verified: true,
+  },
+  {
+    rule_id: "NY-VEH-DL",
+    state: "NY",
+    conditions: [{ fact: "drives", op: "eq", value: true }],
+    task_template: {
+      title: "Get a New York driver license",
+      category: "vehicle",
+      priority: "high",
+      description:
+        "If you become a New York resident, the DMV says you must get a New York driver license within 30 days.",
+      steps: [
+        "Check what documents the DMV needs for your situation.",
+        "Visit a DMV office with proof of name, date of birth and Social Security.",
+        "Turn in your out-of-state license and pass the vision test.",
+      ],
+      documents: ["Current out-of-state driver license", "Proof of identity and date of birth", "Social Security card"],
+      deadline: { label: "Within 30 days of becoming a New York resident", daysAfterMove: 30 },
+      financial: { kind: "fee", note: "The DMV charges a license fee." },
+    },
+    source_name: "New York DMV — Driving in New York State",
+    source_url: "https://dmv.ny.gov/driver-license/driving-in-new-york-state",
+    last_verified: CHECKED,
+    verified: true,
+  },
+  {
+    rule_id: "NY-TAX-IT203",
+    state: "NY",
+    conditions: [{ fact: "moving_between_states", op: "eq", value: true }],
+    task_template: {
+      title: "Plan for a New York part-year resident return",
+      category: "taxes",
+      priority: "medium",
+      description:
+        "If you move into New York during the tax year, the Tax Department says you file Form IT-203, the nonresident and part-year resident return.",
+      steps: [
+        "Write down the exact date you became a New York resident.",
+        "Keep pay records split by before and after the move.",
+        "At tax time, file Form IT-203 for the year of the move.",
+      ],
+      documents: ["Form IT-203", "W-2s and 1099s for the full year", "Proof of your move date"],
+      deadline: { label: "Filed with your state return for the year of the move" },
+      financial: { kind: "tax", note: "New York taxes income you receive as a New York resident, and New York-source income before." },
+    },
+    source_name: "New York Tax Department — IT-203 information",
+    source_url: "https://www.tax.ny.gov/pit/ads/it203_information.htm",
+    last_verified: CHECKED,
+    verified: true,
   },
 
   // ─────────────────── Family & education ───────────────────
