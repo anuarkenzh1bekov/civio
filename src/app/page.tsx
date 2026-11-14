@@ -5,6 +5,7 @@ import { BudgetProjection } from "@/components/BudgetProjection";
 import { CityBackdrop } from "@/components/landing/CityBackdrop";
 import { LiveEngine } from "@/components/landing/LiveEngine";
 import { Logo } from "@/components/Logo";
+import { ThemeToggle } from "@/components/ThemeMode";
 import { compareBudget, dollars } from "@/lib/budget";
 import { DEMO_PROFILE } from "@/lib/demo";
 import { RULES } from "@/lib/rules/data";
@@ -28,7 +29,7 @@ export default function LandingPage() {
   return (
     <main className={styles.home}>
       <div className={styles.cover}>
-        <header className={styles.header}>
+        <header className={`${styles.header} sticky-glass-header`}>
           <div className={styles.headerInner}>
             <Logo />
             <nav aria-label="Primary">
@@ -36,9 +37,12 @@ export default function LandingPage() {
               <a href="#checklist">Checklist</a>
               <a href="#sources">Sources</a>
             </nav>
-            <Link href="/dashboard" className={styles.planLink}>
-              My plan <ArrowUpRight size={15} aria-hidden="true" />
-            </Link>
+            <div className={styles.headerActions}>
+              <ThemeToggle />
+              <Link href="/dashboard" className={styles.planLink}>
+                My plan <ArrowUpRight size={15} aria-hidden="true" />
+              </Link>
+            </div>
           </div>
         </header>
 

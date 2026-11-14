@@ -5,6 +5,8 @@
   color: var(--color-ink);
 }
 
+.header { --header-surface: var(--color-canvas); }
+
 .cover {
   background: var(--color-canvas);
 }
@@ -43,6 +45,13 @@
   font-weight: 550;
 }
 
+.headerActions {
+  justify-self: end;
+  display: flex;
+  align-items: center;
+  gap: .6rem;
+}
+
 .scene {
   position: relative;
   isolation: isolate;
@@ -70,7 +79,7 @@
   content: "";
   position: absolute;
   inset: 0;
-  background: linear-gradient(90deg, rgb(241 241 240 / .94), rgb(241 241 240 / .83) 35%, rgb(241 241 240 / .54) 70%, rgb(241 241 240 / .43));
+  background: linear-gradient(90deg, color-mix(in srgb, var(--color-canvas) 94%, transparent), color-mix(in srgb, var(--color-canvas) 83%, transparent) 35%, color-mix(in srgb, var(--color-canvas) 54%, transparent) 70%, color-mix(in srgb, var(--color-canvas) 43%, transparent));
 }
 
 .motionControl {
@@ -94,10 +103,10 @@
   inset: .32rem;
   border: 1px solid rgb(32 33 36 / .22);
   border-radius: inherit;
-  background: rgb(241 241 240 / .9);
+  background: color-mix(in srgb, var(--color-card) 90%, transparent);
 }
 
-.motionControl:hover::before, .motionControl:focus-visible::before { background: white; }
+.motionControl:hover::before, .motionControl:focus-visible::before { background: var(--color-card); }
 
 .sceneInner {
   display: flex;
@@ -147,7 +156,7 @@
   padding: .85rem 1.15rem;
   background: var(--color-brand);
   border-radius: 5px;
-  color: white;
+  color: var(--color-on-brand);
 }
 
 .primary:hover { background: var(--color-brand-hover); }
@@ -290,7 +299,7 @@
 
 @media (max-width: 580px) {
   .backdrop::after {
-    background: linear-gradient(180deg, rgb(241 241 240 / .94), rgb(241 241 240 / .87) 39%, rgb(241 241 240 / .54) 73%, rgb(241 241 240 / .52));
+    background: linear-gradient(180deg, color-mix(in srgb, var(--color-canvas) 94%, transparent), color-mix(in srgb, var(--color-canvas) 87%, transparent) 39%, color-mix(in srgb, var(--color-canvas) 54%, transparent) 73%, color-mix(in srgb, var(--color-canvas) 52%, transparent));
   }
   .motionControl { bottom: .45rem; right: .65rem; }
   .headerInner { display: flex; justify-content: space-between; }

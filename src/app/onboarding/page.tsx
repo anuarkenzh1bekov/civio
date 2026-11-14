@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 import { useId, useMemo, useState } from "react";
 import { BudgetFields, BudgetSummary } from "@/components/MoveBudget";
 import { Logo } from "@/components/Logo";
+import { ThemeToggle, useThemeMode } from "@/components/ThemeMode";
 import { formatDate } from "@/lib/format";
 import { RULES } from "@/lib/rules/data";
 import { generatePlan } from "@/lib/rules/engine";
@@ -205,6 +206,7 @@ const show = (value: string | undefined) => (value ? (TEXT[value] ?? value) : "S
 const yesNo = (value: boolean | undefined) => (value === undefined ? "Skipped" : value ? "Yes" : "No");
 
 function Wizard({ initial, onDone }: { initial: Profile; onDone: (profile: Profile) => void }) {
+  const { mode } = useThemeMode();
   const [step, setStep] = useState(0);
   const [p, setP] = useState<Profile>(initial);
   const [errors, setErrors] = useState<{ currentState?: string; destinationState?: string }>({});
@@ -227,10 +229,13 @@ function Wizard({ initial, onDone }: { initial: Profile; onDone: (profile: Profi
   };
 
   return (
-    <Theme theme={neutralTheme} mode="dark">
+    <Theme theme={neutralTheme} mode={mode}>
     <div className="atlas-wizard on-stage min-h-dvh bg-stage text-on-stage">
       <div className="mx-auto max-w-5xl px-4 py-5 sm:px-8 lg:py-8">
-        <Logo tone="dark" />
+        <div className="flex items-center justify-between gap-4">
+          <Logo tone="dark" />
+          <ThemeToggle />
+        </div>
         <div className="mt-8 grid items-start gap-5 lg:grid-cols-[minmax(0,1fr)_17rem]">
           <div className="rounded-panel border border-stage-line bg-stage-raised p-5 sm:p-8">
             <div className="flex items-center justify-between gap-4">
@@ -558,7 +563,7 @@ export default function OnboardingPage() {
   const { ready, profile, saveProfile } = useCivio();
 
   if (!ready) {
-    return <div className="min-h-dvh bg-stage" aria-busy="true" />;
+    return <div className="min-h-dvh bg-canvas" aria-busy="true" />;
   }
 
   return (

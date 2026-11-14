@@ -95,6 +95,53 @@
   --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
 }
 
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --color-canvas: #111315;
+  --color-panel: #1d2024;
+  --color-panel-label: #c7cacf;
+  --color-card: #191c20;
+  --color-line: #373b42;
+  --color-line-strong: #565c65;
+  --color-ink: #f0f1f2;
+  --color-ink-muted: #b4b8bf;
+  --color-ink-faint: #969ca4;
+
+  --color-brand: #e8eaed;
+  --color-brand-hover: #ffffff;
+  --color-brand-ink: #e8eaed;
+  --color-brand-soft: #292d32;
+  --color-brand-tint: #555b64;
+  --color-on-brand: #17191c;
+
+  --color-brand-bright: #c6e4df;
+  --color-ok: #7bd6a0;
+  --color-ok-soft: #173629;
+  --color-warn: #ffd18a;
+  --color-warn-soft: #3b2b14;
+  --color-risk: #ffaaa5;
+  --color-risk-soft: #3c2023;
+  --color-risk-bright: #ffb8b4;
+
+  --color-mod-taxes: #e8eaed;
+  --color-mod-health: #b4b8bf;
+  --color-mod-vehicle: #858b94;
+  --color-mod-family: #626973;
+
+  --shadow-card: 0 1px 0 rgb(255 255 255 / 0.03), 0 12px 32px -18px rgb(0 0 0 / 0.65);
+  --shadow-soft: 0 1px 2px rgb(255 255 255 / 0.02), 0 18px 40px -24px rgb(0 0 0 / 0.6);
+  --shadow-lift: 0 2px 0 rgb(255 255 255 / 0.02), 0 28px 60px -28px rgb(0 0 0 / 0.8);
+}
+
+:root[data-theme="light"] .atlas-wizard {
+  --color-stage: var(--color-canvas);
+  --color-stage-raised: var(--color-card);
+  --color-stage-line: var(--color-line);
+  --color-on-stage: var(--color-ink);
+  --color-on-stage-muted: var(--color-ink-muted);
+  --color-brand-bright: var(--color-brand);
+}
+
 @layer base {
   html,
   body {
@@ -107,6 +154,30 @@
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
+  }
+
+  .theme-toggle {
+    display: inline-grid;
+    flex: 0 0 auto;
+    place-items: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    border: 1px solid var(--color-line);
+    border-radius: 999px;
+    background: var(--color-card);
+    color: var(--color-ink);
+    transition: background-color 160ms var(--ease-out), border-color 160ms var(--ease-out);
+  }
+
+  .theme-toggle svg {
+    width: 1.15rem;
+    height: 1.15rem;
+    stroke-width: 1.75;
+  }
+
+  .theme-toggle:hover {
+    background: var(--color-panel);
+    border-color: var(--color-line-strong);
   }
 
   /* Astryx's reset colors headings and paragraphs with its theme text color; Civio's inherit. */
@@ -164,6 +235,65 @@
 
   button:disabled {
     cursor: not-allowed;
+  }
+}
+
+@keyframes theme-fade-out {
+  to { opacity: 0; }
+}
+
+@keyframes theme-fade-in {
+  from { opacity: 0; }
+}
+
+@keyframes sticky-header-surface {
+  from { background-color: var(--header-surface, var(--color-card)); }
+  to { background-color: color-mix(in srgb, var(--header-surface, var(--color-card)) 90%, transparent); }
+}
+
+.sticky-glass-header {
+  --header-surface: var(--color-card);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background-color: var(--header-surface);
+  backdrop-filter: blur(10px);
+}
+
+@supports (animation-timeline: scroll()) {
+  .sticky-glass-header {
+    animation-name: sticky-header-surface;
+    animation-duration: auto;
+    animation-timing-function: linear;
+    animation-fill-mode: both;
+    animation-timeline: scroll(root block);
+    animation-range: 0px 72px;
+  }
+}
+
+::view-transition-group(root) {
+  animation-duration: 140ms;
+}
+
+::view-transition-old(root) {
+  animation: theme-fade-out 140ms ease-out both;
+}
+
+::view-transition-new(root) {
+  animation: theme-fade-in 140ms ease-in both;
+}
+
+:root.theme-view-transition *,
+:root.theme-view-transition *::before,
+:root.theme-view-transition *::after {
+  transition: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(root),
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation-duration: 0ms;
   }
 }
 

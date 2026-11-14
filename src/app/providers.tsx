@@ -5,12 +5,22 @@ import { Theme } from "@astryxdesign/core/theme";
 import { ToastViewport } from "@astryxdesign/core/Toast";
 import { neutralTheme } from "@astryxdesign/theme-neutral/built";
 import Link from "next/link";
+import { ThemeModeProvider, useThemeMode } from "@/components/ThemeMode";
 
-/** Astryx theme, router-aware links and the toast layer for the whole app. */
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
-    // Civio's own surfaces are light or explicitly dark per screen, so the theme does not follow the OS.
-    <Theme theme={neutralTheme} mode="light">
+    <ThemeModeProvider>
+      <AppProviders>{children}</AppProviders>
+    </ThemeModeProvider>
+  );
+}
+
+/** Astryx theme, router-aware links and the toast layer for the whole app. */
+function AppProviders({ children }: { children: React.ReactNode }) {
+  const { mode } = useThemeMode();
+
+  return (
+    <Theme theme={neutralTheme} mode={mode}>
       <LinkProvider component={Link}>
         <ToastViewport position="bottomStart">{children}</ToastViewport>
       </LinkProvider>

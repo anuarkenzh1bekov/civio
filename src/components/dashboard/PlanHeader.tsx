@@ -4,6 +4,7 @@ import { LogOut, Search, UserRound } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { Logo } from "@/components/Logo";
+import { ThemeToggle } from "@/components/ThemeMode";
 
 const sections = [
   { id: "overview", label: "Overview" },
@@ -56,7 +57,7 @@ export function PlanHeader({ preview, onSearch }: { preview: boolean; onSearch: 
   const ProfileIcon = preview ? LogOut : UserRound;
 
   return (
-    <header className="plan-header" ref={headerRef}>
+    <header className="plan-header sticky-glass-header" ref={headerRef}>
       <div className="ledger-shell plan-header-inner">
         <Logo />
         <nav className="plan-sections" aria-label="Plan sections">
@@ -65,6 +66,7 @@ export function PlanHeader({ preview, onSearch }: { preview: boolean; onSearch: 
           ))}
         </nav>
         <div className="plan-tools">
+          <ThemeToggle />
           <button className="plan-search" type="button" onClick={onSearch} aria-label="Search tasks and actions" title="Search tasks and actions">
             <Search aria-hidden="true" />
           </button>
