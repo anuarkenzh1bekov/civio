@@ -60,7 +60,7 @@ export default function LandingPage() {
 
       {/* ── Hook ── */}
       <section className="px-3 sm:px-5">
-        <div className="stage-glow relative mx-auto max-w-[88rem] overflow-hidden rounded-shell text-on-stage">
+        <div className="on-stage stage-glow relative mx-auto max-w-[88rem] overflow-hidden rounded-shell text-on-stage">
           <div className="stage-beams pointer-events-none absolute inset-0" aria-hidden="true" />
           <div className="stage-dots pointer-events-none absolute inset-0" aria-hidden="true" />
 
@@ -117,7 +117,7 @@ export default function LandingPage() {
       {/* ── Whose rules these are ── */}
       <section aria-label="Sources" className="mx-auto max-w-6xl px-5 pt-12 sm:px-8">
         <p className="text-center text-sm text-ink-muted">Rules copied from the agencies that set them</p>
-        <ul className="mt-5 flex flex-wrap items-center justify-center gap-x-8 gap-y-3 text-[0.9375rem] font-medium text-ink-faint">
+        <ul className="mt-5 flex flex-wrap items-center justify-center gap-x-8 gap-y-3 text-[0.9375rem] font-medium text-ink-muted">
           {AGENCIES.map((agency) => (
             <li key={agency} className="whitespace-nowrap">
               {agency}
@@ -141,7 +141,7 @@ export default function LandingPage() {
               {STEPS.map((step) => (
                 <li key={step.n} className="border-t border-line pt-4">
                   <p className="flex items-baseline gap-3 font-semibold">
-                    <span className="font-mono text-sm text-ink-faint">{step.n}/</span>
+                    <span className="font-mono text-sm text-ink-muted">{step.n}/</span>
                     {step.title}
                   </p>
                   <p className="mt-1 pl-9 text-sm text-ink-muted">{step.body}</p>
@@ -329,7 +329,7 @@ export default function LandingPage() {
 
       {/* ── Close: the stage again ── */}
       <section className="px-3 py-24 sm:px-5 lg:py-32">
-        <div className="stage-glow relative mx-auto max-w-[88rem] overflow-hidden rounded-shell text-on-stage">
+        <div className="on-stage stage-glow relative mx-auto max-w-[88rem] overflow-hidden rounded-shell text-on-stage">
           <div className="stage-dots pointer-events-none absolute inset-0" aria-hidden="true" />
           <Reveal className="relative px-5 py-20 text-center sm:px-8 lg:py-28">
             <h2 data-reveal className={`mx-auto max-w-3xl ${H2}`}>

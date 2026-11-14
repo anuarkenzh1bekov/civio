@@ -63,7 +63,7 @@ Known limits:
 
 ## Stack
 
-Next.js 16 (App Router), React 19, TypeScript, Tailwind CSS 4, Astryx (`@astryxdesign/core` with the matcha theme), GSAP for landing reveals, lucide icons, Anthropic SDK, Vitest.
+Next.js 16 (App Router), React 19, TypeScript, Tailwind CSS 4, Astryx (`@astryxdesign/core` with the neutral theme, recolored to Civio's palette), GSAP for landing reveals, lucide icons, Anthropic SDK, Vitest.
 
 ### Where Astryx is used
 
