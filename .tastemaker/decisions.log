@@ -3,3 +3,5 @@
 2026-11-14 pending-review | dashboard | layout | sidebar + stats + dark priorities card + accordion task rows + assistant column
 2026-11-14 rejected | all | reference use | first pass used reference 1 only; user wants all five references visible
 2026-11-14 pending-review | all | reference use | revision 2: one reference per surface (hero=2, dark band=1, onboarding=3, dashboard body=4, dashboard chrome=5)
+2026-11-14 rejected | landing | hero | green CSS panel with uppercase headline, floating module pills, glass plan card and lower card band: user disliked it
+2026-11-14 pending-review | landing | hero | revision 3: dark stage with one light source and dot field, sentence-case headline with a serif italic accent word, two CTAs, real dashboard screenshot rising from the bottom

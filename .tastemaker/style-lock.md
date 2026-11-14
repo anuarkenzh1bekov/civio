@@ -51,3 +51,13 @@ The user rejected the first pass for leaning on reference 1 only. Each reference
 - Reference 4 → dashboard body: mist #F1EFF0 background, white 28px tiles, iridescent rose/lilac/sky/peach accents, donut by module, gradient progress bar.
 - Reference 5 → dashboard chrome: sidebar with plan switcher, search, module tree; folder cards per module; tasks as a table.
 Module tints: taxes rose, health moss, vehicle sky, family peach. Tints never carry text.
+
+## Revision 3 (2026-11-14): landing hero
+The user rejected the green hero and sent four more hero references (dark photographic stage, beige fintech, blue gradient with a pixel field). Common ground taken from them:
+- Nav sits on the page, outside the hero frame: logo, three text links, one ink button.
+- Hero is a dark rounded stage (`.hero-stage`): near-black olive, one light source top right, a lime dot field in the lower corners. Built in CSS; there is still no photograph.
+- Headline in sentence case, weight 400, with one word in Instrument Serif italic (`.serif-accent`). The same accent closes each section heading. This is the user's reference style and overrides the "no italic emphasis" default.
+- One white primary button and one outline button. No floating chips, no stat cards in the hero.
+- The hero visual is a real screenshot of the dashboard (`public/landing/dashboard.png`, re-capture after dashboard changes).
+- A row of agency names under the hero comes from the verified rules' sources.
+- The closing call to action reuses the stage.
