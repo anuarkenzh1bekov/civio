@@ -82,9 +82,11 @@ function Answer({ message }: { message: Message }) {
           <div className="skeleton h-3.5 w-8/12" />
         </div>
       ) : (
-        <Markdown density="compact" isStreaming={message.pending} sources={sources} headingLevelStart={3}>
-          {message.content}
-        </Markdown>
+        <div className="answer">
+          <Markdown density="compact" isStreaming={message.pending} sources={sources} headingLevelStart={3}>
+            {message.content}
+          </Markdown>
+        </div>
       )}
       {message.error && (
         <p role="alert" className="mt-2 rounded-xl bg-risk-soft px-3 py-2 text-sm text-risk">

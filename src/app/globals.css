@@ -567,3 +567,17 @@
     color: #000;
   }
 }
+
+/* Key facts in an assistant answer (deadlines, amounts, forms, sections): a soft, even plate behind the text.
+   Built from the ink color at low opacity, so it works in light and dark mode. */
+.answer strong,
+.answer b {
+  font-weight: 600;
+  color: var(--color-ink);
+  background: color-mix(in srgb, var(--color-ink) 9%, transparent);
+  border-radius: 0.3em;
+  padding: 0.04em 0.28em;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+}
+
