@@ -1,3 +1,5 @@
 2026-11-14 pending-review | landing+app | palette | warm paper + oxblood + moss, dark espresso sections, taken from the user's reference images
 2026-11-14 pending-review | landing | hero | split hero: two-tone headline left, dark plan card right, thin route lines behind
 2026-11-14 pending-review | dashboard | layout | sidebar + stats + dark priorities card + accordion task rows + assistant column
+2026-11-14 rejected | all | reference use | first pass used reference 1 only; user wants all five references visible
+2026-11-14 pending-review | all | reference use | revision 2: one reference per surface (hero=2, dark band=1, onboarding=3, dashboard body=4, dashboard chrome=5)

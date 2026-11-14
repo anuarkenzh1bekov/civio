@@ -42,3 +42,12 @@ Established: 2026-11-14. Source: five reference images from the user (warm finte
 ## Do not
 - No invented metrics, testimonials or savings claims.
 - No gradients, no emoji icons.
+
+## Revision 2 (2026-11-14): one reference per surface
+The user rejected the first pass for leaning on reference 1 only. Each reference now owns a surface:
+- Reference 2 → landing hero: green atmosphere panel (CSS, no photo), centered glass pill nav, uppercase headline, glass plan card, white cards on the lower band, "3 steps" section.
+- Reference 1 → dark espresso band with deadline bars, two-tone section headings, oxblood accents.
+- Reference 3 → onboarding: night #0F0D0D stage, stacked bordered cards, progress dots, lime primary button, option rows with a lime ring, "plan so far" card.
+- Reference 4 → dashboard body: mist #F1EFF0 background, white 28px tiles, iridescent rose/lilac/sky/peach accents, donut by module, gradient progress bar.
+- Reference 5 → dashboard chrome: sidebar with plan switcher, search, module tree; folder cards per module; tasks as a table.
+Module tints: taxes rose, health moss, vehicle sky, family peach. Tints never carry text.
