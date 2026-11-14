@@ -1,6 +1,6 @@
 # Civio
 
-Civio compares the financial impact of staying or moving between US states. Households enter current and expected monthly take-home income, housing, other living costs and one-time moving expenses. A separate checklist covers taxes, health insurance, vehicle paperwork and school enrollment.
+Civio compares the financial impact of staying or moving between US states. Households enter current and expected monthly take-home income, housing, other living costs and one-time moving expenses. A separate checklist covers taxes, health insurance, vehicle paperwork and school enrollment. The app includes light and dark themes and a dedicated page for comparing destination estimates.
 
 MVP scenario: moving from one state to another (demo: Texas → California).
 
@@ -21,10 +21,11 @@ The assistant works without any setup in "rules only" mode: it returns the match
 |---|---|
 | `/` | Landing page. The "Change one answer" block runs the real rule engine in the browser. |
 | `/onboarding` | Choose two different states and enter a budget. Open the plan immediately or continue with the household questions. |
-| `/dashboard` | Editable budget comparison, first-year difference, checklist, priorities and assistant. |
+| `/dashboard` | Editable budget comparison, first-year outlook, checklist, priorities, assistant and a link to destination comparison. |
 | `/dashboard?demo=1` | Explore an isolated Texas → California example with illustrative amounts. |
+| `/compare` | Compare up to three destinations, edit budget estimates, and view first-year outlooks. Results use entered figures, not state averages. |
 
-The profile and task progress are stored in the browser (`localStorage`). There is no account and no database yet.
+The profile, task progress and theme preference are stored in the browser (`localStorage`). There is no account and no database yet.
 
 The first-year estimate uses 12 months of change in cash left after spending, less one-time moving costs. A blank amount stays unknown. The monthly income target shows the take-home pay needed to maintain the current monthly balance. Budget fields stay in the browser when the assistant receives a shared profile.
 
