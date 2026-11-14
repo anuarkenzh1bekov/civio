@@ -82,12 +82,12 @@ export function ArrivalBanner({
   if (arrivedOn) {
     return (
       <div className="tile mt-6 flex flex-wrap items-center gap-x-4 gap-y-2 px-5 py-4">
-        <span className="grid size-9 shrink-0 place-items-center rounded-full bg-moss-wash text-moss">
+        <span className="grid size-9 shrink-0 place-items-center rounded-full bg-ok-soft text-ok">
           <MapPin className="size-4" aria-hidden="true" />
         </span>
         <p className="min-w-0 flex-1 text-sm">
           <span className="font-semibold">You arrived in {destination} on {formatDate(arrivedOn)}.</span>{" "}
-          <span className="text-muted">Deadlines now count from that date.</span>
+          <span className="text-ink-muted">Deadlines now count from that date.</span>
         </p>
         <button type="button" onClick={onUndo} className="btn btn-quiet">
           Undo
@@ -99,10 +99,10 @@ export function ArrivalBanner({
   if (state.kind === "arrived" && !dismissed) {
     const nearBorder = state.guess.candidates.length > 1;
     return (
-      <div className="iris relative mt-6 overflow-hidden rounded-panel p-5 shadow-soft" role="status">
-        <span className="absolute inset-0 bg-white/45" aria-hidden="true" />
+      <div className="bg-brand-soft ring-1 ring-brand-tint relative mt-6 overflow-hidden rounded-panel p-5 shadow-soft" role="status">
+        <span className="absolute inset-0 bg-card/45" aria-hidden="true" />
         <div className="relative flex flex-wrap items-center gap-x-4 gap-y-3">
-          <span className="grid size-10 shrink-0 place-items-center rounded-full bg-white/80">
+          <span className="grid size-10 shrink-0 place-items-center rounded-full bg-card/80">
             <MapPin className="size-5" aria-hidden="true" />
           </span>
           <div className="min-w-0 flex-1">
@@ -115,7 +115,7 @@ export function ArrivalBanner({
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
-            <button type="button" onClick={() => onArrived(localToday())} className="btn btn-ink">
+            <button type="button" onClick={() => onArrived(localToday())} className="btn btn-primary">
               Yes, I've arrived
             </button>
             <button type="button" onClick={() => setDismissed(true)} className="btn btn-quiet">
@@ -128,7 +128,7 @@ export function ArrivalBanner({
   }
 
   return (
-    <p className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted">
+    <p className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-ink-muted">
       <button
         type="button"
         onClick={() => {

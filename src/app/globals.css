@@ -1,66 +1,115 @@
-/* tastemaker · structure: long-scroll narrative · nav: inset pill bar · hero: split statement + plan card · footer: single line
-   mood: warm/premium · palette: extracted from reference images (paper #E7E4D9 / oxblood / moss), contrast matrix passed
-   critique: ShowTell 4 · Phil 4 · Hier 4 · Spec 5 · Restr 4 · Var 5 */
-@import "tailwindcss";
+/* tastemaker · structure: long-scroll narrative · nav: text links + one button · hero: dark stage + product screenshot · footer: single line
+   palette: "Harbor slate", generated in OKLCH. Neutral hue 215 (chroma 0.010) tinted toward the accent hue 205.
+   One accent ramp, one neutral ramp, three status pairs. Every text pair measured, lowest 4.71:1.
+   critique: ShowTell 4 · Phil 4 · Hier 4 · Spec 5 · Restr 5 · Var 4 */
+/* Layer order for Astryx + Tailwind (from the Astryx Next.js + Tailwind example):
+   Astryx reset lowest, Astryx components in the middle, Tailwind utilities on top. */
+@layer reset, theme, base, astryx-base, astryx-theme, components, utilities;
 
+@import "tailwindcss/theme.css" layer(theme);
+@import "tailwindcss/preflight.css" layer(base);
+@import "@astryxdesign/core/reset.css";
+@import "@astryxdesign/core/astryx.css";
+@import "@astryxdesign/theme-neutral/theme.css";
+@import "tailwindcss/utilities.css" layer(utilities);
+
+/* ── Primitives: named by hue, never used in components ── */
+:root {
+  /* Slate: neutral, hue 215. Steps follow Radix roles (1 page … 12 high-contrast text). */
+  --slate-1: #f6fbfd;
+  --slate-2: #f0f5f7;
+  --slate-3: #e9eeef;
+  --slate-4: #e0e6e7;
+  --slate-5: #d4dddf;
+  --slate-6: #c7cfd2;
+  --slate-7: #b4bcbe;
+  --slate-8: #98a0a2;
+  --slate-9: #7a8284;
+  --slate-10: #636a6c;
+  --slate-11: #555c5e;
+  --slate-12: #1a2122;
+  /* Slate, dark end: the stage behind the hero, the onboarding and the dark band. */
+  --slate-d1: #071114;
+  --slate-d2: #101a1d;
+  --slate-d3: #1b2629;
+  --slate-d4: #2c383b;
+
+  /* Harbor: the accent, hue 205. */
+  --harbor-1: #f3fcfd;
+  --harbor-2: #e9f8fa;
+  --harbor-3: #dbf2f4;
+  --harbor-4: #cdebef;
+  --harbor-5: #bbe3e8;
+  --harbor-6: #a6d8de;
+  --harbor-7: #89c7ce;
+  --harbor-8: #5aadb7;
+  --harbor-9: #0f919c;
+  --harbor-10: #016770;
+  --harbor-11: #00555c;
+  --harbor-12: #002528;
+
+  /* Status: background + text only, the two roles the app renders. */
+  --green-soft: #dff5e6;
+  --green-text: #0a693c;
+  --amber-soft: #feebd7;
+  --amber-text: #7a4d04;
+  --red-soft: #fee9e6;
+  --red-text: #9a2929;
+  --red-bright: #f2a49c; /* error text on the dark stage */
+}
+
+/* ── Semantic tokens: named by role. Components use only these. ── */
 @theme {
-  --color-paper: #ece8dd;
-  --color-surface: #f7f4ec;
-  --color-raised: #fffdf8;
-  --color-ink: #2a1513;
-  --color-muted: #6b5a52;
-  --color-taupe: #8a766a; /* large display text only (3.4:1 on paper) */
-  --color-line: #d5cfc0;
-  --color-oxblood: #6b2a27;
-  --color-oxblood-hover: #7c3531;
-  --color-oxblood-wash: #ebd9d3;
-  --color-on-oxblood: #f7f4ec;
-  --color-moss: #4b5229;
-  --color-moss-fill: #7d874d;
-  --color-moss-wash: #e3e6cf;
-  --color-amber: #7a4e0e;
-  --color-amber-wash: #f1e4c8;
-  --color-espresso: #2c1411;
-  --color-espresso-raised: #3a1d19;
-  --color-espresso-line: #54302b;
-  --color-on-dark: #ece8dd;
-  --color-dark-muted: #b5a598;
+  --color-canvas: var(--slate-2); /* page background */
+  --color-panel: var(--slate-3); /* subtle surface, tracks, chips */
+  --color-card: #ffffff; /* raised surface */
+  --color-line: var(--slate-5); /* decorative separator */
+  --color-line-strong: var(--slate-7); /* hover border */
+  --color-ink: var(--slate-12); /* body and headings */
+  --color-ink-muted: var(--slate-10); /* secondary text, 4.71:1 on panel */
+  --color-ink-faint: var(--slate-9); /* display-size second tone and decorative icons only */
 
-  /* Green hero (reference 2) */
-  --color-forest: #262b14;
-  --color-forest-mid: #4a5328;
-  --color-sage: #cdcdae;
-  --color-leaf: #c3d06a;
+  --color-brand: var(--harbor-10); /* solid fill, the one primary action */
+  --color-brand-hover: var(--harbor-11);
+  --color-brand-ink: var(--harbor-11); /* links and accent text */
+  --color-brand-soft: var(--harbor-3); /* selected and highlighted backgrounds */
+  --color-brand-tint: var(--harbor-5);
+  --color-on-brand: #ffffff;
 
-  /* Night stage for onboarding (reference 3) */
-  --color-night: #0f0d0d;
-  --color-night-raised: #191616;
-  --color-night-line: #2c2727;
-  --color-night-muted: #a39a98;
-  --color-lime: #c9dc6c;
-  --color-lime-deep: #9fb845;
-  --color-on-lime: #171212;
+  --color-stage: var(--slate-d1); /* dark surfaces */
+  --color-stage-raised: var(--slate-d2);
+  --color-stage-line: var(--slate-d4);
+  --color-on-stage: var(--slate-1);
+  --color-on-stage-muted: var(--slate-7);
+  --color-brand-bright: var(--harbor-8); /* accent on dark: selection rings, checks, bars */
 
-  /* App shell (references 4 and 5) */
-  --color-mist: #f1eff0;
-  --color-white: #ffffff;
-  --color-hair: #e4e0e1;
-  --color-rose: #eea9b4;
-  --color-lilac: #b9a9e6;
-  --color-sky: #9dc3ee;
-  --color-peach: #f4c39a;
+  --color-ok: var(--green-text);
+  --color-ok-soft: var(--green-soft);
+  --color-warn: var(--amber-text);
+  --color-warn-soft: var(--amber-soft);
+  --color-risk: var(--red-text); /* deadlines close, money at stake */
+  --color-risk-soft: var(--red-soft);
+  --color-risk-bright: var(--red-bright);
+
+  /* Four modules, told apart by lightness inside the one accent hue */
+  --color-mod-taxes: var(--harbor-10);
+  --color-mod-health: var(--harbor-8);
+  --color-mod-vehicle: var(--harbor-6);
+  --color-mod-family: var(--harbor-4);
 
   --font-display: var(--font-bricolage), ui-sans-serif, system-ui, sans-serif;
   --font-sans: var(--font-instrument), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+  --font-serif: var(--font-instrument-serif), Georgia, "Times New Roman", serif;
 
   --radius-card: 1.25rem;
   --radius-panel: 1.75rem;
   --radius-shell: 2rem;
 
-  --shadow-card: 0 1px 0 rgb(42 21 19 / 0.04), 0 12px 32px -18px rgb(42 21 19 / 0.22);
-  --shadow-soft: 0 1px 2px rgb(23 18 18 / 0.04), 0 18px 40px -24px rgb(23 18 18 / 0.18);
-  --shadow-lift: 0 2px 0 rgb(42 21 19 / 0.04), 0 28px 60px -28px rgb(42 21 19 / 0.38);
+  /* Shadows carry the slate hue so they read as part of the surface, not grey smudges. */
+  --shadow-card: 0 1px 0 rgb(7 17 20 / 0.04), 0 12px 32px -18px rgb(7 17 20 / 0.2);
+  --shadow-soft: 0 1px 2px rgb(7 17 20 / 0.04), 0 18px 40px -24px rgb(7 17 20 / 0.16);
+  --shadow-lift: 0 2px 0 rgb(7 17 20 / 0.04), 0 28px 60px -28px rgb(7 17 20 / 0.34);
 
   --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
 }
@@ -72,11 +121,23 @@
   }
 
   body {
-    background: var(--color-paper);
+    background: var(--color-canvas);
     color: var(--color-ink);
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
+  }
+
+  /* Astryx's reset colors headings and paragraphs with its theme text color; Civio's inherit. */
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6,
+  p,
+  small {
+    color: inherit;
   }
 
   h1,
@@ -94,18 +155,18 @@
 
   /* The ring shows instantly: keyboard users must never wait for it. */
   :focus-visible {
-    outline: 2px solid var(--color-oxblood);
+    outline: 2px solid var(--color-brand);
     outline-offset: 2px;
     border-radius: 6px;
   }
 
-  .on-dark :focus-visible {
-    outline-color: var(--color-on-dark);
+  .on-stage :focus-visible {
+    outline-color: var(--color-brand-bright);
   }
 
   ::selection {
-    background: var(--color-oxblood);
-    color: var(--color-on-oxblood);
+    background: var(--color-brand);
+    color: var(--color-on-brand);
   }
 
   button,
@@ -152,158 +213,119 @@
     opacity: 0.45;
   }
 
+  /* The one filled action of a light view */
   .btn-primary {
-    background: var(--color-oxblood);
-    color: var(--color-on-oxblood);
+    background: var(--color-brand);
+    color: var(--color-on-brand);
   }
 
   .btn-quiet {
-    background: var(--color-raised);
+    background: var(--color-card);
     color: var(--color-ink);
     border: 1px solid var(--color-line);
   }
 
-  .btn-on-dark {
-    background: var(--color-on-dark);
-    color: var(--color-espresso);
+  /* The one filled action of a dark view */
+  .btn-stage {
+    background: var(--color-on-stage);
+    color: var(--color-stage);
   }
 
-  .btn-ghost-dark {
-    color: var(--color-on-dark);
-    border: 1px solid var(--color-espresso-line);
+  .btn-stage-quiet {
+    color: var(--color-on-stage);
+    border: 1px solid var(--color-stage-line);
   }
 
   @media (hover: hover) and (pointer: fine) {
     .btn-primary:hover:not(:disabled) {
-      background: var(--color-oxblood-hover);
+      background: var(--color-brand-hover);
     }
     .btn-quiet:hover:not(:disabled) {
-      border-color: var(--color-taupe);
+      border-color: var(--color-line-strong);
     }
-    .btn-on-dark:hover:not(:disabled) {
-      background: var(--color-raised);
+    .btn-stage:hover:not(:disabled) {
+      background: var(--color-card);
     }
-    .btn-ghost-dark:hover:not(:disabled) {
-      border-color: var(--color-dark-muted);
-    }
-    .btn-night:hover:not(:disabled) {
-      color: var(--color-white);
+    .btn-stage-quiet:hover:not(:disabled) {
+      border-color: var(--color-on-stage-muted);
     }
   }
 
   .card {
-    background: var(--color-raised);
+    background: var(--color-card);
     border: 1px solid var(--color-line);
     border-radius: var(--radius-card);
     box-shadow: var(--shadow-card);
   }
 
-  .field {
-    width: 100%;
-    min-height: 3rem;
-    padding: 0 0.875rem;
-    border-radius: 0.875rem;
-    border: 1px solid var(--color-espresso-line);
-    background: var(--color-espresso-raised);
-    color: var(--color-on-dark);
-    font-size: 1rem; /* 16px keeps iOS from zooming the page on focus */
-    transition: border-color 160ms var(--ease-out);
-  }
-
-  .field::placeholder {
-    color: var(--color-dark-muted);
-    opacity: 0.7;
-  }
-
-  .field:focus-visible {
-    outline: 2px solid var(--color-on-dark);
-    outline-offset: 1px;
-    border-radius: 0.875rem;
-  }
-
-  /* Soft white card of the app shell */
   .tile {
-    background: var(--color-white);
+    background: var(--color-card);
     border-radius: var(--radius-panel);
     box-shadow: var(--shadow-soft);
   }
 
-  .btn-lime {
-    background: linear-gradient(180deg, var(--color-lime), var(--color-lime-deep));
-    color: var(--color-on-lime);
-  }
-
-  .btn-night {
-    background: var(--color-night-raised);
-    color: var(--color-night-muted);
-    border: 1px solid var(--color-night-line);
-  }
-
-  .btn-ink {
-    background: var(--color-ink);
-    color: var(--color-white);
-  }
-
-  .night-field {
+  .stage-field {
     width: 100%;
     min-height: 3rem;
     padding: 0 0.875rem;
     border-radius: 0.875rem;
-    border: 1px solid var(--color-night-line);
-    background: var(--color-night);
-    color: var(--color-white);
-    font-size: 1rem;
+    border: 1px solid var(--color-stage-line);
+    background: var(--color-stage);
+    color: var(--color-on-stage);
+    font-size: 1rem; /* 16px keeps iOS from zooming the page on focus */
     transition: border-color 160ms var(--ease-out);
   }
 
-  .night-field::placeholder {
-    color: var(--color-night-muted);
+  .stage-field::placeholder {
+    color: var(--color-on-stage-muted);
     opacity: 0.7;
   }
 
-  .night-field:focus-visible {
-    outline: 2px solid var(--color-lime);
+  .stage-field:focus-visible {
+    outline: 2px solid var(--color-brand-bright);
     outline-offset: 1px;
     border-radius: 0.875rem;
   }
 
-  .on-night :focus-visible {
-    outline-color: var(--color-lime);
-  }
-
-  /* Green hero atmosphere: light from the top left, moss below. Built in CSS, no photograph. */
-  .hero-green {
+  /* Dark surface with one light source: the hero, the closing section and the next-up card. */
+  .stage-glow {
     background:
-      radial-gradient(60% 55% at 18% 0%, rgb(232 236 190 / 0.55), transparent 62%),
-      radial-gradient(45% 60% at 88% 12%, rgb(195 208 106 / 0.28), transparent 60%),
-      radial-gradient(70% 55% at 50% 108%, rgb(38 43 20 / 0.92), transparent 70%),
-      radial-gradient(40% 45% at 8% 92%, rgb(74 83 40 / 0.9), transparent 70%),
-      linear-gradient(170deg, #9aa468 0%, #6d7841 42%, #3a421f 100%);
+      radial-gradient(55% 65% at 80% -10%, rgb(15 145 156 / 0.38), transparent 62%),
+      radial-gradient(40% 50% at 8% 0%, rgb(0 85 92 / 0.32), transparent 66%),
+      radial-gradient(80% 60% at 50% 120%, rgb(27 38 41 / 0.9), transparent 70%),
+      var(--color-stage);
   }
 
-  .hero-rays {
-    background: repeating-linear-gradient(
-      112deg,
-      rgb(255 255 255 / 0.07) 0 6%,
-      transparent 6% 15%
+  /* Soft beams falling from the light source */
+  .stage-beams {
+    background: conic-gradient(
+      from 196deg at 80% -12%,
+      transparent 0deg,
+      rgb(246 251 253 / 0.09) 9deg,
+      transparent 17deg,
+      rgb(246 251 253 / 0.06) 27deg,
+      transparent 36deg,
+      rgb(246 251 253 / 0.04) 47deg,
+      transparent 58deg
     );
-    mask-image: linear-gradient(180deg, black, transparent 72%);
+    filter: blur(18px);
   }
 
-  .glass {
-    background: rgb(255 255 255 / 0.14);
-    border: 1px solid rgb(255 255 255 / 0.22);
-    backdrop-filter: blur(14px);
-    -webkit-backdrop-filter: blur(14px);
+  /* Dot field that gathers in the lower corners and thins toward the center */
+  .stage-dots {
+    background-image: radial-gradient(rgb(90 173 183 / 0.5) 1.2px, transparent 1.6px);
+    background-size: 18px 18px;
+    mask-image:
+      radial-gradient(48% 62% at 0% 100%, black, transparent 72%),
+      radial-gradient(48% 62% at 100% 100%, black, transparent 72%);
+    mask-composite: add;
   }
 
-  /* Iridescent blob used on the overview and deadline cards (reference 4) */
-  .iris {
-    background:
-      radial-gradient(60% 60% at 30% 30%, var(--color-rose), transparent 70%),
-      radial-gradient(55% 55% at 75% 35%, var(--color-lilac), transparent 70%),
-      radial-gradient(60% 60% at 55% 80%, var(--color-sky), transparent 70%),
-      radial-gradient(50% 50% at 20% 85%, var(--color-peach), transparent 70%);
+  .serif-accent {
+    font-family: var(--font-serif);
+    font-style: italic;
+    font-weight: 400;
+    letter-spacing: -0.01em;
   }
 
   .mono-label {
@@ -377,6 +399,37 @@
   .btn:active:not(:disabled) {
     transform: none;
   }
+}
+
+/* ── Astryx integration ──
+   Unlayered on purpose: these must win over the theme's own layer.
+   Astryx components take Civio's typefaces and the Harbor palette; the theme wrapper does not recolor Civio's own text.
+   light-dark() follows the mode passed to <Theme>: light in the app, dark in the onboarding. */
+[data-astryx-theme] {
+  --font-family-body: var(--font-sans);
+  --font-family-heading: var(--font-display);
+  --font-family-code: var(--font-mono);
+
+  --color-accent: light-dark(var(--harbor-10), var(--harbor-8));
+  --color-accent-muted: light-dark(var(--harbor-4), var(--slate-d4));
+  --color-text-accent: light-dark(var(--harbor-11), var(--harbor-8));
+  --color-icon-accent: light-dark(var(--harbor-11), var(--harbor-8));
+  --color-on-accent: light-dark(#ffffff, var(--slate-d1));
+  --focus-outline-color: light-dark(var(--harbor-10), var(--harbor-8));
+
+  --color-text-primary: light-dark(var(--slate-12), var(--slate-1));
+  --color-text-secondary: light-dark(var(--slate-10), var(--slate-7));
+  --color-background-body: light-dark(var(--slate-2), var(--slate-d1));
+  --color-background-surface: light-dark(#ffffff, var(--slate-d2));
+  --color-background-card: light-dark(#ffffff, var(--slate-d2));
+  --color-background-popover: light-dark(#ffffff, var(--slate-d2));
+  --color-border: light-dark(var(--slate-5), var(--slate-d4));
+
+  /* Controls match Civio's own 48px fields and buttons */
+  --size-element-lg: 3rem;
+
+  color: inherit;
+  font-family: var(--font-sans);
 }
 
 /* Printing from the documents page puts only the letter on paper. */

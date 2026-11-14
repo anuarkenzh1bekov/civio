@@ -22,9 +22,9 @@ export function CategoryIcon({ category, className = "size-4" }: { category: Cat
 }
 
 const STATUS_STYLE: Record<TaskStatus, string> = {
-  pending: "bg-surface text-muted border-line",
-  needs_verification: "bg-amber-wash text-amber border-transparent",
-  done: "bg-moss-wash text-moss border-transparent",
+  pending: "bg-panel text-ink-muted border-line",
+  needs_verification: "bg-warn-soft text-warn border-transparent",
+  done: "bg-ok-soft text-ok border-transparent",
 };
 
 const STATUS_ICON: Record<TaskStatus, LucideIcon> = {
@@ -48,7 +48,7 @@ export function StatusBadge({ status }: { status: TaskStatus }) {
 export function PriorityBadge({ priority }: { priority: Priority }) {
   if (priority !== "high") return null;
   return (
-    <span className="inline-flex items-center whitespace-nowrap rounded-full bg-oxblood-wash px-2.5 py-1 text-xs font-semibold text-oxblood">
+    <span className="inline-flex items-center whitespace-nowrap rounded-full bg-risk-soft px-2.5 py-1 text-xs font-semibold text-risk">
       High
     </span>
   );

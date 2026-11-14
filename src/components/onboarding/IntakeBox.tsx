@@ -73,11 +73,11 @@ export function IntakeBox({ onRead }: { onRead: (patch: Partial<Profile>, result
   };
 
   return (
-    <div className="rounded-2xl border border-night-line bg-night p-4 sm:p-5">
+    <div className="rounded-2xl border border-stage-line bg-stage p-4 sm:p-5">
       <label htmlFor={id} className="flex items-center gap-2 font-medium">
-        <Sparkles className="size-4 text-lime" aria-hidden="true" /> Describe your move in your own words
+        <Sparkles className="size-4 text-brand-bright" aria-hidden="true" /> Describe your move in your own words
       </label>
-      <p className="mt-1 text-sm text-night-muted">
+      <p className="mt-1 text-sm text-on-stage-muted">
         Any language. You check every answer before the plan is built.
       </p>
       <textarea
@@ -93,12 +93,12 @@ export function IntakeBox({ onRead }: { onRead: (patch: Partial<Profile>, result
           }
         }}
         placeholder="e.g. Moving from Austin to San Diego on January 1. I have a car and insurance through my employer…"
-        className="night-field mt-3 h-auto resize-y py-3"
+        className="stage-field mt-3 h-auto resize-y py-3"
       />
 
       {image && (
-        <p className="mt-3 inline-flex max-w-full items-center gap-2 rounded-full border border-night-line px-3 py-1.5 text-sm">
-          <ImagePlus className="size-4 shrink-0 text-lime" aria-hidden="true" />
+        <p className="mt-3 inline-flex max-w-full items-center gap-2 rounded-full border border-stage-line px-3 py-1.5 text-sm">
+          <ImagePlus className="size-4 shrink-0 text-brand-bright" aria-hidden="true" />
           <span className="truncate">{image.name}</span>
           <button type="button" onClick={() => setImage(null)} aria-label="Remove photo" className="grid size-6 place-items-center">
             <X className="size-3.5" aria-hidden="true" />
@@ -107,11 +107,11 @@ export function IntakeBox({ onRead }: { onRead: (patch: Partial<Profile>, result
       )}
 
       <div className="mt-3 flex flex-wrap items-center gap-2">
-        <button type="button" onClick={() => void submit()} disabled={busy || (text.trim() === "" && !image)} className="btn btn-lime">
+        <button type="button" onClick={() => void submit()} disabled={busy || (text.trim() === "" && !image)} className="btn btn-stage">
           {busy ? <LoaderCircle className="size-4 animate-spin" aria-hidden="true" /> : <Sparkles className="size-4" aria-hidden="true" />}
           {busy ? "Reading…" : "Fill in my answers"}
         </button>
-        <button type="button" onClick={() => fileRef.current?.click()} disabled={busy} className="btn btn-night">
+        <button type="button" onClick={() => fileRef.current?.click()} disabled={busy} className="btn btn-stage-quiet">
           <ImagePlus className="size-4" aria-hidden="true" /> Add a photo
         </button>
         <input
@@ -126,11 +126,11 @@ export function IntakeBox({ onRead }: { onRead: (patch: Partial<Profile>, result
             e.target.value = "";
           }}
         />
-        <span className="text-xs text-night-muted">License, insurance card or lease. The photo is read once and not stored.</span>
+        <span className="text-xs text-on-stage-muted">License, insurance card or lease. The photo is read once and not stored.</span>
       </div>
 
       {error && (
-        <p role="alert" className="mt-3 text-sm text-lime">
+        <p role="alert" className="mt-3 text-sm text-brand-bright">
           {error}
         </p>
       )}

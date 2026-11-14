@@ -53,8 +53,8 @@ export function LiveEngine() {
 
   return (
     <div className="grid gap-6 lg:grid-cols-[minmax(0,20rem)_minmax(0,1fr)] lg:gap-10">
-      <div className="rounded-panel border border-line bg-raised p-6 shadow-card">
-        <p className="mono-label text-muted">The change</p>
+      <div className="rounded-panel border border-line bg-card p-6 shadow-card">
+        <p className="mono-label text-ink-muted">The change</p>
         <p className="mt-3 font-display text-2xl font-semibold tracking-tight">Moving to</p>
         <div className="mt-3 flex flex-wrap gap-2" role="group" aria-label="Destination state">
           {DESTINATIONS.map((d) => {
@@ -66,7 +66,7 @@ export function LiveEngine() {
                 aria-pressed={active}
                 onClick={() => setProfile((p) => ({ ...p, destinationState: d.code }))}
                 className={`min-h-11 rounded-full border px-4 text-sm font-semibold transition-colors duration-150 ${
-                  active ? "border-oxblood bg-oxblood text-on-oxblood" : "border-line bg-surface text-ink"
+                  active ? "border-brand bg-brand text-on-brand" : "border-line bg-panel text-ink"
                 }`}
               >
                 {d.label}
@@ -75,7 +75,7 @@ export function LiveEngine() {
           })}
         </div>
 
-        <p className="mono-label mt-8 text-muted">About the household</p>
+        <p className="mono-label mt-8 text-ink-muted">About the household</p>
         <div className="mt-3 grid gap-2">
           {TOGGLES.map((t) => {
             const active = t.on(profile);
@@ -86,13 +86,13 @@ export function LiveEngine() {
                 aria-pressed={active}
                 onClick={() => setProfile(t.flip)}
                 className={`flex min-h-12 items-center justify-between rounded-2xl border px-4 text-left text-[0.9375rem] font-medium transition-colors duration-150 ${
-                  active ? "border-moss-fill bg-moss-wash text-ink" : "border-line bg-surface text-muted"
+                  active ? "border-brand-tint bg-brand-soft text-ink" : "border-line bg-panel text-ink-muted"
                 }`}
               >
                 {t.label}
                 <span
                   className={`grid size-5 place-items-center rounded-full border ${
-                    active ? "border-moss bg-moss text-raised" : "border-taupe"
+                    active ? "border-brand bg-brand text-on-brand" : "border-ink-faint"
                   }`}
                 >
                   {active && <Check className="size-3.5" strokeWidth={3} aria-hidden="true" />}
@@ -106,33 +106,33 @@ export function LiveEngine() {
       <div aria-live="polite">
         <div className="flex items-baseline gap-3">
           <span className="font-display text-6xl font-semibold tracking-tight tabular-nums">{plan.length}</span>
-          <span className="text-muted">obligations change with this move</span>
+          <span className="text-ink-muted">obligations change with this move</span>
         </div>
         <div className="mt-6 grid gap-4 sm:grid-cols-2">
           {ORDER.map((category) => {
             const tasks = plan.filter((t) => t.category === category);
             return (
-              <div key={category} className="rounded-card border border-line bg-surface p-5">
+              <div key={category} className="rounded-card border border-line bg-panel p-5">
                 <div className="flex items-center justify-between">
                   <span className="inline-flex items-center gap-2 text-sm font-semibold">
-                    <CategoryIcon category={category} className="size-4 text-oxblood" />
+                    <CategoryIcon category={category} className="size-4 text-ink-muted" />
                     {CATEGORY_LABEL[category]}
                   </span>
-                  <span className="font-mono text-xs text-muted tabular-nums">{tasks.length}</span>
+                  <span className="font-mono text-xs text-ink-muted tabular-nums">{tasks.length}</span>
                 </div>
                 {tasks.length === 0 ? (
-                  <p className="mt-4 text-sm text-muted">Nothing to do here.</p>
+                  <p className="mt-4 text-sm text-ink-muted">Nothing to do here.</p>
                 ) : (
                   <ul className="mt-4 grid gap-2.5">
                     {tasks.map((task) => (
                       <li key={task.id} className="flex items-start justify-between gap-3 text-sm">
                         <span>{task.title}</span>
                         {task.deadline?.date ? (
-                          <span className="shrink-0 font-mono text-xs text-oxblood tabular-nums">
+                          <span className="shrink-0 font-mono text-xs text-ink-muted tabular-nums">
                             {formatShortDate(task.deadline.date)}
                           </span>
                         ) : task.status === "needs_verification" ? (
-                          <span className="shrink-0 rounded-full bg-amber-wash px-2 py-0.5 text-xs font-semibold text-amber">
+                          <span className="shrink-0 rounded-full bg-warn-soft px-2 py-0.5 text-xs font-semibold text-warn">
                             Verify
                           </span>
                         ) : null}
@@ -144,7 +144,7 @@ export function LiveEngine() {
             );
           })}
         </div>
-        <p className="mt-4 text-sm text-muted">
+        <p className="mt-4 text-sm text-ink-muted">
           Dates assume a move on {formatShortDate(profile.moveDate)}. Oregon has no verified rules yet, so Civio flags
           those tasks instead of guessing.
         </p>

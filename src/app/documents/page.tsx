@@ -53,7 +53,7 @@ function CopyButton({ text, label = "Copy" }: { text: string; label?: string }) 
         }
       }}
     >
-      {copied ? <Check className="size-4 text-moss" aria-hidden="true" /> : <Copy className="size-4" aria-hidden="true" />}
+      {copied ? <Check className="size-4 text-ok" aria-hidden="true" /> : <Copy className="size-4" aria-hidden="true" />}
       <span aria-live="polite">{copied ? "Copied" : label}</span>
     </button>
   );
@@ -90,7 +90,7 @@ function Field({
         placeholder={placeholder}
         autoComplete={autoComplete ?? "off"}
         maxLength={200}
-        className="mt-1.5 h-11 w-full rounded-xl bg-mist px-3 text-[0.9375rem] ring-1 ring-hair placeholder:text-muted/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink"
+        className="mt-1.5 h-11 w-full rounded-xl bg-panel px-3 text-[0.9375rem] ring-1 ring-line placeholder:text-ink-muted/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink"
       />
     </label>
   );
@@ -148,13 +148,13 @@ function Letters({ unlocked, onUnlock }: { unlocked: boolean; onUnlock: () => vo
     <section aria-labelledby="letters-title" className="tile overflow-hidden">
       <div className="flex flex-wrap items-start justify-between gap-3 p-6 pb-0">
         <div>
-          <p className="mono-label text-muted">Move Pack</p>
+          <p className="mono-label text-ink-muted">Move Pack</p>
           <h2 id="letters-title" className="mt-1 text-xl font-semibold tracking-tight">
             Letters ready to send
           </h2>
         </div>
         {unlocked && (
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-moss-wash px-3 py-1 text-xs font-semibold text-moss">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-ok-soft px-3 py-1 text-xs font-semibold text-brand-ink">
             <Check className="size-3.5" aria-hidden="true" /> Unlocked
           </span>
         )}
@@ -172,14 +172,14 @@ function Letters({ unlocked, onUnlock }: { unlocked: boolean; onUnlock: () => vo
               setNotice(null);
             }}
             className={`min-h-10 rounded-full px-4 text-sm font-semibold transition-colors duration-150 ${
-              active === k ? "bg-ink text-white" : "bg-mist text-muted"
+              active === k ? "bg-brand-soft text-brand-ink ring-1 ring-brand-tint" : "bg-panel text-ink-muted"
             }`}
           >
             {LETTERS[k].title}
           </button>
         ))}
       </div>
-      <p className="px-6 pt-3 text-sm text-muted">{meta.blurb}</p>
+      <p className="px-6 pt-3 text-sm text-ink-muted">{meta.blurb}</p>
 
       {unlocked ? (
         <div className="grid gap-6 p-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
@@ -189,7 +189,7 @@ function Letters({ unlocked, onUnlock }: { unlocked: boolean; onUnlock: () => vo
             <Field label="New address" value={fields.newAddress} onChange={(newAddress) => setField({ newAddress })} placeholder="Street, city, state, ZIP" />
             <Field label="Recipient" value={fields.recipient} onChange={(recipient) => setField({ recipient })} placeholder={meta.recipientHint} />
             <Field label={`${meta.referenceLabel} (optional)`} value={fields.reference} onChange={(reference) => setField({ reference })} />
-            <p className="text-xs text-muted">
+            <p className="text-xs text-ink-muted">
               Names and addresses stay in this browser. They are sent to the AI model only when you press “Tailor with AI”.
             </p>
           </div>
@@ -204,13 +204,13 @@ function Letters({ unlocked, onUnlock }: { unlocked: boolean; onUnlock: () => vo
               onChange={(e) => setCustom({ key, text: e.target.value, mode: "edited" })}
               rows={18}
               spellCheck
-              className="letter-sheet w-full resize-y rounded-2xl bg-mist/60 p-5 font-mono text-[0.8125rem] leading-relaxed ring-1 ring-hair focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink"
+              className="letter-sheet w-full resize-y rounded-2xl bg-panel/60 p-5 font-mono text-[0.8125rem] leading-relaxed ring-1 ring-line focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink"
             />
             {/* A textarea prints clipped, so the page prints this copy instead. */}
             <pre className="print-sheet" aria-hidden="true">
               {text}
             </pre>
-            <p className="mt-2 text-xs text-muted" aria-live="polite">
+            <p className="mt-2 text-xs text-ink-muted" aria-live="polite">
               {custom?.key === key
                 ? custom.mode === "ai"
                   ? "Rewritten by AI from your inputs. Read it before sending."
@@ -224,7 +224,7 @@ function Letters({ unlocked, onUnlock }: { unlocked: boolean; onUnlock: () => vo
               )}
             </p>
 
-            <div className="mt-4 flex flex-wrap items-end gap-2 rounded-2xl bg-mist/60 p-3">
+            <div className="mt-4 flex flex-wrap items-end gap-2 rounded-2xl bg-panel/60 p-3">
               <label className="min-w-0 flex-1 basis-56">
                 <span className="text-sm font-medium">Anything to add or change?</span>
                 <input
@@ -232,16 +232,16 @@ function Letters({ unlocked, onUnlock }: { unlocked: boolean; onUnlock: () => vo
                   onChange={(e) => setInstructions(e.target.value)}
                   maxLength={600}
                   placeholder="e.g. mention that I pay rent through the 31st…"
-                  className="mt-1.5 h-11 w-full rounded-xl bg-white px-3 text-[0.9375rem] ring-1 ring-hair placeholder:text-muted/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink"
+                  className="mt-1.5 h-11 w-full rounded-xl bg-card px-3 text-[0.9375rem] ring-1 ring-line placeholder:text-ink-muted/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink"
                 />
               </label>
-              <button type="button" onClick={() => void tailor()} disabled={busy} className="btn btn-ink">
+              <button type="button" onClick={() => void tailor()} disabled={busy} className="btn btn-primary">
                 {busy ? <LoaderCircle className="size-4 animate-spin" aria-hidden="true" /> : <Sparkles className="size-4" aria-hidden="true" />}
                 {busy ? "Writing…" : "Tailor with AI"}
               </button>
             </div>
             {notice && (
-              <p role="status" className="mt-2 text-sm text-amber">
+              <p role="status" className="mt-2 text-sm text-warn">
                 {notice}
               </p>
             )}
@@ -258,23 +258,23 @@ function Letters({ unlocked, onUnlock }: { unlocked: boolean; onUnlock: () => vo
           </div>
         </div>
       ) : (
-        <div className="relative m-6 overflow-hidden rounded-2xl ring-1 ring-hair">
-          <pre aria-hidden="true" className="max-h-72 select-none overflow-hidden whitespace-pre-wrap bg-mist/60 p-5 font-mono text-[0.8125rem] leading-relaxed blur-[3px]">
+        <div className="relative m-6 overflow-hidden rounded-2xl ring-1 ring-line">
+          <pre aria-hidden="true" className="max-h-72 select-none overflow-hidden whitespace-pre-wrap bg-panel/60 p-5 font-mono text-[0.8125rem] leading-relaxed blur-[3px]">
             {template}
           </pre>
-          <div className="absolute inset-0 grid place-items-center bg-white/70 p-5 text-center">
+          <div className="absolute inset-0 grid place-items-center bg-card/70 p-5 text-center">
             <div className="max-w-sm">
               <span className="mx-auto grid size-11 place-items-center rounded-full bg-ink text-white">
                 <Lock className="size-5" aria-hidden="true" />
               </span>
               <p className="mt-4 font-display text-2xl font-semibold tracking-tight">Move Pack · $19</p>
-              <p className="mt-1 text-sm text-muted">
+              <p className="mt-1 text-sm text-ink-muted">
                 {kinds.length} letters filled from your profile, AI tailoring, and copy, download or print. One payment per move.
               </p>
-              <button type="button" onClick={onUnlock} className="btn btn-ink mt-5">
+              <button type="button" onClick={onUnlock} className="btn btn-primary mt-5">
                 Unlock Move Pack <ArrowRight className="size-4" aria-hidden="true" />
               </button>
-              <p className="mt-2 text-xs text-muted">Demo checkout: no card is asked for and nothing is charged.</p>
+              <p className="mt-2 text-xs text-ink-muted">Demo checkout: no card is asked for and nothing is charged.</p>
             </div>
           </div>
         </div>
@@ -287,16 +287,16 @@ export default function DocumentsPage() {
   const { ready, hasPlan, profile, tasks, pack, setPack } = useCivio();
   const notify = useMemo(() => buildNotifyList(profile, tasks), [profile, tasks]);
 
-  if (!ready) return <div className="min-h-dvh bg-mist" aria-busy="true" />;
+  if (!ready) return <div className="min-h-dvh bg-panel" aria-busy="true" />;
 
   if (!hasPlan) {
     return (
-      <div className="grid min-h-dvh place-items-center bg-mist px-5">
+      <div className="grid min-h-dvh place-items-center bg-panel px-5">
         <div className="tile max-w-md p-8 text-center">
           <h1 className="text-2xl font-semibold tracking-tight">Documents need a plan first</h1>
-          <p className="mt-2 text-muted">Tell Civio where you are moving and the list and letters are built from that.</p>
+          <p className="mt-2 text-ink-muted">Tell Civio where you are moving and the list and letters are built from that.</p>
           <div className="mt-6 flex flex-wrap justify-center gap-2">
-            <Link href="/onboarding" className="btn btn-ink">
+            <Link href="/onboarding" className="btn btn-primary">
               Get Started <ArrowRight className="size-4" aria-hidden="true" />
             </Link>
             <Link href="/dashboard?demo=1" className="btn btn-quiet">
@@ -309,7 +309,7 @@ export default function DocumentsPage() {
   }
 
   return (
-    <div className="min-h-dvh bg-mist">
+    <div className="min-h-dvh bg-panel">
       <main className="mx-auto max-w-6xl px-4 pb-16 pt-5 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between gap-3 print:hidden">
           <Logo />
@@ -319,7 +319,7 @@ export default function DocumentsPage() {
         </div>
 
         <h1 className="mt-8 text-[clamp(1.75rem,3vw,2.375rem)] font-semibold leading-tight tracking-[-0.03em]">Documents</h1>
-        <p className="mt-1 text-muted">
+        <p className="mt-1 text-ink-muted">
           {stateName(profile.currentState)} to {stateName(profile.destinationState)}. Built from your answers, so nothing here
           applies to someone else's move.
         </p>
@@ -327,17 +327,17 @@ export default function DocumentsPage() {
         <section aria-labelledby="notify-title" className="tile mt-6 overflow-hidden print:hidden">
           <div className="flex flex-wrap items-center justify-between gap-3 p-6 pb-4">
             <div>
-              <p className="mono-label text-muted">Free</p>
+              <p className="mono-label text-ink-muted">Free</p>
               <h2 id="notify-title" className="mt-1 text-xl font-semibold tracking-tight">
                 Who to notify
               </h2>
             </div>
             <CopyButton text={notifyListText(notify, profile)} label="Copy the list" />
           </div>
-          <ol className="divide-y divide-hair border-t border-hair">
+          <ol className="divide-y divide-line border-t border-line">
             {notify.map((item, index) => (
               <li key={item.id} className="grid gap-x-4 gap-y-1 px-6 py-4 md:grid-cols-[2rem_minmax(0,1fr)_minmax(0,1.4fr)]">
-                <span className="font-mono text-xs tabular-nums text-muted md:pt-1">{String(index + 1).padStart(2, "0")}</span>
+                <span className="font-mono text-xs tabular-nums text-ink-muted md:pt-1">{String(index + 1).padStart(2, "0")}</span>
                 <div>
                   <p className="font-semibold">{item.who}</p>
                   {item.link && (
@@ -345,7 +345,7 @@ export default function DocumentsPage() {
                       href={item.link.url}
                       target="_blank"
                       rel="noreferrer"
-                      className="mt-0.5 inline-flex items-center gap-1 text-sm font-semibold text-moss underline-offset-4 hover:underline"
+                      className="mt-0.5 inline-flex items-center gap-1 text-sm font-semibold text-brand-ink underline-offset-4 hover:underline"
                     >
                       {item.link.name} <ArrowUpRight className="size-3.5" aria-hidden="true" />
                     </a>
@@ -353,8 +353,8 @@ export default function DocumentsPage() {
                 </div>
                 <div className="text-sm">
                   <p>{item.why}</p>
-                  <p className="mt-1 text-muted">{item.how}</p>
-                  {item.letter && <p className="mt-1 text-xs text-muted">Letter in Move Pack: {LETTERS[item.letter].title}</p>}
+                  <p className="mt-1 text-ink-muted">{item.how}</p>
+                  {item.letter && <p className="mt-1 text-xs text-ink-muted">Letter in Move Pack: {LETTERS[item.letter].title}</p>}
                 </div>
               </li>
             ))}
@@ -365,7 +365,7 @@ export default function DocumentsPage() {
           <Letters unlocked={pack} onUnlock={() => setPack(true)} />
         </div>
 
-        <p className="mt-8 text-sm text-muted print:hidden">
+        <p className="mt-8 text-sm text-ink-muted print:hidden">
           These are general templates, not legal advice. Check your lease, policy or account terms for notice periods and
           required forms before you send anything.
         </p>

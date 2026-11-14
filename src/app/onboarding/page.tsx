@@ -1,5 +1,8 @@
 "use client";
 
+import { Selector } from "@astryxdesign/core/Selector";
+import { Theme } from "@astryxdesign/core/theme";
+import { neutralTheme } from "@astryxdesign/theme-neutral/built";
 import { ArrowLeft, ArrowRight, Check, Plus, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useId, useMemo, useState } from "react";
@@ -40,7 +43,7 @@ function Choice<T extends string | boolean>({
         <p id={id} className="font-medium">
           {label}
         </p>
-        {optional && <span className="text-xs text-night-muted">Optional</span>}
+        {optional && <span className="text-xs text-on-stage-muted">Optional</span>}
       </div>
       <div className={`mt-3 grid gap-2 ${columns === 3 ? "sm:grid-cols-3" : "sm:grid-cols-2"}`}>
         {options.map((option) => {
@@ -54,21 +57,21 @@ function Choice<T extends string | boolean>({
               onClick={() => onChange(selected ? undefined : option.value)}
               className={`flex min-h-12 items-center justify-between gap-3 rounded-2xl border px-4 py-2.5 text-left text-[0.9375rem] transition-colors duration-150 ${
                 selected
-                  ? "border-lime bg-night font-semibold text-white shadow-[0_0_0_3px_rgb(201_220_108/0.14)]"
-                  : "border-night-line bg-night text-white"
+                  ? "border-brand-bright bg-stage font-semibold text-on-stage shadow-[0_0_0_3px_rgb(90_173_183/0.18)]"
+                  : "border-stage-line bg-stage text-on-stage"
               }`}
             >
               <span>
                 {option.label}
                 {option.hint && (
-                  <span className="block text-xs font-normal text-night-muted">
+                  <span className="block text-xs font-normal text-on-stage-muted">
                     {option.hint}
                   </span>
                 )}
               </span>
               <span
                 className={`grid size-5 shrink-0 place-items-center rounded-full ${
-                  selected ? "bg-lime text-on-lime" : "border border-night-line"
+                  selected ? "bg-brand-bright text-stage" : "border border-stage-line"
                 }`}
               >
                 {selected && <Check className="size-3.5" strokeWidth={3} aria-hidden="true" />}
@@ -81,6 +84,9 @@ function Choice<T extends string | boolean>({
   );
 }
 
+const STATE_OPTIONS = US_STATES.map((state) => ({ value: state.code, label: state.name }));
+
+/** Searchable state picker (Astryx Selector): 51 options are too many to scroll. */
 function StateSelect({
   label,
   value,
@@ -92,33 +98,20 @@ function StateSelect({
   onChange: (value: string | undefined) => void;
   error?: string;
 }) {
-  const id = useId();
   return (
-    <div>
-      <label htmlFor={id} className="font-medium">
-        {label}
-      </label>
-      <select
-        id={id}
-        value={value ?? ""}
-        onChange={(e) => onChange(e.target.value || undefined)}
-        aria-invalid={Boolean(error)}
-        aria-describedby={error ? `${id}-error` : undefined}
-        className={`night-field mt-3 appearance-none ${error ? "border-lime" : ""}`}
-      >
-        <option value="">Select a state…</option>
-        {US_STATES.map((s) => (
-          <option key={s.code} value={s.code}>
-            {s.name}
-          </option>
-        ))}
-      </select>
-      {error && (
-        <p id={`${id}-error`} className="mt-2 text-sm text-lime" role="alert">
-          {error}
-        </p>
-      )}
-    </div>
+    <Selector
+      label={label}
+      options={STATE_OPTIONS}
+      value={value}
+      onChange={(next) => onChange(next || undefined)}
+      hasSearch
+      searchPlaceholder="Type a state…"
+      placeholder="Select a state…"
+      isRequired
+      size="lg"
+      width="100%"
+      status={error ? { type: "error", message: error } : undefined}
+    />
   );
 }
 
@@ -140,9 +133,9 @@ function ChildAges({ ages, onChange }: { ages: number[]; onChange: (ages: number
         <label htmlFor={id} className="font-medium">
           How old are they?
         </label>
-        <span className="text-xs text-night-muted">Optional</span>
+        <span className="text-xs text-on-stage-muted">Optional</span>
       </div>
-      <p className="mt-1 text-sm text-night-muted">School rules depend on age. Add each child.</p>
+      <p className="mt-1 text-sm text-on-stage-muted">School rules depend on age. Add each child.</p>
       <div className="mt-3 flex gap-2">
         <input
           id={id}
@@ -157,9 +150,9 @@ function ChildAges({ ages, onChange }: { ages: number[]; onChange: (ages: number
               add();
             }
           }}
-          className="night-field max-w-40"
+          className="stage-field max-w-40"
         />
-        <button type="button" onClick={add} disabled={!valid} className="btn btn-night">
+        <button type="button" onClick={add} disabled={!valid} className="btn btn-stage-quiet">
           <Plus className="size-4" aria-hidden="true" /> Add
         </button>
       </div>
@@ -171,7 +164,7 @@ function ChildAges({ ages, onChange }: { ages: number[]; onChange: (ages: number
                 type="button"
                 onClick={() => onChange(ages.filter((_, i) => i !== index))}
                 aria-label={`Remove child aged ${age}`}
-                className="inline-flex min-h-10 items-center gap-1.5 rounded-full bg-lime px-3.5 text-sm font-semibold text-on-lime"
+                className="inline-flex min-h-10 items-center gap-1.5 rounded-full bg-brand-bright px-3.5 text-sm font-semibold text-stage"
               >
                 {age} {age === 1 ? "year" : "years"} <X className="size-3.5" aria-hidden="true" />
               </button>
@@ -185,8 +178,8 @@ function ChildAges({ ages, onChange }: { ages: number[]; onChange: (ages: number
 
 function ReviewRow({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex items-baseline justify-between gap-4 border-b border-night-line py-3 last:border-b-0">
-      <dt className="text-sm text-night-muted">{label}</dt>
+    <div className="flex items-baseline justify-between gap-4 border-b border-stage-line py-3 last:border-b-0">
+      <dt className="text-sm text-on-stage-muted">{label}</dt>
       <dd className="text-right text-[0.9375rem]">{value}</dd>
     </div>
   );
@@ -239,18 +232,19 @@ function Wizard({ initial, onDone }: { initial: Profile; onDone: (profile: Profi
   };
 
   return (
-    <div className="on-night min-h-dvh bg-night text-white">
+    <Theme theme={neutralTheme} mode="dark">
+    <div className="on-stage min-h-dvh bg-stage text-on-stage">
       <div className="mx-auto max-w-6xl px-5 py-6 sm:px-8 lg:py-8">
         <Logo tone="dark" />
         <div className="mt-8 grid items-start gap-5 lg:grid-cols-[minmax(0,1fr)_22rem]">
-          <div className="rounded-panel border border-night-line bg-night-raised p-5 sm:p-8">
+          <div className="rounded-panel border border-stage-line bg-stage-raised p-5 sm:p-8">
             <div className="flex items-center justify-between gap-4">
               <div className="flex items-center gap-1.5" aria-hidden="true">
                 {STEPS.map((name, index) => (
                   <span
                     key={name}
                     className={`h-1.5 rounded-full transition-colors duration-200 ${
-                      index === step ? "w-8 bg-white" : index < step ? "w-2 bg-lime" : "w-2 bg-night-line"
+                      index === step ? "w-8 bg-on-stage" : index < step ? "w-2 bg-brand-bright" : "w-2 bg-stage-line"
                     }`}
                   />
                 ))}
@@ -259,13 +253,13 @@ function Wizard({ initial, onDone }: { initial: Profile; onDone: (profile: Profi
                 <button
                   type="button"
                   onClick={() => setStep(step - 1)}
-                  className="inline-flex min-h-10 items-center gap-1.5 text-sm font-medium text-night-muted hover:text-white"
+                  className="inline-flex min-h-10 items-center gap-1.5 text-sm font-medium text-on-stage-muted hover:text-on-stage"
                 >
                   <ArrowLeft className="size-4" aria-hidden="true" /> Back
                 </button>
               )}
             </div>
-            <p className="mt-6 text-sm text-night-muted">
+            <p className="mt-6 text-sm text-on-stage-muted">
               Step {step + 1} of {STEPS.length} · {STEPS[step]}
             </p>
 
@@ -280,7 +274,7 @@ function Wizard({ initial, onDone }: { initial: Profile; onDone: (profile: Profi
             {step === 0 && (
               <>
                 <h1 className="text-4xl font-medium tracking-[-0.03em]">Where are you moving?</h1>
-                <p className="mt-3 text-night-muted">The two states decide which rules apply. Everything else is optional.</p>
+                <p className="mt-3 text-on-stage-muted">The two states decide which rules apply. Everything else is optional.</p>
                 <div className="mt-8">
                   <IntakeBox
                     onRead={(patch, result) => {
@@ -291,7 +285,7 @@ function Wizard({ initial, onDone }: { initial: Profile; onDone: (profile: Profi
                     }}
                   />
                 </div>
-                <p className="mono-label mt-8 text-night-muted">Or answer step by step</p>
+                <p className="mono-label mt-8 text-on-stage-muted">Or answer step by step</p>
                 <div className="mt-4 grid gap-6 sm:grid-cols-2">
                   <StateSelect
                     label="Current state"
@@ -310,23 +304,23 @@ function Wizard({ initial, onDone }: { initial: Profile; onDone: (profile: Profi
                       <label htmlFor="move-date" className="font-medium">
                         Planned move date
                       </label>
-                      <span className="text-xs text-night-muted">Optional</span>
+                      <span className="text-xs text-on-stage-muted">Optional</span>
                     </div>
                     <input
                       id="move-date"
                       type="date"
                       value={p.moveDate ?? ""}
                       onChange={(e) => set({ moveDate: e.target.value || undefined })}
-                      className="night-field mt-3 [color-scheme:dark]"
+                      className="stage-field mt-3 [color-scheme:dark]"
                     />
-                    <p className="mt-2 text-sm text-night-muted">Used to turn “within 20 days” into a calendar date.</p>
+                    <p className="mt-2 text-sm text-on-stage-muted">Used to turn “within 20 days” into a calendar date.</p>
                   </div>
                   <div>
                     <div className="flex items-baseline justify-between">
                       <label htmlFor="zip" className="font-medium">
                         New ZIP code
                       </label>
-                      <span className="text-xs text-night-muted">Optional</span>
+                      <span className="text-xs text-on-stage-muted">Optional</span>
                     </div>
                     <input
                       id="zip"
@@ -337,10 +331,10 @@ function Wizard({ initial, onDone }: { initial: Profile; onDone: (profile: Profi
                       onChange={(e) => set({ zip: e.target.value.replace(/\D/g, "").slice(0, 5) || undefined })}
                       aria-invalid={Boolean(errors.zip)}
                       aria-describedby={errors.zip ? "zip-error" : undefined}
-                      className="night-field mt-3"
+                      className="stage-field mt-3"
                     />
                     {errors.zip && (
-                      <p id="zip-error" role="alert" className="mt-2 text-sm text-lime">
+                      <p id="zip-error" role="alert" className="mt-2 text-sm text-risk-bright">
                         {errors.zip}
                       </p>
                     )}
@@ -352,7 +346,7 @@ function Wizard({ initial, onDone }: { initial: Profile; onDone: (profile: Profi
             {step === 1 && (
               <>
                 <h1 className="text-4xl font-medium tracking-[-0.03em]">How do you earn?</h1>
-                <p className="mt-3 text-night-muted">This decides withholding forms and estimated tax payments.</p>
+                <p className="mt-3 text-on-stage-muted">This decides withholding forms and estimated tax payments.</p>
                 <div className="mt-8 grid gap-8">
                   <Choice
                     label="Employment"
@@ -383,7 +377,7 @@ function Wizard({ initial, onDone }: { initial: Profile; onDone: (profile: Profi
             {step === 2 && (
               <>
                 <h1 className="text-4xl font-medium tracking-[-0.03em]">Who is moving with you?</h1>
-                <p className="mt-3 text-night-muted">Children of school age add enrollment tasks.</p>
+                <p className="mt-3 text-on-stage-muted">Children of school age add enrollment tasks.</p>
                 <div className="mt-8 grid gap-8">
                   <Choice
                     label="Marital status"
@@ -417,7 +411,7 @@ function Wizard({ initial, onDone }: { initial: Profile; onDone: (profile: Profi
             {step === 3 && (
               <>
                 <h1 className="text-4xl font-medium tracking-[-0.03em]">How are you insured today?</h1>
-                <p className="mt-3 text-night-muted">Each kind of coverage reacts differently to a change of state.</p>
+                <p className="mt-3 text-on-stage-muted">Each kind of coverage reacts differently to a change of state.</p>
                 <div className="mt-8">
                   <Choice
                     label="Health insurance"
@@ -438,7 +432,7 @@ function Wizard({ initial, onDone }: { initial: Profile; onDone: (profile: Profi
             {step === 4 && (
               <>
                 <h1 className="text-4xl font-medium tracking-[-0.03em]">Are you bringing a vehicle?</h1>
-                <p className="mt-3 text-night-muted">Registration and license deadlines are usually the first to hit.</p>
+                <p className="mt-3 text-on-stage-muted">Registration and license deadlines are usually the first to hit.</p>
                 <div className="mt-8 grid gap-8">
                   <Choice
                     label="Do you own a vehicle?"
@@ -471,41 +465,41 @@ function Wizard({ initial, onDone }: { initial: Profile; onDone: (profile: Profi
             {step === 5 && (
               <>
                 <h1 className="text-4xl font-medium tracking-[-0.03em]">Check your answers</h1>
-                <p className="mt-3 text-night-muted">
+                <p className="mt-3 text-on-stage-muted">
                   Skipped answers are fine. Tasks that depend on them are marked “Needs verification”.
                 </p>
                 {intake && (
-                  <div className="mt-6 rounded-2xl border border-lime/40 p-4" aria-live="polite">
+                  <div className="mt-6 rounded-2xl border border-brand-bright/40 p-4" aria-live="polite">
                     <p className="font-medium">
                       Filled in from your description
-                      <span className="ml-2 font-mono text-xs font-normal text-night-muted">
+                      <span className="ml-2 font-mono text-xs font-normal text-on-stage-muted">
                         {intake.mode === "ai" ? "read by AI" : "read by built-in rules"}
                       </span>
                     </p>
-                    {intake.notice && <p className="mt-1 text-sm text-night-muted">{intake.notice}</p>}
+                    {intake.notice && <p className="mt-1 text-sm text-on-stage-muted">{intake.notice}</p>}
                     <ul className="mt-3 grid gap-1.5 text-sm">
                       {intake.found.map((item) => (
                         <li key={item.field} className="flex flex-wrap items-baseline gap-x-2">
-                          <span className="text-night-muted">{item.label}:</span>
+                          <span className="text-on-stage-muted">{item.label}:</span>
                           <span>{TEXT[item.value] ?? item.value}</span>
-                          {item.from && <span className="text-xs text-night-muted">from “{item.from}”</span>}
+                          {item.from && <span className="text-xs text-on-stage-muted">from “{item.from}”</span>}
                         </li>
                       ))}
                     </ul>
-                    <p className="mt-3 text-sm text-night-muted">
+                    <p className="mt-3 text-sm text-on-stage-muted">
                       Check the answers below. Use Back or the step list to correct anything.
                     </p>
                   </div>
                 )}
                 {(!p.currentState || !p.destinationState) && (
-                  <p role="alert" className="mt-6 rounded-2xl border border-night-line p-4 text-sm text-lime">
+                  <p role="alert" className="mt-6 rounded-2xl border border-stage-line p-4 text-sm text-brand-bright">
                     Civio still needs {!p.currentState && !p.destinationState ? "both states" : !p.currentState ? "the state you live in now" : "the state you are moving to"}.{" "}
                     <button type="button" onClick={() => setStep(0)} className="underline underline-offset-4">
                       Add it in step 1
                     </button>
                   </p>
                 )}
-                <dl className="mt-8 rounded-2xl border border-night-line px-5">
+                <dl className="mt-8 rounded-2xl border border-stage-line px-5">
                   <ReviewRow label="Move" value={`${stateName(p.currentState)} → ${stateName(p.destinationState)}`} />
                   <ReviewRow label="Move date" value={p.moveDate ? formatDate(p.moveDate) : "Skipped"} />
                   <ReviewRow label="Employment" value={show(p.employment)} />
@@ -520,16 +514,16 @@ function Wizard({ initial, onDone }: { initial: Profile; onDone: (profile: Profi
                   <ReviewRow label="Health insurance" value={show(p.insurance)} />
                   <ReviewRow label="Vehicle" value={yesNo(p.hasVehicle)} />
                 </dl>
-                <label className="mt-6 flex cursor-pointer items-start gap-3 rounded-2xl border border-night-line p-4">
+                <label className="mt-6 flex cursor-pointer items-start gap-3 rounded-2xl border border-stage-line p-4">
                   <input
                     type="checkbox"
                     checked={p.aiConsent === true}
                     onChange={(e) => set({ aiConsent: e.target.checked })}
-                    className="mt-1 size-4 accent-(--color-lime)"
+                    className="mt-1 size-4 accent-(--color-brand-bright)"
                   />
                   <span>
                     <span className="font-medium">Let the assistant use these answers</span>
-                    <span className="mt-1 block text-sm text-night-muted">
+                    <span className="mt-1 block text-sm text-on-stage-muted">
                       They are sent with your questions so answers fit your states and situation. You can turn this off
                       any time.
                     </span>
@@ -539,11 +533,11 @@ function Wizard({ initial, onDone }: { initial: Profile; onDone: (profile: Profi
             )}
 
             <div className="mt-10 grid gap-2">
-              <button type="submit" className="btn btn-lime w-full">
+              <button type="submit" className="btn btn-stage w-full">
                 {last ? "Build my plan" : "Continue"} <ArrowRight className="size-4" aria-hidden="true" />
               </button>
               {step > 0 && !last && (
-                <button type="button" onClick={() => setStep(step + 1)} className="btn btn-night w-full">
+                <button type="button" onClick={() => setStep(step + 1)} className="btn btn-stage-quiet w-full">
                   Skip
                 </button>
               )}
@@ -552,35 +546,35 @@ function Wizard({ initial, onDone }: { initial: Profile; onDone: (profile: Profi
           </div>
 
           <aside className="grid gap-5">
-            <div className="rounded-panel border border-night-line bg-night-raised p-5" aria-live="polite">
-              <p className="text-sm text-night-muted">Your plan so far</p>
+            <div className="rounded-panel border border-stage-line bg-stage-raised p-5" aria-live="polite">
+              <p className="text-sm text-on-stage-muted">Your plan so far</p>
               <p className="mt-1 flex items-baseline gap-2">
                 <span className="font-display text-5xl font-semibold tabular-nums">{matched.length}</span>
-                <span className="text-night-muted">{matched.length === 1 ? "task" : "tasks"} matched</span>
+                <span className="text-on-stage-muted">{matched.length === 1 ? "task" : "tasks"} matched</span>
               </p>
               {matched.length > 0 ? (
                 <ul className="mt-4 grid gap-1.5">
                   {matched.slice(0, 5).map((task) => (
                     <li
                       key={task.id}
-                      className="flex items-center gap-2.5 rounded-xl border border-night-line bg-night px-3 py-2.5 text-sm"
+                      className="flex items-center gap-2.5 rounded-xl border border-stage-line bg-stage px-3 py-2.5 text-sm"
                     >
-                      <span className="grid size-5 shrink-0 place-items-center rounded-full bg-lime text-on-lime">
+                      <span className="grid size-5 shrink-0 place-items-center rounded-full bg-brand-bright text-stage">
                         <Check className="size-3" strokeWidth={3.5} aria-hidden="true" />
                       </span>
                       <span className="truncate">{task.title}</span>
                     </li>
                   ))}
                   {matched.length > 5 && (
-                    <li className="px-3 pt-1 text-sm text-night-muted">and {matched.length - 5} more</li>
+                    <li className="px-3 pt-1 text-sm text-on-stage-muted">and {matched.length - 5} more</li>
                   )}
                 </ul>
               ) : (
-                <p className="mt-4 text-sm text-night-muted">Pick your two states and the rules start matching.</p>
+                <p className="mt-4 text-sm text-on-stage-muted">Pick your two states and the rules start matching.</p>
               )}
             </div>
 
-            <ol className="hidden rounded-panel border border-night-line bg-night-raised p-3 lg:grid">
+            <ol className="hidden rounded-panel border border-stage-line bg-stage-raised p-3 lg:grid">
               {STEPS.map((name, index) => {
                 const state = index === step ? "current" : index < step ? "done" : "todo";
                 return (
@@ -591,16 +585,16 @@ function Wizard({ initial, onDone }: { initial: Profile; onDone: (profile: Profi
                       onClick={() => setStep(index)}
                       aria-current={state === "current" ? "step" : undefined}
                       className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-[0.9375rem] ${
-                        state === "current" ? "bg-night font-semibold text-white" : "text-night-muted"
+                        state === "current" ? "bg-stage font-semibold text-on-stage" : "text-on-stage-muted"
                       }`}
                     >
                       <span
                         className={`grid size-6 shrink-0 place-items-center rounded-full font-mono text-xs ${
                           state === "done"
-                            ? "bg-lime text-on-lime"
+                            ? "bg-brand-bright text-stage"
                             : state === "current"
-                              ? "bg-white text-on-lime"
-                              : "border border-night-line"
+                              ? "bg-on-stage text-stage"
+                              : "border border-stage-line"
                         }`}
                       >
                         {state === "done" ? <Check className="size-3.5" strokeWidth={3} aria-hidden="true" /> : index + 1}
@@ -615,6 +609,7 @@ function Wizard({ initial, onDone }: { initial: Profile; onDone: (profile: Profi
         </div>
       </div>
     </div>
+    </Theme>
   );
 }
 
@@ -623,7 +618,7 @@ export default function OnboardingPage() {
   const { ready, profile, saveProfile } = useCivio();
 
   if (!ready) {
-    return <div className="min-h-dvh bg-night" aria-busy="true" />;
+    return <div className="min-h-dvh bg-stage" aria-busy="true" />;
   }
 
   return (

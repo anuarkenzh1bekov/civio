@@ -24,10 +24,10 @@ export function ContinueLink({ sid }: { sid: string | undefined }) {
   };
 
   return (
-    <div className="rounded-2xl bg-white p-3 shadow-soft ring-1 ring-hair">
+    <div className="rounded-2xl bg-card p-3 shadow-soft ring-1 ring-line">
       <button type="button" onClick={copy} className="flex min-h-10 w-full items-center gap-2.5 text-left text-[0.9375rem] font-medium">
         {state === "copied" ? (
-          <Check className="size-4 text-moss" aria-hidden="true" />
+          <Check className="size-4 text-ok" aria-hidden="true" />
         ) : (
           <Smartphone className="size-4" strokeWidth={1.75} aria-hidden="true" />
         )}
@@ -39,10 +39,10 @@ export function ContinueLink({ sid }: { sid: string | undefined }) {
           value={url}
           aria-label="Link to this plan"
           onFocus={(e) => e.target.select()}
-          className="mt-1 w-full rounded-lg bg-mist px-2 py-1.5 font-mono text-xs"
+          className="mt-1 w-full rounded-lg bg-panel px-2 py-1.5 font-mono text-xs"
         />
       )}
-      <p className="mt-1 text-xs text-muted">No account. Anyone with the link can open and edit this plan.</p>
+      <p className="mt-1 text-xs text-ink-muted">No account. Anyone with the link can open and edit this plan.</p>
     </div>
   );
 }

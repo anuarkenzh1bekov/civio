@@ -14,7 +14,7 @@ function AmountInput({ id, label, value, onChange }: { id: string; label: string
   return (
     <label className="flex shrink-0 items-center gap-1.5">
       <span className="sr-only">{label}, amount in dollars</span>
-      <span className="text-muted" aria-hidden="true">$</span>
+      <span className="text-ink-muted" aria-hidden="true">$</span>
       <input
         id={id}
         inputMode="decimal"
@@ -27,8 +27,8 @@ function AmountInput({ id, label, value, onChange }: { id: string; label: string
           const parsed = parseAmount(e.target.value);
           if (parsed !== null || e.target.value.trim() === "") onChange(parsed);
         }}
-        className={`h-11 w-28 rounded-xl bg-mist px-3 text-right font-mono text-[0.9375rem] tabular-nums ring-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink ${
-          invalid ? "ring-oxblood" : "ring-hair"
+        className={`h-11 w-28 rounded-xl bg-panel px-3 text-right font-mono text-[0.9375rem] tabular-nums ring-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink ${
+          invalid ? "ring-risk" : "ring-line"
         }`}
       />
     </label>
@@ -61,17 +61,17 @@ export function CostCalculator({
         <div className="tile overflow-hidden">
           {summary.lines.length > 0 ? (
             <>
-              <ul className="divide-y divide-hair">
+              <ul className="divide-y divide-line">
                 {summary.lines.map((line) => (
                   <li key={line.id} className="flex flex-wrap items-center gap-x-4 gap-y-2 px-5 py-4">
                     <div className="min-w-0 flex-1 basis-60">
                       <p className="font-medium">{line.label}</p>
-                      <p className="mt-0.5 text-sm text-muted">{line.hint}</p>
+                      <p className="mt-0.5 text-sm text-ink-muted">{line.hint}</p>
                       <a
                         href={line.sourceUrl}
                         target="_blank"
                         rel="noreferrer"
-                        className="mt-1 inline-flex items-center gap-1 text-sm font-semibold text-moss underline-offset-4 hover:underline"
+                        className="mt-1 inline-flex items-center gap-1 text-sm font-semibold text-brand-ink underline-offset-4 hover:underline"
                       >
                         {line.sourceName} <ArrowUpRight className="size-3.5" aria-hidden="true" />
                       </a>
@@ -80,8 +80,8 @@ export function CostCalculator({
                   </li>
                 ))}
               </ul>
-              <div className="flex flex-wrap items-baseline justify-between gap-2 border-t border-hair bg-mist/60 px-5 py-4">
-                <p className="text-sm text-muted">
+              <div className="flex flex-wrap items-baseline justify-between gap-2 border-t border-line bg-panel/60 px-5 py-4">
+                <p className="text-sm text-ink-muted">
                   {summary.entered} of {summary.lines.length} amounts entered. Civio adds up what you type and does not
                   estimate the rest.
                 </p>
@@ -91,19 +91,19 @@ export function CostCalculator({
               </div>
             </>
           ) : (
-            <p className="p-6 text-sm text-muted">No agency fees are attached to the tasks in this plan.</p>
+            <p className="p-6 text-sm text-ink-muted">No agency fees are attached to the tasks in this plan.</p>
           )}
         </div>
 
         <div className="tile p-5">
           <h3 className="font-sans text-[0.9375rem] font-semibold">What changes, without a number</h3>
-          <p className="mt-1 text-sm text-muted">
+          <p className="mt-1 text-sm text-ink-muted">
             Civio does not calculate taxes or premiums. These are the things to ask a tax professional or your insurer about.
           </p>
           <ul className="mt-4 grid gap-3 text-sm">
             {summary.changes.map((change) => (
               <li key={change.ruleId} className="flex gap-3">
-                <span className="mono-label mt-0.5 w-24 shrink-0 text-muted">{KIND_LABEL[change.kind]}</span>
+                <span className="mono-label mt-0.5 w-24 shrink-0 text-ink-muted">{KIND_LABEL[change.kind]}</span>
                 <span>{change.note}</span>
               </li>
             ))}
