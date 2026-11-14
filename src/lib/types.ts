@@ -9,6 +9,7 @@ export type Insurance = "employer" | "marketplace" | "medicaid" | "other" | "non
  *  answer stays undefined and the rule engine treats it as unknown, never as "no". */
 export type Profile = {
   budget?: import("./budget").MoveBudget;
+  forecast?: import("./forecast/model").Forecast;
   drives?: boolean;
   currentState?: StateCode;
   destinationState?: StateCode;

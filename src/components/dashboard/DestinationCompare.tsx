@@ -4,6 +4,7 @@ import { Plus, X } from "lucide-react";
 import { useState } from "react";
 import { BudgetProjection } from "@/components/BudgetProjection";
 import { compareBudget, dollars, type MoveBudget } from "@/lib/budget";
+import { estimateBudget } from "@/lib/forecast/model";
 import { stateName, US_STATES } from "@/lib/states";
 import type { Profile } from "@/lib/types";
 import styles from "./DestinationCompare.module.css";
@@ -37,6 +38,15 @@ function startingBudget(profile: Profile): MoveBudget {
   };
 }
 
+function destinationBudget(profile: Profile, destination: string): MoveBudget {
+  if (destination === profile.destinationState) return { ...profile.budget };
+  const baseline = startingBudget(profile);
+  if (!destination || !profile.forecast) return baseline;
+  const estimate = estimateBudget({ ...profile.forecast, destination, destinationMetro: undefined,
+    offer: null, moving: "estimate" });
+  return { ...estimate, ...baseline };
+}
+
 export function DestinationCompare({ profile }: { profile: Profile }) {
   const [scenarios, setScenarios] = useState<Scenario[]>(() => [
     { id: 1, destination: profile.destinationState ?? "", budget: { ...(profile.budget ?? {}) } },
@@ -61,7 +71,7 @@ export function DestinationCompare({ profile }: { profile: Profile }) {
       return [...current, {
         id: Math.max(...current.map((scenario) => scenario.id)) + 1,
         destination,
-        budget: startingBudget(profile),
+        budget: destinationBudget(profile, destination),
       }];
     });
   }
@@ -77,7 +87,8 @@ export function DestinationCompare({ profile }: { profile: Profile }) {
         </button>
       </div>
       <p className={styles.note}>
-        Edit the numbers. Results use your inputs, not state averages.
+        {profile.forecast ? "New destinations start with your current pay, state costs and a fresh moving estimate. You can edit each amount."
+          : "Enter your estimates for each destination to compare it with staying."}
       </p>
 
       <div className={styles.grid}>
@@ -98,7 +109,11 @@ export function DestinationCompare({ profile }: { profile: Profile }) {
                     className={styles.select}
                     aria-label={`Destination ${index + 1}`}
                     value={scenario.destination}
-                    onChange={(event) => updateScenario(scenario.id, (current) => ({ ...current, destination: event.target.value }))}
+                    onChange={(event) => {
+                      const destination = event.currentTarget.value;
+                      updateScenario(scenario.id, current => ({ ...current, destination,
+                        budget: profile.forecast ? destinationBudget(profile, destination) : current.budget }));
+                    }}
                   >
                     <option value="">Choose a state</option>
                     {destinations.map(({ code, name }) => <option key={code} value={code}>{name}</option>)}

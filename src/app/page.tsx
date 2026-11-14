@@ -97,15 +97,36 @@ export default function LandingPage() {
               </div>
             </div>
           </div>
-          <div className={styles.photograph}>
+          <div className={styles.photographs} aria-hidden="true">
             <Image
+              className={styles.keyHand}
               src="/landing/house-keys.webp"
-              alt="A hand holds a ring of brass house keys."
+              alt=""
               width={1878}
               height={1494}
               preload
               quality={90}
-              sizes="(max-width: 700px) 90vw, (max-width: 1400px) 50vw, 760px"
+              sizes="(max-width: 700px) 38vw, (max-width: 1740px) 27vw, 470px"
+            />
+            <Image
+              className={styles.paperHand}
+              src="/landing/hand-with-invoice.webp"
+              alt=""
+              width={1080}
+              height={1537}
+              quality={90}
+              loading="eager"
+              sizes="(max-width: 700px) 36vw, (max-width: 1687px) 24vw, 405px"
+            />
+            <Image
+              className={styles.cashHand}
+              src="/landing/hand-with-dollars.webp"
+              alt=""
+              width={1320}
+              height={534}
+              quality={90}
+              loading="eager"
+              sizes="(max-width: 700px) 48vw, (max-width: 1647px) 34vw, 560px"
             />
           </div>
         </section>

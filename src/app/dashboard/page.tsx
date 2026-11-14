@@ -35,6 +35,8 @@ import { RouteBanner } from "@/components/dashboard/RouteBanner";
 import { CATEGORY_SHORT, CategoryIcon, PriorityBadge, StatusBadge } from "@/components/ui";
 import { daysUntil, formatDate } from "@/lib/format";
 import { adoptSession, useCivio, type PlanTask } from "@/lib/store";
+import { folderCost } from "@/lib/forecast/model";
+import { money } from "@/lib/forecast/conversation";
 import { CATEGORY_LABEL, type Category, type TaskStatus } from "@/lib/types";
 
 const CATEGORIES: Category[] = ["taxes", "health", "vehicle", "family"];
@@ -427,6 +429,7 @@ function Dashboard({ preview, panel }: { preview: boolean; panel: string | null 
       setStatus("needs_verification");
     } else if (id.startsWith("task:")) reveal(id.slice(5));
   };
+  const categoryCost = profile.forecast && category !== "all" ? folderCost(profile.forecast, category) : null;
   const askAbout = (task: PlanTask) => {
     setSeed({ text: `Explain this task in plain words: “${task.title}”. What should I do first?`, nonce: Date.now() });
     setAssistantOpen(true);
@@ -525,6 +528,10 @@ function Dashboard({ preview, panel }: { preview: boolean; panel: string | null 
             </div>
           </div>
 
+          {categoryCost && <div className="folder-budget"><strong>{categoryCost.label}</strong>
+            <span>{profile.currentState} {money(categoryCost.before)} → {profile.destinationState} {money(categoryCost.after)} / mo</span>
+            <small>{category === "taxes" ? "Modeled tax on the salary in your chat forecast." : "Spending benchmark for your household size. Included in the automatic budget."}</small>
+          </div>}
           <div className="mt-3 flex flex-wrap gap-3">
             <select aria-label="Task category" className="rounded-lg border border-line bg-card px-3 py-2" value={category} onChange={e => setCategory(e.target.value as typeof category)}>
               <option value="all">All categories</option>

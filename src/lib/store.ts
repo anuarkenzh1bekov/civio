@@ -42,7 +42,7 @@ function read(): Saved {
   try {
     raw = window.localStorage.getItem(KEY);
   } catch {
-    // Storage can be blocked (private mode). The app then works for the session only.
+    if (cache) return cache.value;
   }
   if (cache && cache.raw === raw) return cache.value;
   let value = EMPTY;
@@ -86,7 +86,11 @@ function write(next: Saved, sync = true) {
   try {
     window.localStorage.setItem(KEY, raw);
   } catch {
-    // Keep the in-memory copy.
+    // Use the readable storage snapshot (including null) as the cache key
+    // if writes are unavailable, so the next render retains the plan.
+    let existing: string | null = null;
+    try { existing = window.localStorage.getItem(KEY); } catch { /* Storage is blocked. */ }
+    cache = { raw: existing, value };
   }
   listeners.forEach((fn) => fn());
   if (sync && value.sid) {

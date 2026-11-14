@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { ProfileSchema } from "@/lib/profile-schema";
+import { forecastSchema } from "@/lib/forecast/schema";
 import { isSessionId, sessions } from "@/lib/server/sessions";
 
 export const runtime = "nodejs";
@@ -7,7 +8,8 @@ export const runtime = "nodejs";
 /** What a session holds. Validated on every write, so the store never keeps arbitrary JSON. */
 const SessionSchema = z
   .object({
-    profile: ProfileSchema,
+    profile: ProfileSchema.extend({ forecast: forecastSchema.optional() }).refine(p => !p.forecast ||
+      (p.forecast.origin === p.currentState && p.forecast.destination === p.destinationState)),
     done: z.array(z.string().max(64)).max(200),
     demo: z.boolean(),
     costs: z.record(z.string().max(64), z.number().min(-1_000_000).max(1_000_000)),

@@ -17,16 +17,7 @@ export default function ComparePage() {
     return <main className={styles.loading} aria-busy="true" aria-label="Loading comparison" />;
   }
 
-  const budget = profile.budget;
-  const hasDestinationEstimates = budget && (
-    budget.incomeAfter !== undefined ||
-    budget.housingAfter !== undefined ||
-    budget.otherAfter !== undefined ||
-    budget.moving !== undefined
-  );
-  const comparisonProfile = hasPlan
-    ? { ...DEMO_PROFILE, ...profile, budget: hasDestinationEstimates ? budget : DEMO_PROFILE.budget }
-    : DEMO_PROFILE;
+  const comparisonProfile = hasPlan ? profile : DEMO_PROFILE;
 
   return (
     <div className={styles.page}>

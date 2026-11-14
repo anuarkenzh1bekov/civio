@@ -96,9 +96,9 @@ export function CostCalculator({
         </div>
 
         <div className="tile p-5">
-          <h3 className="font-sans text-[0.9375rem] font-semibold">What changes, without a number</h3>
+          <h3 className="font-sans text-[0.9375rem] font-semibold">Tax and coverage details</h3>
           <p className="mt-1 text-sm text-ink-muted">
-            Civio does not calculate taxes or premiums. These are the things to ask a tax professional or your insurer about.
+            Check these requirements with the agency or insurer for your move.
           </p>
           <ul className="mt-4 grid gap-3 text-sm">
             {summary.changes.map((change) => (

@@ -81,7 +81,7 @@
   content: "";
   position: absolute;
   inset: 0;
-  background: linear-gradient(90deg, color-mix(in srgb, var(--color-canvas) 94%, transparent), color-mix(in srgb, var(--color-canvas) 83%, transparent) 35%, color-mix(in srgb, var(--color-canvas) 54%, transparent) 70%, color-mix(in srgb, var(--color-canvas) 43%, transparent));
+  background: radial-gradient(ellipse 68% 115% at 50% 42%, color-mix(in srgb, var(--color-canvas) 97%, transparent) 14%, color-mix(in srgb, var(--color-canvas) 88%, transparent) 48%, color-mix(in srgb, var(--color-canvas) 55%, transparent) 100%);
 }
 
 .motionControl {
@@ -113,18 +113,20 @@
 .sceneInner {
   display: flex;
   align-items: center;
-  min-height: clamp(31rem, 41vw, 42rem);
+  justify-content: center;
+  min-height: clamp(31rem, 41vw, 44rem);
 }
 
 .copy {
   position: relative;
   z-index: 1;
-  width: 52%;
-  padding-block: 3.5rem;
+  width: 58%;
+  padding-block: 3.5rem 4rem;
+  text-align: center;
 }
 
 .copy h1 {
-  font: 530 clamp(3.5rem, 7.25vw, 7.3rem)/.94 var(--font-sans);
+  font: 530 clamp(3.4rem, 7.15vw, 7.25rem)/.94 var(--font-sans);
   letter-spacing: -.06em;
   text-wrap: initial;
 }
@@ -135,13 +137,14 @@
 
 .copy > p {
   max-width: 26rem;
-  margin-top: 1.45rem;
+  margin: 1.35rem auto 0;
   color: var(--color-ink-muted);
   font-size: clamp(1rem, 1.25vw, 1.18rem);
   line-height: 1.5;
 }
 
 .actions {
+  justify-content: center;
   flex-wrap: wrap;
   gap: 1.55rem;
   margin-top: 1.7rem;
@@ -168,25 +171,37 @@
   text-underline-offset: .25em;
 }
 
-.photograph {
+.photographs {
   position: absolute;
-  top: 50%;
-  right: 0;
-  width: clamp(0px, 49vw, 57rem);
-  max-height: 100%;
-  aspect-ratio: 1878 / 1494;
-  transform: translateY(-50%);
+  inset: 0;
   pointer-events: none;
+  user-select: none;
 }
 
-.photograph img {
+.photographs img {
+  position: absolute;
   display: block;
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  object-position: right center;
+  height: auto;
+}
+
+.keyHand {
+  top: 3%;
+  right: -1%;
+  width: min(27%, 29.4rem);
   transform: scaleX(-1);
-  transform-origin: center;
+}
+
+.paperHand {
+  left: .8%;
+  bottom: 0;
+  width: min(24%, 25.3rem);
+  transform: translateY(15%);
+}
+
+.cashHand {
+  right: -1.6%;
+  bottom: 8%;
+  width: min(34%, 35rem);
 }
 
 .summary {
@@ -286,7 +301,7 @@
 @media (max-width: 760px) {
   .headerInner { min-height: 3.9rem; }
   .header nav { gap: 1rem; }
-  .sceneInner { min-height: 24rem; }
+  .sceneInner { min-height: 26rem; }
   .copy { padding-block: 2.3rem; }
   .copy h1 { font-size: clamp(2.9rem, 7.4vw, 3.6rem); }
   .actions { gap: .85rem; }
@@ -299,19 +314,25 @@
   .sources { justify-content: flex-start; }
 }
 
-@media (max-width: 580px) {
+@media (max-width: 700px) {
   .backdrop::after {
     background: linear-gradient(180deg, color-mix(in srgb, var(--color-canvas) 94%, transparent), color-mix(in srgb, var(--color-canvas) 87%, transparent) 39%, color-mix(in srgb, var(--color-canvas) 54%, transparent) 73%, color-mix(in srgb, var(--color-canvas) 52%, transparent));
   }
-  .motionControl { bottom: .45rem; right: .65rem; }
-  .headerInner { display: flex; justify-content: space-between; }
-  .header nav { display: none; }
-  .sceneInner { display: block; min-height: auto; }
-  .copy { width: 100%; padding-block: 2.3rem 0; text-align: center; }
+  .motionControl { right: auto; left: 49%; bottom: .35rem; transform: translateX(-50%); }
+  .sceneInner { min-height: auto; }
+  .copy { width: 100%; padding-block: 2.3rem 0; }
   .copy h1 { font-size: clamp(3rem, 11.8vw, 4.25rem); }
   .copy > p { max-width: 23rem; margin: .9rem auto 0; }
   .actions { margin-top: 1.1rem; justify-content: center; gap: 1.1rem; }
-  .photograph { position: relative; inset: auto; margin: .9rem 0 .65rem auto; width: min(88%, 23rem); max-height: none; transform: none; }
+  .photographs { position: relative; inset: auto; height: clamp(10rem, 47vw, 18rem); margin-top: 1.25rem; }
+  .paperHand { left: 2%; width: 36%; max-height: 110%; object-fit: contain; object-position: bottom left; transform: translateY(11%); }
+  .keyHand { top: 0; right: -.7%; width: 38%; }
+  .cashHand { right: -2%; bottom: 1%; width: 48%; }
+}
+
+@media (max-width: 580px) {
+  .headerInner { display: flex; justify-content: space-between; }
+  .header nav { display: none; }
   .summaryInner { padding-block: 1.15rem 1.4rem; }
   .metrics dt { font-size: .75rem; }
   .metrics dd { font-size: clamp(1.3rem, 5.3vw, 1.7rem); }

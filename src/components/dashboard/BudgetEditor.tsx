@@ -3,6 +3,8 @@
 import { CheckCheck, ListChecks, SlidersHorizontal, Truck, type LucideIcon } from "lucide-react";
 import { useRef, useState } from "react";
 import { BudgetProjection } from "@/components/BudgetProjection";
+import { ForecastDetails } from "@/components/ForecastDetails";
+import Link from "next/link";
 import { compareBudget, dollars, matchingIncome, monthlyRows, type MoveBudget } from "@/lib/budget";
 import type { Profile } from "@/lib/types";
 
@@ -82,6 +84,8 @@ export function BudgetEditor({ profile, sample, onSave, onChecklist }: BudgetEdi
         </section>
         <BudgetProjection budget={budget} />
       </div>
+      {profile.forecast && <ForecastDetails forecast={profile.forecast} budget={budget} />}
+      {!sample && !profile.forecast && <p className="forecast-entry"><Link href="/onboarding">Estimate my budget with Civio →</Link></p>}
       <form key={version} id="budget" ref={formRef} className="ledger-panel" onSubmit={event => {
         event.preventDefault();
         if (draft) onSave(draft);
