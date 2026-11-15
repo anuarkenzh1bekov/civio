@@ -1,0 +1,9 @@
+node_modules
+.next
+.git
+.data
+.env*
+!.env.example
+pitch-screens
+*.log
+.claude

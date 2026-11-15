@@ -32,7 +32,7 @@ const noStore = { "Cache-Control": "no-store" };
 export async function GET(request: Request) {
   const sid = new URL(request.url).searchParams.get("sid") ?? "";
   const mode = mailMode();
-  const record = isSessionId(sid) ? reminders().get(sid) : null;
+  const record = isSessionId(sid) ? await reminders().get(sid) : null;
   const status: ReminderStatus["status"] = record?.status === "confirmed" || record?.status === "pending" ? record.status : "none";
   return Response.json(
     { mode, status, ...(record && status !== "none" ? { email: maskEmail(record.email) } : {}) } satisfies ReminderStatus,
@@ -44,14 +44,14 @@ export async function POST(request: Request) {
   const parsed = BodySchema.safeParse(await request.json().catch(() => null));
   if (!parsed.success) return Response.json({ error: "Enter a valid email and tick the box to agree." }, { status: 400 });
   const { sid, email } = parsed.data;
-  if (!isSessionId(sid) || !sessions().get(sid)) {
+  if (!isSessionId(sid) || !(await sessions().get(sid))) {
     return Response.json({ error: "Open your plan first, then turn reminders on." }, { status: 404 });
   }
   const mode = mailMode();
   if (mode === "off") return Response.json({ error: "Email is not set up on this server." }, { status: 503 });
 
   const store = reminders();
-  const existing = store.get(sid);
+  const existing = await store.get(sid);
   if (existing?.status === "confirmed" && existing.email === email) {
     return Response.json({ mode, status: "confirmed", email: maskEmail(email) } satisfies ReminderStatus);
   }
@@ -68,7 +68,7 @@ export async function POST(request: Request) {
   if (!delivered) return Response.json({ error: "The confirmation email could not be sent. Try again later." }, { status: 502 });
 
   const now = Date.now();
-  store.put({ sid, email, status: "pending", token, createdAt: existing?.createdAt ?? now, confirmSentAt: now, sent: existing?.sent ?? [] });
+  await store.put({ sid, email, status: "pending", token, createdAt: existing?.createdAt ?? now, confirmSentAt: now, sent: existing?.sent ?? [] });
   return Response.json(
     {
       mode,

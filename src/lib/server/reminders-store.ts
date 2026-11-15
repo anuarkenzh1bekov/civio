@@ -1,12 +1,13 @@
 import { mkdirSync, readFileSync, renameSync, writeFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import path from "node:path";
+import { firestore, useFirestore } from "@/lib/server/firestore";
 
 /**
  * Reminder subscriptions, one per anonymous session. The email lives only here, never in the
  * session document, and is removed when the person unsubscribes. Same two backends as the
- * sessions store (built-in SQLite, or a JSON file) and the same advice: for a multi-instance
- * deployment swap `open()` for Postgres, the interface is four functions.
+ * sessions store (Firestore on Cloud Run, locally built-in SQLite or a JSON file) and the same advice: for a multi-instance
+ * deployment swap `open()` for Postgres, the interface is four async functions.
  */
 
 export type Reminder = {
@@ -24,13 +25,33 @@ export type Reminder = {
 };
 
 export type ReminderStore = {
-  get(sid: string): Reminder | null;
-  byToken(token: string): Reminder | null;
-  put(reminder: Reminder): void;
-  all(): Reminder[];
+  get(sid: string): Promise<Reminder | null>;
+  byToken(token: string): Promise<Reminder | null>;
+  put(reminder: Reminder): Promise<void>;
+  all(): Promise<Reminder[]>;
 };
 
 const DIR = path.join(process.cwd(), ".data");
+
+function openFirestore(): ReminderStore {
+  const collection = () => firestore().collection("reminders");
+  return {
+    async get(sid) {
+      const snapshot = await collection().doc(sid).get();
+      return snapshot.exists ? (snapshot.data() as Reminder) : null;
+    },
+    async byToken(token) {
+      const found = await collection().where("token", "==", token).limit(1).get();
+      return found.empty ? null : (found.docs[0]!.data() as Reminder);
+    },
+    async put(reminder) {
+      await collection().doc(reminder.sid).set(reminder);
+    },
+    async all() {
+      return (await collection().where("status", "==", "confirmed").get()).docs.map((d) => d.data() as Reminder);
+    },
+  };
+}
 
 function openSqlite(): ReminderStore {
   const require = createRequire(import.meta.url);
@@ -51,10 +72,10 @@ function openSqlite(): ReminderStore {
   );
   const parse = (row: unknown) => (row ? (JSON.parse((row as { data: string }).data) as Reminder) : null);
   return {
-    get: (sid) => parse(bySid.get(sid)),
-    byToken: (token) => parse(byToken.get(token)),
-    put: (r) => void upsert.run(r.sid, r.token, JSON.stringify(r)),
-    all: () => list.all().map((row) => parse(row)!),
+    get: async (sid) => parse(bySid.get(sid)),
+    byToken: async (token) => parse(byToken.get(token)),
+    put: async (r) => void upsert.run(r.sid, r.token, JSON.stringify(r)),
+    all: async () => list.all().map((row) => parse(row)!),
   };
 }
 
@@ -68,15 +89,15 @@ function openFile(): ReminderStore {
     }
   };
   return {
-    get: (sid) => read().find((r) => r.sid === sid) ?? null,
-    byToken: (token) => read().find((r) => r.token === token) ?? null,
-    put(reminder) {
+    get: async (sid) => read().find((r) => r.sid === sid) ?? null,
+    byToken: async (token) => read().find((r) => r.token === token) ?? null,
+    async put(reminder) {
       const rest = read().filter((r) => r.sid !== reminder.sid);
       const temp = `${file}.${process.pid}.tmp`;
       writeFileSync(temp, JSON.stringify([...rest, reminder]));
       renameSync(temp, file);
     },
-    all: read,
+    all: async () => read(),
   };
 }
 
@@ -84,6 +105,7 @@ let store: ReminderStore | undefined;
 
 export function reminders(): ReminderStore {
   if (store) return store;
+  if (useFirestore()) return (store = openFirestore());
   mkdirSync(DIR, { recursive: true });
   try {
     store = openSqlite();

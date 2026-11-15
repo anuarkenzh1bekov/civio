@@ -28,9 +28,9 @@ async function handle(request: Request) {
 
   const store = reminders();
   const result = await runReminders({
-    records: store.all(),
-    loadSession(sid) {
-      const row = sessions().get(sid);
+    records: await store.all(),
+    async loadSession(sid) {
+      const row = await sessions().get(sid);
       if (!row) return null;
       const data = JSON.parse(row.data) as { profile: Profile; done: string[] };
       return { profile: data.profile, done: data.done };

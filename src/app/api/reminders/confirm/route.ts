@@ -14,10 +14,10 @@ const page = (title: string, body: string, status = 200) =>
 export async function GET(request: Request) {
   const token = new URL(request.url).searchParams.get("token") ?? "";
   const store = reminders();
-  const record = token.length >= 16 ? store.byToken(token) : null;
+  const record = token.length >= 16 ? await store.byToken(token) : null;
   if (!record || record.status === "unsubscribed" || !record.email) {
     return page("This link is no longer valid", "Turn reminders on again from your plan to get a new confirmation email.", 404);
   }
-  if (record.status !== "confirmed") store.put({ ...record, status: "confirmed", confirmedAt: Date.now() });
+  if (record.status !== "confirmed") await store.put({ ...record, status: "confirmed", confirmedAt: Date.now() });
   return Response.redirect(`${appOrigin(request)}/dashboard?s=${record.sid}&reminders=confirmed`, 302);
 }

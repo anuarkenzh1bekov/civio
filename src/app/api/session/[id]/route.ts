@@ -20,7 +20,7 @@ type Context = { params: Promise<{ id: string }> };
 export async function GET(_request: Request, { params }: Context) {
   const { id } = await params;
   if (!isSessionId(id)) return Response.json({ error: "Not found." }, { status: 404 });
-  const row = sessions().get(id);
+  const row = await sessions().get(id);
   if (!row) return Response.json({ error: "Not found." }, { status: 404 });
   return Response.json(
     { session: JSON.parse(row.data), updatedAt: row.updatedAt },
@@ -40,6 +40,6 @@ export async function PUT(request: Request, { params }: Context) {
     return Response.json({ error: "Invalid session." }, { status: 400 });
   }
   const updatedAt = Date.now();
-  sessions().put(id, JSON.stringify(session), updatedAt);
+  await sessions().put(id, JSON.stringify(session), updatedAt);
   return Response.json({ ok: true, updatedAt });
 }

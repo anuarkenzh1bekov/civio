@@ -7,9 +7,9 @@ import type { Profile } from "@/lib/types";
 
 export type RunDeps = {
   records: readonly Reminder[];
-  loadSession: (sid: string) => { profile: Profile; done: string[] } | null;
+  loadSession: (sid: string) => Promise<{ profile: Profile; done: string[] } | null> | { profile: Profile; done: string[] } | null;
   send: (mail: Mail) => Promise<boolean>;
-  save: (reminder: Reminder) => void;
+  save: (reminder: Reminder) => Promise<void> | void;
   today: string;
   origin: string;
   /** Work out what would be sent without sending or recording anything. */
@@ -33,7 +33,7 @@ export async function runReminders(deps: RunDeps): Promise<RunResult> {
   for (const record of deps.records) {
     if (record.status !== "confirmed" || !record.email) continue;
     result.checked++;
-    const session = deps.loadSession(record.sid);
+    const session = await deps.loadSession(record.sid);
     if (!session) continue;
 
     const plan = generatePlan(session.profile, RULES);
@@ -55,7 +55,7 @@ export async function runReminders(deps: RunDeps): Promise<RunResult> {
     }
     if (delivered) {
       // Recorded only after a successful send, so a failed run is retried by the next one.
-      deps.save({ ...record, sent: [...new Set([...record.sent, ...mark])] });
+      await deps.save({ ...record, sent: [...new Set([...record.sent, ...mark])] });
       result.emailed++;
     } else {
       result.failed++;

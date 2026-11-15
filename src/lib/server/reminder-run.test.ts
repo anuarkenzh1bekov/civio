@@ -19,7 +19,9 @@ function setup(records: Reminder[], opts: { fail?: boolean; done?: string[] } = 
       sent.push(mail);
       return true;
     },
-    save: (r: Reminder) => saved.push(r),
+    save: (r: Reminder) => {
+      saved.push(r);
+    },
     today: "2027-02-01", // three days before the 20-day vehicle registration deadline of a Jan 15 move
     origin: "https://civio.test",
   };

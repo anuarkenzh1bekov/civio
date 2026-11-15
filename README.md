@@ -78,7 +78,7 @@ questionnaire ──────────────────────
 3. **Documents** (`/api/documents`). Letters are built from templates and the user's inputs. On request, the model rewrites a letter for tone and extra details; it is told not to add legal claims, deadlines or amounts and leaves a `[placeholder]` instead. Without a key the template is the letter.
    The same page fills the official **IRS Form 8822** (change of address) in the browser with `pdf-lib` (`src/lib/forms/f8822.ts`, form in `public/forms/`): the PDF's own fields get the typed values and nothing is sent to a server. Social security numbers and signatures are always left blank.
 
-4. **Deadline reminders** (`/api/reminders`, `src/lib/reminders.ts`). Plain code on the deterministic plan, no model: 7, 3 and 1 days before a task's date the person gets one email (a person who joins two days before a deadline gets one email, not three), nothing for tasks marked done, one note for a deadline that was missed. The address is confirmed by a link in an email first (double opt-in), kept apart from the plan, removed on unsubscribe, and every email has an unsubscribe link and header. A daily job (`/api/reminders/run`, closed unless `CRON_SECRET` is set, scheduled in `vercel.json`) recomputes each plan from the stored session, so dates in emails always match the app. Mail goes through Resend (`RESEND_API_KEY`, `MAIL_FROM`); in development it is written to `.data/outbox/` instead. Sessions and subscriptions live in `.data/`: on a serverless host swap the two stores for a database (`src/lib/server/sessions.ts`, `reminders-store.ts`)
+4. **Deadline reminders** (`/api/reminders`, `src/lib/reminders.ts`). Plain code on the deterministic plan, no model: 7, 3 and 1 days before a task's date the person gets one email (a person who joins two days before a deadline gets one email, not three), nothing for tasks marked done, one note for a deadline that was missed. The address is confirmed by a link in an email first (double opt-in), kept apart from the plan, removed on unsubscribe, and every email has an unsubscribe link and header. A daily job (`/api/reminders/run`, closed unless `CRON_SECRET` is set, called daily by Cloud Scheduler) recomputes each plan from the stored session, so dates in emails always match the app. Mail goes through Resend (`RESEND_API_KEY`, `MAIL_FROM`); in development it is written to `.data/outbox/` instead. Sessions and subscriptions live in Firestore on Cloud Run and in `.data/` locally (`src/lib/server/sessions.ts`, `reminders-store.ts`)
 
 The profile is sent to the assistant only when the user has switched sharing on. Names and addresses typed into letters stay in the browser and are sent to the model only when the user presses "Tailor with AI".
 
@@ -127,3 +127,24 @@ Layout and visuals are Tailwind. Astryx supplies the interactive pieces that are
 | `Switch` | Profile sharing with the assistant |
 
 `/dashboard?panel=ask` and `/dashboard?panel=search` open the assistant and the palette directly. The CSS layer order in `src/app/globals.css` follows the Astryx Next.js + Tailwind example; the overrides at the end of that file keep Civio's typefaces and text colors.
+
+## Deploy on Google Cloud Run
+
+The app ships as a container (`Dockerfile`, Next.js `standalone` output). On Cloud Run the container's disk is wiped on restart, so sessions and reminder subscriptions are stored in Firestore (chosen automatically when `K_SERVICE` is set, or with `STORE=firestore`).
+
+```sh
+# once per project
+gcloud services enable run.googleapis.com cloudbuild.googleapis.com artifactregistry.googleapis.com firestore.googleapis.com secretmanager.googleapis.com cloudscheduler.googleapis.com
+gcloud firestore databases create --location=us-central1 --type=firestore-native
+printf '%s' "$GOOGLE_API_KEY" | gcloud secrets create google-api-key --data-file=-
+printf '%s' "$(openssl rand -hex 24)" | gcloud secrets create cron-secret --data-file=-
+# let the service account read the secrets and use Firestore (roles/secretmanager.secretAccessor, roles/datastore.user)
+
+# deploy (builds the image with Cloud Build)
+gcloud run deploy civio --source . --region us-central1 --allow-unauthenticated   --max-instances 3 --memory 512Mi   --set-secrets GOOGLE_API_KEY=google-api-key:latest,CRON_SECRET=cron-secret:latest   --set-env-vars APP_URL=https://civio-<PROJECT_NUMBER>.us-central1.run.app
+
+# daily reminders
+gcloud scheduler jobs create http civio-reminders --location us-central1 --schedule "0 15 * * *"   --uri https://civio-<PROJECT_NUMBER>.us-central1.run.app/api/reminders/run --http-method GET   --headers "Authorization=Bearer $(gcloud secrets versions access latest --secret cron-secret)"
+```
+
+For emails add `RESEND_API_KEY` and `MAIL_FROM` as secrets / env vars. Cost at demo traffic is inside the free tiers of Cloud Run, Firestore and Cloud Scheduler; Gemini is billed per token.
