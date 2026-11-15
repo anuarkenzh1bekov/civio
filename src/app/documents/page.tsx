@@ -5,6 +5,8 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Suspense, useMemo, useState } from "react";
 import type { DocumentResponse } from "@/app/api/documents/route";
+import { Field } from "@/components/documents/Field";
+import { TaxForm8822 } from "@/components/documents/TaxForm8822";
 import { Logo } from "@/components/Logo";
 import {
   availableLetters,
@@ -68,34 +70,6 @@ function download(name: string, text: string) {
   link.download = name;
   link.click();
   URL.revokeObjectURL(url);
-}
-
-function Field({
-  label,
-  value,
-  onChange,
-  placeholder,
-  autoComplete,
-}: {
-  label: string;
-  value: string;
-  onChange: (value: string) => void;
-  placeholder?: string;
-  autoComplete?: string;
-}) {
-  return (
-    <label className="block">
-      <span className="text-sm font-medium">{label}</span>
-      <input
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        placeholder={placeholder}
-        autoComplete={autoComplete ?? "off"}
-        maxLength={200}
-        className="mt-1.5 h-11 w-full rounded-xl bg-panel px-3 text-[0.9375rem] ring-1 ring-line placeholder:text-ink-muted/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink"
-      />
-    </label>
-  );
 }
 
 function Letters({ unlocked, onUnlock, profile }: { unlocked: boolean; onUnlock: () => void; profile: Profile }) {
@@ -375,6 +349,8 @@ function Documents({ preview }: { preview: boolean }) {
             ))}
           </ol>
         </section>
+
+        {tasks.some((task) => task.id === "US-TAX-8822") && <TaxForm8822 profile={profile} />}
 
         <div className="mt-6">
           <Letters unlocked={pack} onUnlock={() => setPack(true)} profile={profile} />
