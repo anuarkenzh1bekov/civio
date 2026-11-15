@@ -1,8 +1,6 @@
 # Civio
 
-Civio is for a household deciding whether to move to another US state. You enter what you earn and spend now and what you expect after the move, and it shows the difference over the first year. Then it builds the checklist that comes with the move: taxes, health insurance, vehicle paperwork and school enrollment, each task with a deadline and a link to the official page.
-
-The demo scenario is a move from Texas to California.
+Civio helps a household work out whether a move to another US state pays off, and then walks it through the paperwork the move brings: taxes, health insurance, vehicle registration and school enrollment.
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/civio-demo-dark.gif">
@@ -11,10 +9,9 @@ The demo scenario is a move from Texas to California.
 
 The recording follows your GitHub theme. Both versions: [light](docs/civio-demo-light.gif), [dark](docs/civio-demo-dark.gif). Live demo: https://civio-1008637543619.us-central1.run.app/
 
-Requirements, deadlines, task order and totals come from a rule base and plain code. A model reads free text, explains rules and rewrites letters. Every AI feature has a rule-based fallback, so the app works with no API key at all.
-
 ## Contents
 
+- [What Civio is](#what-civio-is)
 - [Run it](#run-it)
 - [Screens](#screens)
 - [How it works](#how-it-works)
@@ -22,6 +19,45 @@ Requirements, deadlines, task order and totals come from a rule base and plain c
 - [What is verified, and what is not](#what-is-verified-and-what-is-not)
 - [Stack](#stack)
 - [Deploy on Google Cloud Run](#deploy-on-google-cloud-run)
+
+## What Civio is
+
+A move to another state raises two questions at once. Will the household have more or less money after it? And what has to be filed, changed or cancelled, and by when? The answers are spread across state and federal sites, and each state has its own deadlines. Civio puts the budget and the paperwork in one plan.
+
+### Who it is for
+
+A household that is planning a move between US states, or is still choosing between up to three destinations. The demo follows a family going from Texas to California.
+
+### What you put in
+
+- What you take home each month now and what you expect after the move.
+- Housing, other living costs and the one-time cost of the move itself.
+- A few facts about the household: work, children, health insurance, a car.
+
+You can answer step by step, describe the move in your own words, or upload a photo of a license, insurance card or lease. Skipping a question is allowed. Civio then marks the tasks that depend on it as "Needs verification" and does not guess.
+
+### What you get back
+
+| | |
+|---|---|
+| First-year outlook | How much cash the move adds or takes away over 12 months, moving costs included, and the take-home pay you would need to keep today's monthly balance. |
+| Destination comparison | The same numbers for up to three states side by side. |
+| Checklist | Tasks for taxes, health insurance, vehicle paperwork and school enrollment. Each has a date counted from your move date, the steps, the documents to bring and a link to the official page. Tasks appear in the order you can actually do them. |
+| Cost calculator | The fees your tasks involve, each linked to the page that states the amount. You enter the amounts and Civio totals them. |
+| Who to notify | A list of the offices and companies that need your new address. |
+| Letters and forms | Change-of-address letters filled from your answers, and the official IRS Form 8822 filled in the browser. |
+| Reminders | An email 7, 3 and 1 days before a deadline, if you ask for them. |
+| Assistant | Plain-language answers about your tasks, each with links to the official text it came from. |
+
+### What it does not do
+
+Civio gives general information. It is not legal, tax or insurance advice. It has checked rules for five states so far (California, Texas, Florida, Washington and New York) and says so when a state is not covered. It stores no fee amounts. There are no accounts: a plan lives in your browser and under an anonymous link you can open on another device.
+
+The plan, the assistant, the cost calculator and the who-to-notify list are free. Letters are a paid add-on, and checkout is a demo for now. Details are under [Pricing](#pricing).
+
+### How much of it is AI
+
+Requirements, deadlines, task order and totals come from a rule base and plain code. A model reads free text, explains rules and rewrites letters. Every AI feature has a rule-based fallback, so the app works with no API key at all.
 
 ## Run it
 
