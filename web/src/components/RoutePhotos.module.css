@@ -1,0 +1,12 @@
+.photos { position: absolute; z-index: -2; inset: 0; overflow: hidden; pointer-events: none; }
+.photos img { object-fit: cover; opacity: 0; }
+.photos img[data-ready="true"] { opacity: 1; }
+
+/* Both images fill the frame, even while the other one's request is pending. */
+.photos:has(.origin[data-ready="true"]) .destination {
+  mask-image: linear-gradient(98deg, transparent 29%, rgb(0 0 0 / .12) 39%, rgb(0 0 0 / .88) 61%, black 71%);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .destination { transition: opacity 360ms ease-out; }
+}

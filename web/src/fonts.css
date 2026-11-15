@@ -1,0 +1,13 @@
+/* Typefaces, served from the app itself. globals.css maps these onto the type roles. */
+@import "@fontsource-variable/bricolage-grotesque/index.css";
+@import "@fontsource-variable/instrument-sans/index.css";
+@import "@fontsource-variable/geist-mono/index.css";
+@import "@fontsource/instrument-serif/400.css";
+@import "@fontsource/instrument-serif/400-italic.css";
+
+:root {
+  --font-bricolage: "Bricolage Grotesque Variable";
+  --font-instrument: "Instrument Sans Variable";
+  --font-instrument-serif: "Instrument Serif";
+  --font-geist-mono: "Geist Mono Variable";
+}

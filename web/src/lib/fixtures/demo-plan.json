@@ -1,0 +1,348 @@
+[
+  {
+    "id": "CA-VEH-RESIDENCY",
+    "ruleId": "CA-VEH-RESIDENCY",
+    "title": "Collect proof of your California address",
+    "category": "vehicle",
+    "priority": "high",
+    "description": "The DMV asks for documents that show you live in California when you apply for a driver license. Without them the office visit does not count, so this comes before the license.",
+    "steps": [
+      "Open the DMV's list of accepted residency documents.",
+      "Pick documents that show your name and new California address, such as a signed lease or a utility bill.",
+      "Keep the originals together with your identity document for the DMV visit."
+    ],
+    "documents": [
+      "California residency documents from the DMV's accepted list",
+      "Identity document from the DMV's accepted list"
+    ],
+    "deadline": null,
+    "financial": null,
+    "source": {
+      "name": "California DMV — Requirements for a California driver's license",
+      "url": "https://www.dmv.ca.gov/portal/file/fast-facts-5-requirements-for-a-california-drivers-license/",
+      "lastVerified": "2026-11-14"
+    },
+    "dependsOn": [],
+    "status": "pending"
+  },
+  {
+    "id": "CA-VEH-DL",
+    "ruleId": "CA-VEH-DL",
+    "title": "Get a California driver license",
+    "category": "vehicle",
+    "priority": "high",
+    "description": "If you become a California resident and drive, the DMV says you must get a California driver license within 10 days.",
+    "steps": [
+      "Start the driver license application on the DMV site.",
+      "Book a DMV office visit.",
+      "Bring your identity and residency documents and your current license."
+    ],
+    "documents": [
+      "Current out-of-state driver license",
+      "Identity and California residency documents listed by the DMV"
+    ],
+    "deadline": {
+      "label": "Within 10 days of becoming a California resident",
+      "date": "2027-01-25"
+    },
+    "financial": {
+      "kind": "fee",
+      "note": "The DMV charges an application fee."
+    },
+    "source": {
+      "name": "California DMV — Requirements for a California driver's license",
+      "url": "https://www.dmv.ca.gov/portal/file/fast-facts-5-requirements-for-a-california-drivers-license/",
+      "lastVerified": "2026-11-14"
+    },
+    "dependsOn": [
+      "CA-VEH-RESIDENCY"
+    ],
+    "status": "pending",
+    "daysAfterMove": 10
+  },
+  {
+    "id": "CA-VEH-INSURANCE",
+    "ruleId": "CA-VEH-INSURANCE",
+    "title": "Move your auto insurance to a California policy",
+    "category": "vehicle",
+    "priority": "medium",
+    "description": "California's minimum liability limits rose on January 1, 2025: $30,000 for injury or death of one person, $60,000 per accident, and $15,000 for property damage.",
+    "steps": [
+      "Tell your insurer your move date and California garaging address.",
+      "Confirm the new policy meets the 30/60/15 minimum.",
+      "Keep proof of insurance for your DMV registration visit."
+    ],
+    "documents": [
+      "Proof of California auto insurance"
+    ],
+    "deadline": null,
+    "financial": {
+      "kind": "fee",
+      "note": "Your premium is re-rated for the new address."
+    },
+    "source": {
+      "name": "California Department of Insurance — Automobile insurance guide",
+      "url": "https://www.insurance.ca.gov/01-consumers/105-type/95-guides/01-auto/upload/IG-Auto-Insurance-Updated-020525.pdf",
+      "lastVerified": "2026-11-14",
+      "effectiveDate": "2025-01-01"
+    },
+    "dependsOn": [],
+    "status": "pending"
+  },
+  {
+    "id": "CA-VEH-REG",
+    "ruleId": "CA-VEH-REG",
+    "title": "Register your vehicle in California",
+    "category": "vehicle",
+    "priority": "high",
+    "description": "The California DMV requires a vehicle from another state to be registered within 20 days of establishing residency or accepting employment in California. The DMV advises submitting the application and fees on time even if some paperwork is still missing.",
+    "steps": [
+      "Get a smog certification from a California smog station, if your vehicle needs one.",
+      "Complete form REG 343, signed by every registered owner.",
+      "Bring the vehicle to a DMV office for VIN verification (REG 31). An appointment is recommended.",
+      "Hand in the out-of-state title, registration and plates, and pay the fees."
+    ],
+    "documents": [
+      "Application for Title or Registration (REG 343)",
+      "Out-of-state title",
+      "Out-of-state registration or renewal notice",
+      "Smog certification, if required",
+      "Verification of Vehicle (REG 31)"
+    ],
+    "deadline": {
+      "label": "Within 20 days of establishing residency or accepting employment in California",
+      "date": "2027-02-04"
+    },
+    "financial": {
+      "kind": "penalty",
+      "note": "Registration fees and use tax are due. Late registration adds DMV penalties."
+    },
+    "source": {
+      "name": "California DMV — New California resident portal",
+      "url": "https://www.dmv.ca.gov/portal/driver-education-and-safety/special-interest-driver-guides/new-to-california/",
+      "lastVerified": "2026-11-14"
+    },
+    "dependsOn": [
+      "CA-VEH-INSURANCE"
+    ],
+    "status": "pending",
+    "daysAfterMove": 20
+  },
+  {
+    "id": "CA-HEALTH-COVEREDCA",
+    "ruleId": "CA-HEALTH-COVEREDCA",
+    "title": "Enroll through Covered California",
+    "category": "health",
+    "priority": "high",
+    "description": "A Marketplace plan from another state does not follow you. Moving to California is a qualifying life event, and Covered California generally gives you 60 days from the move date to apply.",
+    "steps": [
+      "Start a new application at CoveredCA.com with your California address.",
+      "Compare plans available in your new ZIP code.",
+      "Pick a plan, then end your old-state plan so the coverage dates line up."
+    ],
+    "documents": [
+      "Proof of your new address and move date (lease, utility bill)",
+      "Household income details",
+      "Social Security numbers for everyone applying"
+    ],
+    "deadline": {
+      "label": "Generally 60 days from the date of your move",
+      "date": "2027-03-16"
+    },
+    "financial": {
+      "kind": "coverage",
+      "note": "Miss the window and you wait for the next open enrollment without a plan."
+    },
+    "source": {
+      "name": "Covered California — Major life changes",
+      "url": "https://www.coveredca.com/special-enrollment/",
+      "lastVerified": "2026-11-14"
+    },
+    "dependsOn": [],
+    "status": "pending",
+    "daysAfterMove": 60
+  },
+  {
+    "id": "US-TAX-1040ES",
+    "ruleId": "US-TAX-1040ES",
+    "title": "Review your quarterly estimated tax payments",
+    "category": "taxes",
+    "priority": "high",
+    "description": "With 1099 or self-employment income, no employer withholds tax for you. The IRS says you generally have to make estimated payments if you expect to owe $1,000 or more when you file.",
+    "steps": [
+      "Estimate this year's income and tax with the Form 1040-ES worksheet.",
+      "Pay each quarter through IRS Direct Pay or your IRS online account.",
+      "Check whether California also expects state estimated payments."
+    ],
+    "documents": [
+      "Form 1040-ES worksheet",
+      "Year-to-date income and expense records",
+      "Last year's tax return"
+    ],
+    "deadline": {
+      "label": "Quarterly: April 15, June 15, September 15 and January 15 (next business day if the date falls on a weekend or holiday)"
+    },
+    "financial": {
+      "kind": "penalty",
+      "note": "Underpaying a quarter can add an IRS underpayment penalty."
+    },
+    "source": {
+      "name": "IRS — Estimated taxes",
+      "url": "https://www.irs.gov/businesses/small-businesses-self-employed/estimated-taxes",
+      "lastVerified": "2026-11-14"
+    },
+    "dependsOn": [],
+    "status": "pending"
+  },
+  {
+    "id": "CA-FAM-SCHOOL",
+    "ruleId": "CA-FAM-SCHOOL",
+    "title": "Enroll your child in a California school",
+    "category": "family",
+    "priority": "high",
+    "description": "In California, children between 6 and 18 are subject to compulsory full-time education. A child is admitted to kindergarten if they turn five on or before September 1 of the school year.",
+    "steps": [
+      "Find the school district for your new address.",
+      "Ask the district for its enrollment document list.",
+      "Bring your child's immunization record to registration.",
+      "Request records from the previous school."
+    ],
+    "documents": [
+      "Immunization record (checked at admission under California Department of Public Health rules)",
+      "Other documents on your school district's enrollment list"
+    ],
+    "deadline": {
+      "label": "Before your child's first school day after the move"
+    },
+    "financial": null,
+    "source": {
+      "name": "California Department of Education — Kindergarten FAQ",
+      "url": "https://www.cde.ca.gov/ci/gs/em/kindergartenfaq.asp",
+      "lastVerified": "2026-11-14"
+    },
+    "dependsOn": [],
+    "status": "pending"
+  },
+  {
+    "id": "US-TAX-8822",
+    "ruleId": "US-TAX-8822",
+    "title": "Tell the IRS your new address",
+    "category": "taxes",
+    "priority": "medium",
+    "description": "The IRS mails notices and refunds to the address it has on file. Form 8822 updates your home mailing address.",
+    "steps": [
+      "Download Form 8822 from IRS.gov.",
+      "Fill in your old and new address.",
+      "Mail it to the IRS address listed in the form instructions for your old state."
+    ],
+    "documents": [
+      "Form 8822",
+      "Your Social Security number",
+      "Old and new mailing address"
+    ],
+    "deadline": null,
+    "financial": {
+      "kind": "tax",
+      "note": "A missed IRS notice can turn into late-payment interest."
+    },
+    "source": {
+      "name": "IRS — About Form 8822",
+      "url": "https://www.irs.gov/forms-pubs/about-form-8822",
+      "lastVerified": "2026-11-14"
+    },
+    "dependsOn": [],
+    "status": "pending"
+  },
+  {
+    "id": "CA-TAX-540NR-IN",
+    "ruleId": "CA-TAX-540NR-IN",
+    "title": "Plan for a California part-year resident return",
+    "category": "taxes",
+    "priority": "medium",
+    "description": "If you move into California during the year, the Franchise Tax Board treats you as a part-year resident. Part-year residents who meet the income thresholds file Form 540NR.",
+    "steps": [
+      "Write down the exact date you became a California resident.",
+      "Keep pay records split by before and after the move.",
+      "At tax time, file Form 540NR with Schedule CA (540NR)."
+    ],
+    "documents": [
+      "Form 540NR",
+      "Schedule CA (540NR)",
+      "W-2s and 1099s for the full year",
+      "Proof of your move date"
+    ],
+    "deadline": {
+      "label": "Filed with your state return for the year of the move"
+    },
+    "financial": {
+      "kind": "tax",
+      "note": "California taxes all income received while you are a resident."
+    },
+    "source": {
+      "name": "California FTB — Part-year resident and nonresident",
+      "url": "https://www.ftb.ca.gov/file/personal/residency-status/part-year-and-nonresident.html",
+      "lastVerified": "2026-11-14"
+    },
+    "dependsOn": [],
+    "status": "pending"
+  },
+  {
+    "id": "CA-TAX-DE4",
+    "ruleId": "CA-TAX-DE4",
+    "title": "Give your employer a California DE 4",
+    "category": "taxes",
+    "priority": "medium",
+    "description": "The federal W-4 only covers federal withholding. California income tax withholding is set by the state DE 4. Without a valid DE 4, an employer withholds as single with zero allowances.",
+    "steps": [
+      "Download the DE 4 from the EDD site.",
+      "Complete it with your filing status and allowances.",
+      "Hand it to your employer's payroll team together with your new address."
+    ],
+    "documents": [
+      "Form DE 4 (Employee's Withholding Allowance Certificate)",
+      "Your new California address"
+    ],
+    "deadline": null,
+    "financial": {
+      "kind": "tax",
+      "note": "Wrong state withholding shows up as a bill or an oversized refund at tax time."
+    },
+    "source": {
+      "name": "California EDD — DE 4",
+      "url": "https://edd.ca.gov/siteassets/files/pdf_pub_ctr/de4.pdf",
+      "lastVerified": "2026-11-14"
+    },
+    "dependsOn": [],
+    "status": "pending"
+  },
+  {
+    "id": "US-TAX-ORIGIN-CHECK",
+    "ruleId": "US-TAX-ORIGIN-CHECK",
+    "title": "Check whether Texas expects a final state return",
+    "category": "taxes",
+    "priority": "medium",
+    "description": "States that tax income usually want a part-year return for the months you lived there. Civio has not verified the rule for Texas.",
+    "steps": [
+      "Open the Texas tax agency site from the official directory.",
+      "Look for part-year resident filing rules.",
+      "Note the form name and due date in this task."
+    ],
+    "documents": [
+      "W-2s and 1099s for the year",
+      "Proof of your move date"
+    ],
+    "deadline": null,
+    "financial": {
+      "kind": "tax",
+      "note": "Income earned before the move may be taxable in Texas."
+    },
+    "source": {
+      "name": "USA.gov — State taxes",
+      "url": "https://www.usa.gov/state-taxes",
+      "lastVerified": "2026-11-14"
+    },
+    "dependsOn": [],
+    "status": "needs_verification",
+    "verificationNote": "Civio has no verified rule for this state yet. Confirm the requirement and any deadline on the official site before acting."
+  }
+]

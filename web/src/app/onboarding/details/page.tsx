@@ -1,0 +1,648 @@
+import { Selector } from "@astryxdesign/core/Selector";
+import { Theme } from "@astryxdesign/core/theme";
+import { neutralTheme } from "@astryxdesign/theme-neutral/built";
+import { ArrowLeft, ArrowRight, Check, ChevronDown, Plus, X } from "lucide-react";
+import { useRouter } from "@/lib/navigation";
+import { useEffect, useId, useMemo, useRef, useState } from "react";
+import { usePlan, type IntakeResponse } from "@/lib/api";
+import { BudgetFields, BudgetSummary } from "@/components/MoveBudget";
+import { Logo } from "@/components/Logo";
+import { ChatIntake } from "@/components/onboarding/ChatIntake";
+import { ThemeToggle, useThemeMode } from "@/components/ThemeMode";
+import { formatDate } from "@/lib/format";
+import { stateName, US_STATES } from "@/lib/states";
+import { useCivio } from "@/lib/store";
+import type { Profile } from "@/lib/types";
+
+const STEPS = ["Your move", "Move budget", "Work & income", "Family", "Health insurance", "Vehicle", "Review"] as const;
+
+type Option<T extends string | boolean> = { value: T; label: string; hint?: string };
+
+/** A single-choice group. Choosing the selected option again clears it, so any optional question can be left blank. */
+function Choice<T extends string | boolean>({
+  label,
+  options,
+  value,
+  onChange,
+  optional = true,
+  columns = 2,
+}: {
+  label: string;
+  options: Option<T>[];
+  value: T | undefined;
+  onChange: (value: T | undefined) => void;
+  optional?: boolean;
+  columns?: 2 | 3;
+}) {
+  const id = useId();
+  return (
+    <div role="radiogroup" aria-labelledby={id}>
+      <div className="flex items-baseline justify-between gap-3">
+        <p id={id} className="font-medium">
+          {label}
+        </p>
+        {optional && <span className="text-xs text-on-stage-muted">Optional</span>}
+      </div>
+      <div className={`mt-3 grid gap-2 ${columns === 3 ? "sm:grid-cols-3" : "sm:grid-cols-2"}`}>
+        {options.map((option) => {
+          const selected = value === option.value;
+          return (
+            <button
+              key={String(option.value)}
+              type="button"
+              role="radio"
+              aria-checked={selected}
+              onClick={() => onChange(selected ? undefined : option.value)}
+              className={`flex min-h-12 items-center justify-between gap-3 rounded-2xl border px-4 py-2.5 text-left text-[0.9375rem] transition-colors duration-150 ${
+                selected
+                  ? "border-brand-bright bg-stage font-semibold text-on-stage shadow-[0_0_0_3px_rgb(90_173_183/0.18)]"
+                  : "border-stage-line bg-stage text-on-stage"
+              }`}
+            >
+              <span>
+                {option.label}
+                {option.hint && (
+                  <span className="block text-xs font-normal text-on-stage-muted">
+                    {option.hint}
+                  </span>
+                )}
+              </span>
+              <span
+                className={`grid size-5 shrink-0 place-items-center rounded-full ${
+                  selected ? "bg-brand-bright text-stage" : "border border-stage-line"
+                }`}
+              >
+                {selected && <Check className="size-3.5" strokeWidth={3} aria-hidden="true" />}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+const STATE_OPTIONS = US_STATES.map((state) => ({ value: state.code, label: state.name }));
+
+/** Searchable state picker (Astryx Selector): 51 options are too many to scroll. */
+function StateSelect({
+  label,
+  value,
+  onChange,
+  error,
+}: {
+  label: string;
+  value: string | undefined;
+  onChange: (value: string | undefined) => void;
+  error?: string;
+}) {
+  return (
+    <Selector
+      label={label}
+      options={STATE_OPTIONS}
+      value={value}
+      onChange={(next) => onChange(next || undefined)}
+      hasSearch
+      searchPlaceholder="Type a state…"
+      placeholder="Select a state…"
+      isRequired
+      size="lg"
+      width="100%"
+      status={error ? { type: "error", message: error } : undefined}
+    />
+  );
+}
+
+function ChildAges({ ages, onChange }: { ages: number[]; onChange: (ages: number[]) => void }) {
+  const id = useId();
+  const [draft, setDraft] = useState("");
+  const parsed = Number(draft);
+  const valid = draft !== "" && Number.isInteger(parsed) && parsed >= 0 && parsed <= 25;
+
+  const add = () => {
+    if (!valid) return;
+    onChange([...ages, parsed]);
+    setDraft("");
+  };
+
+  return (
+    <div>
+      <div className="flex items-baseline justify-between gap-3">
+        <label htmlFor={id} className="font-medium">
+          How old are they?
+        </label>
+        <span className="text-xs text-on-stage-muted">Optional</span>
+      </div>
+      <p className="mt-1 text-sm text-on-stage-muted">School rules depend on age. Add each child.</p>
+      <div className="mt-3 flex gap-2">
+        <input
+          id={id}
+          inputMode="numeric"
+          autoComplete="off"
+          placeholder="Age, e.g. 7…"
+          value={draft}
+          onChange={(e) => setDraft(e.target.value.replace(/\D/g, "").slice(0, 2))}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              e.preventDefault();
+              add();
+            }
+          }}
+          className="stage-field max-w-40"
+        />
+        <button type="button" onClick={add} disabled={!valid} className="btn btn-stage-quiet">
+          <Plus className="size-4" aria-hidden="true" /> Add
+        </button>
+      </div>
+      {ages.length > 0 && (
+        <ul className="mt-3 flex flex-wrap gap-2">
+          {ages.map((age, index) => (
+            <li key={`${age}-${index}`}>
+              <button
+                type="button"
+                onClick={() => onChange(ages.filter((_, i) => i !== index))}
+                aria-label={`Remove child aged ${age}`}
+                className="inline-flex min-h-10 items-center gap-1.5 rounded-full bg-brand-bright px-3.5 text-sm font-semibold text-stage"
+              >
+                {age} {age === 1 ? "year" : "years"} <X className="size-3.5" aria-hidden="true" />
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+
+function ReviewRow({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex items-baseline justify-between gap-4 border-b border-stage-line py-3 last:border-b-0">
+      <dt className="text-sm text-on-stage-muted">{label}</dt>
+      <dd className="text-right text-[0.9375rem]">{value}</dd>
+    </div>
+  );
+}
+
+const TEXT: Record<string, string> = {
+  employee: "Employee",
+  self_employed: "Self-employed",
+  unemployed: "Unemployed",
+  w2: "W-2",
+  "1099": "1099",
+  both: "W-2 and 1099",
+  none: "None",
+  single: "Single",
+  married: "Married",
+  divorced: "Divorced",
+  widowed: "Widowed",
+  employer: "Employer plan",
+  marketplace: "Marketplace",
+  medicaid: "Medicaid",
+  other: "Other",
+};
+const show = (value: string | undefined) => (value ? (TEXT[value] ?? value) : "Skipped");
+const yesNo = (value: boolean | undefined) => (value === undefined ? "Skipped" : value ? "Yes" : "No");
+
+function Wizard({ initial, onDone }: { initial: Profile; onDone: (profile: Profile) => void }) {
+  const { mode } = useThemeMode();
+  const [step, setStep] = useState(0);
+  const [chatOpen, setChatOpen] = useState(false);
+  const stepMarker = useRef<HTMLParagraphElement>(null);
+  const previousStep = useRef(step);
+  const [p, setP] = useState<Profile>(initial);
+  const [errors, setErrors] = useState<{ currentState?: string; destinationState?: string }>({});
+  const set = (patch: Partial<Profile>) => setP((prev) => ({ ...prev, ...patch }));
+  const [intake, setIntake] = useState<IntakeResponse | null>(null);
+
+  const plan = usePlan(p).tasks;
+  const matched = useMemo(() => plan.filter(task => task.status === "pending"), [plan]);
+  const last = step === STEPS.length - 1;
+
+  useEffect(() => {
+    if (previousStep.current !== step && window.matchMedia("(max-width: 700px)").matches) {
+      stepMarker.current?.focus({ preventScroll: true });
+      stepMarker.current?.scrollIntoView({ block: "start", behavior: "instant" });
+    }
+    previousStep.current = step;
+  }, [step]);
+
+  const next = () => {
+    if (step === 0) {
+      const found: typeof errors = {};
+      if (!p.currentState) found.currentState = "Choose the state you live in now.";
+      if (!p.destinationState) found.destinationState = "Choose the state you are moving to.";
+      if (p.currentState && p.currentState === p.destinationState) found.destinationState = "Choose a different state for an interstate move.";
+      setErrors(found);
+      if (Object.keys(found).length > 0) return;
+    }
+    if (last || step === 1) {
+      // Free-text intake can land here without both states.
+      if (!p.currentState || !p.destinationState) return setStep(0);
+      onDone(p);
+    } else setStep(step + 1);
+  };
+
+  return (
+    <Theme theme={neutralTheme} mode={mode}>
+    <div className="atlas-wizard on-stage min-h-dvh bg-stage text-on-stage">
+      <div className="mx-auto max-w-5xl px-4 py-5 sm:px-8 lg:py-8">
+        <div className="flex items-center justify-between gap-4">
+          <Logo tone="dark" />
+          <ThemeToggle />
+        </div>
+        <div className="wizard-layout mt-8 grid items-start gap-5 lg:grid-cols-[minmax(0,1fr)_17rem]">
+          <div className="wizard-card rounded-panel border border-stage-line bg-stage-raised p-5 sm:p-8">
+            <div className="flex items-center justify-between gap-4">
+              <div className="flex items-center gap-1.5" aria-hidden="true">
+                {STEPS.map((name, index) => (
+                  <span
+                    key={name}
+                    className={`h-1.5 rounded-full transition-colors duration-200 ${
+                      index === step ? "w-8 bg-on-stage" : index < step ? "w-2 bg-brand-bright" : "w-2 bg-stage-line"
+                    }`}
+                  />
+                ))}
+              </div>
+              {step > 0 && (
+                <button
+                  type="button"
+                  onClick={() => setStep(step - 1)}
+                  className="inline-flex min-h-10 items-center gap-1.5 text-sm font-medium text-on-stage-muted hover:text-on-stage"
+                >
+                  <ArrowLeft className="size-4" aria-hidden="true" /> Back
+                </button>
+              )}
+            </div>
+            <p ref={stepMarker} tabIndex={-1} className="wizard-step-marker mt-6 text-sm text-on-stage-muted">
+              Step {step + 1} of {STEPS.length} · {STEPS[step]}
+            </p>
+
+          <form
+            key={step}
+            className="rise mt-2"
+            onSubmit={(e) => {
+              e.preventDefault();
+              next();
+            }}
+          >
+            {step === 0 && (
+              <>
+                <h1 className="text-4xl font-medium tracking-[-0.03em]">Where are you moving?</h1>
+                <p className="mt-3 text-on-stage-muted">The two states decide which rules apply. Everything else is optional.</p>
+                <button type="button" className="wizard-chat-toggle" aria-controls="wizard-chat" aria-expanded={chatOpen}
+                  onClick={() => setChatOpen(!chatOpen)}>
+                  Describe my move or add a photo <ChevronDown size={16} aria-hidden="true" />
+                </button>
+                <div id="wizard-chat" data-expanded={chatOpen} className="mt-8">
+                  <ChatIntake
+                    profile={p}
+                    onPatch={(patch) => {
+                      set(patch);
+                      setErrors({});
+                    }}
+                    onReview={(result) => {
+                      setIntake(result);
+                      setStep(STEPS.length - 1);
+                    }}
+                  />
+                </div>
+                <p className="wizard-form-divider mono-label mt-8 text-on-stage-muted">Or answer step by step</p>
+                <div className="mt-4 grid gap-6 sm:grid-cols-2">
+                  <StateSelect
+                    label="Current state"
+                    value={p.currentState}
+                    onChange={(v) => set({ currentState: v })}
+                    error={errors.currentState}
+                  />
+                  <StateSelect
+                    label="Destination state"
+                    value={p.destinationState}
+                    onChange={(v) => set({ destinationState: v })}
+                    error={errors.destinationState}
+                  />
+                  <div>
+                    <div className="flex items-baseline justify-between">
+                      <label htmlFor="move-date" className="font-medium">
+                        Planned move date
+                      </label>
+                      <span className="text-xs text-on-stage-muted">Optional</span>
+                    </div>
+                    <input
+                      id="move-date"
+                      type="date"
+                      value={p.moveDate ?? ""}
+                      onChange={(e) => set({ moveDate: e.target.value || undefined })}
+                      className="stage-field mt-3 [color-scheme:dark]"
+                    />
+                    <p className="mt-2 text-sm text-on-stage-muted">Used to turn “within 20 days” into a calendar date.</p>
+                  </div>
+                </div>
+                {p.currentState && p.destinationState && p.currentState !== p.destinationState && (
+                  <p className="mt-4 text-sm text-on-stage-muted">Your budget uses your own estimates. {p.destinationState === "CA" ? "California has detailed vehicle, state tax and school tasks." : p.destinationState === "TX" ? "Texas has detailed vehicle tasks. For state tax and school requirements, follow the agency links." : "For local vehicle, state tax and school requirements, your checklist links to the relevant agencies."}</p>
+                )}
+              </>
+            )}
+
+            {step === 1 && (
+              <>
+                <h1 className="text-4xl font-medium tracking-tight">How would your budget change?</h1>
+                <div className="mt-5"><BudgetFields budget={p.budget ?? {}} before={p.currentState ?? "Now"} after={p.destinationState ?? "After"} onChange={budget => set({ budget })} /></div>
+                <div className="mt-6" aria-live="polite"><BudgetSummary budget={p.budget} /></div>
+              </>
+            )}
+
+            {step === 2 && (
+              <>
+                <h1 className="text-4xl font-medium tracking-[-0.03em]">How do you earn?</h1>
+                <p className="mt-3 text-on-stage-muted">This decides withholding forms and estimated tax payments.</p>
+                <div className="mt-8 grid gap-8">
+                  <Choice
+                    label="Employment"
+                    columns={3}
+                    value={p.employment}
+                    onChange={(v) => set({ employment: v })}
+                    options={[
+                      { value: "employee", label: "Employee" },
+                      { value: "self_employed", label: "Self-employed" },
+                      { value: "unemployed", label: "Unemployed" },
+                    ]}
+                  />
+                  <Choice
+                    label="Income type"
+                    value={p.income}
+                    onChange={(v) => set({ income: v })}
+                    options={[
+                      { value: "w2", label: "W-2", hint: "Paid as an employee" },
+                      { value: "1099", label: "1099", hint: "Contract or freelance" },
+                      { value: "both", label: "Both" },
+                      { value: "none", label: "None" },
+                    ]}
+                  />
+                </div>
+              </>
+            )}
+
+            {step === 3 && (
+              <>
+                <h1 className="text-4xl font-medium tracking-[-0.03em]">Who is moving with you?</h1>
+                <p className="mt-3 text-on-stage-muted">Children of school age add enrollment tasks.</p>
+                <div className="mt-8 grid gap-8">
+                  <Choice
+                    label="Marital status"
+                    value={p.marital}
+                    onChange={(v) => set({ marital: v })}
+                    options={[
+                      { value: "single", label: "Single" },
+                      { value: "married", label: "Married" },
+                      { value: "divorced", label: "Divorced" },
+                      { value: "widowed", label: "Widowed" },
+                    ]}
+                  />
+                  <Choice
+                    label="Do you have children?"
+                    value={p.hasChildren}
+                    onChange={(v) => set({ hasChildren: v, childAges: v ? (p.childAges ?? []) : [] })}
+                    options={[
+                      { value: true, label: "Yes" },
+                      { value: false, label: "No" },
+                    ]}
+                  />
+                  {p.hasChildren === true && (
+                    <div className="rise">
+                      <ChildAges ages={p.childAges ?? []} onChange={(childAges) => set({ childAges })} />
+                    </div>
+                  )}
+                </div>
+              </>
+            )}
+
+            {step === 4 && (
+              <>
+                <h1 className="text-4xl font-medium tracking-[-0.03em]">How are you insured today?</h1>
+                <p className="mt-3 text-on-stage-muted">Each kind of coverage reacts differently to a change of state.</p>
+                <div className="mt-8">
+                  <Choice
+                    label="Health insurance"
+                    value={p.insurance}
+                    onChange={(v) => set({ insurance: v })}
+                    options={[
+                      { value: "employer", label: "Employer", hint: "Through a job" },
+                      { value: "marketplace", label: "Marketplace", hint: "HealthCare.gov or a state exchange" },
+                      { value: "medicaid", label: "Medicaid" },
+                      { value: "other", label: "Other" },
+                      { value: "none", label: "None" },
+                    ]}
+                  />
+                </div>
+              </>
+            )}
+
+            {step === 5 && (
+              <>
+                <h1 className="text-4xl font-medium tracking-[-0.03em]">Are you bringing a vehicle?</h1>
+                <p className="mt-3 text-on-stage-muted">Registration and license deadlines are usually the first to hit.</p>
+                <div className="mt-8 grid gap-8">
+                  <Choice
+                    label="Are you bringing a vehicle from another state?"
+                    value={p.hasVehicle}
+                    onChange={(v) =>
+                      set({ hasVehicle: v, vehicleRegisteredInCurrentState: v ? p.vehicleRegisteredInCurrentState : undefined })
+                    }
+                    options={[
+                      { value: true, label: "Yes" },
+                      { value: false, label: "No" },
+                    ]}
+                  />
+                  <div className="rise">
+                      <Choice
+                        label="Will you drive after moving?"
+                        value={p.drives}
+                        onChange={(v) => set({ drives: v })}
+                        options={[
+                          { value: true, label: "Yes" },
+                          { value: false, label: "No" },
+                        ]}
+                      />
+                    </div>
+                </div>
+              </>
+            )}
+
+            {step === 6 && (
+              <>
+                <h1 className="text-4xl font-medium tracking-[-0.03em]">Check your answers</h1>
+                <p className="mt-3 text-on-stage-muted">
+                  Skipped answers are fine. Tasks that depend on them are marked “Needs verification”.
+                </p>
+                {intake && (
+                  <div className="mt-6 rounded-2xl border border-brand-bright/40 p-4" aria-live="polite">
+                    <p className="font-medium">
+                      Filled in from our chat
+                      <span className="ml-2 font-mono text-xs font-normal text-on-stage-muted">
+                        {intake.mode === "ai" ? "read by AI" : "read by built-in rules"}
+                      </span>
+                    </p>
+                    {intake.notice && <p className="mt-1 text-sm text-on-stage-muted">{intake.notice}</p>}
+                    <ul className="mt-3 grid gap-1.5 text-sm">
+                      {intake.found.map((item) => (
+                        <li key={item.field} className="flex flex-wrap items-baseline gap-x-2">
+                          {item.value ? (
+                            <>
+                              <span className="text-on-stage-muted">{item.label}:</span>
+                              <span>{TEXT[item.value] ?? item.value}</span>
+                            </>
+                          ) : (
+                            <span>{item.label}</span>
+                          )}
+                          {item.from && <span className="text-xs text-on-stage-muted">from “{item.from}”</span>}
+                        </li>
+                      ))}
+                    </ul>
+                    <p className="mt-3 text-sm text-on-stage-muted">
+                      Check the answers below. Use Back or the step list to correct anything.
+                    </p>
+                  </div>
+                )}
+                {(!p.currentState || !p.destinationState) && (
+                  <p role="alert" className="mt-6 rounded-2xl border border-stage-line p-4 text-sm text-brand-bright">
+                    Civio still needs {!p.currentState && !p.destinationState ? "both states" : !p.currentState ? "the state you live in now" : "the state you are moving to"}.{" "}
+                    <button type="button" onClick={() => setStep(0)} className="underline underline-offset-4">
+                      Add it in step 1
+                    </button>
+                  </p>
+                )}
+                <div className="mt-5"><BudgetSummary budget={p.budget} /></div>
+                <dl className="mt-8 rounded-2xl border border-stage-line px-5">
+                  <ReviewRow label="Move" value={`${stateName(p.currentState)} → ${stateName(p.destinationState)}`} />
+                  <ReviewRow label="Move date" value={p.moveDate ? formatDate(p.moveDate) : "Skipped"} />
+                  <ReviewRow label="Employment" value={show(p.employment)} />
+                  <ReviewRow label="Income type" value={show(p.income)} />
+                  <ReviewRow label="Marital status" value={show(p.marital)} />
+                  <ReviewRow
+                    label="Children"
+                    value={
+                      p.hasChildren && p.childAges?.length ? `Yes, ages ${p.childAges.join(", ")}` : yesNo(p.hasChildren)
+                    }
+                  />
+                  <ReviewRow label="Health insurance" value={show(p.insurance)} />
+                  <ReviewRow label="Vehicle" value={yesNo(p.hasVehicle)} />
+                </dl>
+                <label className="mt-6 flex cursor-pointer items-start gap-3 rounded-2xl border border-stage-line p-4">
+                  <input
+                    type="checkbox"
+                    checked={p.aiConsent === true}
+                    onChange={(e) => set({ aiConsent: e.target.checked })}
+                    className="mt-1 size-4 accent-(--color-brand-bright)"
+                  />
+                  <span>
+                    <span className="font-medium">Share my move details with the assistant</span>
+                    <span className="mt-1 block text-sm text-on-stage-muted">
+                      Your budget stays in this browser. Other move details can be sent with your questions. You can turn this off
+                      any time.
+                    </span>
+                  </span>
+                </label>
+              </>
+            )}
+
+            <div className="mt-10 grid gap-2">
+              <button type="submit" className="btn btn-stage w-full">
+                {last ? "Build my plan" : step === 1 ? "Open my financial plan" : "Continue"} <ArrowRight className="size-4" aria-hidden="true" />
+              </button>
+              {step === 1 && <button type="button" onClick={(e) => { if (e.currentTarget.form?.reportValidity()) setStep(2); }} className="btn btn-stage-quiet w-full">Personalize my checklist first</button>}
+              {step > 1 && !last && (
+                <button type="button" onClick={() => setStep(step + 1)} className="btn btn-stage-quiet w-full">
+                  Skip
+                </button>
+              )}
+            </div>
+          </form>
+          </div>
+
+          <aside className="wizard-rail grid gap-4">
+            <div className="wizard-preview rounded-panel border border-stage-line bg-stage-raised p-5" aria-live="polite">
+              <p className="text-sm text-on-stage-muted">Your checklist</p>
+              <p className="mt-1 flex items-baseline gap-2">
+                <span className="font-display text-5xl font-semibold tabular-nums">{matched.length}</span>
+                <span className="text-on-stage-muted">{matched.length === 1 ? "task" : "tasks"} matched</span>
+              </p>
+              {matched.length > 0 ? (
+                <ul className="mt-4 grid gap-1.5">
+                  {matched.slice(0, 5).map((task) => (
+                    <li
+                      key={task.id}
+                      className="flex items-center gap-2.5 rounded-xl border border-stage-line bg-stage px-3 py-2.5 text-sm"
+                    >
+                      <span className="grid size-5 shrink-0 place-items-center rounded-full bg-brand-bright text-stage">
+                        <Check className="size-3" strokeWidth={3.5} aria-hidden="true" />
+                      </span>
+                      <span className="truncate">{task.title}</span>
+                    </li>
+                  ))}
+                  {matched.length > 5 && (
+                    <li className="px-3 pt-1 text-sm text-on-stage-muted">and {matched.length - 5} more</li>
+                  )}
+                </ul>
+              ) : (
+                <p className="mt-4 text-sm text-on-stage-muted">Choose two different states and add details to see confirmed tasks.</p>
+              )}
+            </div>
+
+            <ol className="wizard-steps hidden rounded-panel border border-stage-line bg-stage-raised p-3 lg:grid">
+              {STEPS.map((name, index) => {
+                const state = index === step ? "current" : index < step ? "done" : "todo";
+                return (
+                  <li key={name}>
+                    <button
+                      type="button"
+                      disabled={index > step && !intake}
+                      onClick={() => setStep(index)}
+                      aria-current={state === "current" ? "step" : undefined}
+                      className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-[0.9375rem] ${
+                        state === "current" ? "bg-stage font-semibold text-on-stage" : "text-on-stage-muted"
+                      }`}
+                    >
+                      <span
+                        className={`grid size-6 shrink-0 place-items-center rounded-full font-mono text-xs ${
+                          state === "done"
+                            ? "bg-brand-bright text-stage"
+                            : state === "current"
+                              ? "bg-on-stage text-stage"
+                              : "border border-stage-line"
+                        }`}
+                      >
+                        {state === "done" ? <Check className="size-3.5" strokeWidth={3} aria-hidden="true" /> : index + 1}
+                      </span>
+                      {name}
+                    </button>
+                  </li>
+                );
+              })}
+            </ol>
+          </aside>
+        </div>
+      </div>
+    </div>
+    </Theme>
+  );
+}
+
+export default function ProfileDetailsPage() {
+  const router = useRouter();
+  const { ready, profile, saveProfile } = useCivio();
+
+  if (!ready) {
+    return <div className="min-h-dvh bg-canvas" aria-busy="true" />;
+  }
+
+  return (
+    <Wizard
+      initial={profile}
+      onDone={(next) => {
+        const routeChanged = next.currentState !== profile.currentState || next.destinationState !== profile.destinationState;
+        saveProfile(routeChanged && next.forecast ? { ...next, forecast: undefined, budget: next.budget === profile.budget ? undefined : next.budget } : next);
+        router.push("/dashboard");
+      }}
+    />
+  );
+}
