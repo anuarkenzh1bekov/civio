@@ -8,6 +8,7 @@ import { usePlan, type IntakeResponse } from "@/lib/api";
 import { BudgetFields, BudgetSummary } from "@/components/MoveBudget";
 import { Logo } from "@/components/Logo";
 import { ChatIntake } from "@/components/onboarding/ChatIntake";
+import { UsDateInput } from "@/components/onboarding/UsDateInput";
 import { ThemeToggle, useThemeMode } from "@/components/ThemeMode";
 import { formatDate } from "@/lib/format";
 import { stateName, US_STATES } from "@/lib/states";
@@ -327,12 +328,11 @@ function Wizard({ initial, onDone }: { initial: Profile; onDone: (profile: Profi
                       </label>
                       <span className="text-xs text-on-stage-muted">Optional</span>
                     </div>
-                    <input
+                    <UsDateInput
                       id="move-date"
-                      type="date"
-                      value={p.moveDate ?? ""}
-                      onChange={(e) => set({ moveDate: e.target.value || undefined })}
-                      className="stage-field mt-3 [color-scheme:dark]"
+                      value={p.moveDate}
+                      onChange={(moveDate) => set({ moveDate })}
+                      className="stage-field mt-3"
                     />
                     <p className="mt-2 text-sm text-on-stage-muted">Used to turn “within 20 days” into a calendar date.</p>
                   </div>

@@ -16,6 +16,12 @@ export type IntakeResult = {
 export type IntakeResponse = IntakeResult & { mode: "ai" | "rules_only"; notice?: string };
 export type ChatIntakeResponse = IntakeResponse & { declined: import("@/lib/intake/flow").FlowField[] };
 export type DocumentResponse = { letter: string; mode: "ai" | "template"; notice?: string };
+export type ReminderStatus = {
+  mode: "resend" | "outbox" | "off";
+  status: "none" | "pending" | "confirmed";
+  email?: string;
+  devConfirmUrl?: string;
+};
 export type RuleSource = { ruleId: string; name: string; url: string; lastVerified: string };
 
 // ── Cached reads ──

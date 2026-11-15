@@ -1,15 +1,19 @@
 # Civio
 
-Civio answers one question for a household moving between US states: **will the move pay off, and what paperwork does it bring?** It compares take-home income, housing, living costs and moving expenses for the first year, then builds a checklist of taxes, health insurance, vehicle and school tasks with deadlines and official sources.
+Civio helps a household work out whether a move to another US state pays off, and then walks it through the paperwork the move brings: taxes, health insurance, vehicle registration and school enrollment.
 
-![Civio: from two states to a forecast, a checklist and a who-to-notify list](docs/civio-demo.gif)
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/civio-demo-dark.gif">
+  <img src="docs/civio-demo-light.gif" alt="Civio walkthrough: landing page, onboarding chat, dashboard, budget, checklist, a task with its source, the assistant and the who-to-notify list">
+</picture>
 
-*Answer a few questions, get the first-year forecast, open the plan, then the checklist and the who-to-notify list.*
+The recording follows your GitHub theme. Both versions: [light](docs/civio-demo-light.gif), [dark](docs/civio-demo-dark.gif). Live demo: https://civio-1008637543619.us-central1.run.app/
 
-The design rule: **the core is deterministic, and AI sits around it.** Requirements, deadlines, task order and totals come from a rule base and plain code. A model reads free text, explains rules and rewrites letters. Every AI feature has a rule-based fallback, so the product works with no key at all.
+[Walkthrough of the mobile planner](docs/civio-demo.gif)
 
 ## Contents
 
+- [What Civio is](#what-civio-is)
 - [Quick start](#quick-start)
 - [Project layout](#project-layout)
 - [Screens](#screens)
@@ -18,6 +22,42 @@ The design rule: **the core is deterministic, and AI sits around it.** Requireme
 - [What is verified, and what is not](#what-is-verified-and-what-is-not)
 - [Pricing](#pricing)
 - [Stack](#stack)
+- [Deploy on Google Cloud Run](#deploy-on-google-cloud-run)
+
+## What Civio is
+
+A move to another state raises two questions at once. Will the household have more or less money after it? And what has to be filed, changed or cancelled, and by when? The answers are spread across state and federal sites, and each state has its own deadlines. Civio puts the budget and the paperwork in one plan.
+
+### Who it is for
+
+A household that is planning a move between US states, or is still choosing between up to three destinations. The demo follows a family going from Texas to California.
+
+### What you put in
+
+- What you take home each month now and what you expect after the move.
+- Housing, other living costs and the one-time cost of the move itself.
+- A few facts about the household: work, children, health insurance, a car.
+
+You can answer step by step, describe the move in your own words, or upload a photo of a license, insurance card or lease. Skipping a question is allowed. Civio then marks the tasks that depend on it as "Needs verification" and does not guess.
+
+### What you get back
+
+| | |
+|---|---|
+| First-year outlook | How much cash the move adds or takes away over 12 months, moving costs included, and the take-home pay you would need to keep today's monthly balance. |
+| Destination comparison | The same numbers for up to three states side by side. |
+| Checklist | Tasks for taxes, health insurance, vehicle paperwork and school enrollment. Each has a date counted from your move date, the steps, the documents to bring and a link to the official page. Tasks appear in the order you can actually do them. |
+| Cost calculator | The fees your tasks involve, each linked to the page that states the amount. You enter the amounts and Civio totals them. |
+| Who to notify | A list of the offices and companies that need your new address. |
+| Letters and forms | Change-of-address letters filled from your answers, and the official IRS Form 8822 filled in the browser. |
+| Reminders | An email 7, 3 and 1 days before a deadline, if you ask for them. |
+| Assistant | Plain-language answers about your tasks, each with links to the official text it came from. |
+
+### What it does not do
+
+Civio gives general information. It is not legal, tax or insurance advice. It has checked rules for five states so far (California, Texas, Florida, Washington and New York) and says so when a state is not covered. It stores no fee amounts. There are no accounts: a plan lives in your browser and under an anonymous link you can open on another device.
+
+The plan, the assistant, the cost calculator and the who-to-notify list are free. Letters are a paid add-on, and checkout is a demo for now. Details are under [Pricing](#pricing).
 
 ## Quick start
 
@@ -98,7 +138,7 @@ Everything that recalculates as you type stays in the browser. The browser never
 | `/onboarding` | Guided questions that end in a first-year forecast. A description in free text or a photo of a document fills in the answers. |
 | `/onboarding/details` | The full questionnaire with a guided chat, for the household details behind the checklist. |
 | `/dashboard` | Editable budget, first-year difference, checklist with filters and dependencies, arrival check, cost calculator, assistant. |
-| `/documents` | Who-to-notify list (free) and letters (Move Pack). |
+| `/documents` | Who-to-notify list, official IRS Form 8822 and Move Pack letters. |
 | `/compare` | Up to three destinations side by side, each with editable amounts and a first-year outlook. |
 | `/dashboard?demo=1` | A Texas → California example with illustrative amounts. It lives in memory and never overwrites a saved plan. |
 | `/dashboard?s=<id>` | Opens a plan started on another device. |
@@ -137,7 +177,18 @@ questionnaire ──────────────────────
 
 **Arrival check.** When the dashboard opens, the browser is asked for its location once per session. The coordinates are turned into a state in the browser (`web/src/lib/geo.ts`, bounding boxes) and never leave it. If that state is the destination, Civio offers to switch to the arrival checklist, and on confirmation deadlines count from today. This is a check on open, not tracking.
 
-**Session without login.** The first save creates a random session id. The plan lives in `localStorage` and is mirrored to the server, so "Continue on another device" is a link containing that id. Anyone with the link can open and edit the plan. Storage is SQLite in `backend/.data/` (`backend/app/sessions.py`). On a host without a persistent disk, swap that file for Postgres.
+**Session without login.** The first save creates a random session id. The plan lives in `localStorage` and is mirrored to the server, so "Continue on another device" is a link containing that id. Anyone with the link can open and edit the plan. The API stores sessions in SQLite locally and Firestore on Cloud Run. It reads plans saved by the earlier server using their original session IDs.
+
+### Deadline reminders
+
+`/api/reminders` and `backend/app/reminders.py` are plain code on the deterministic plan, with no model involved.
+
+- You get one email 7, 3 and 1 days before a task's date. Someone who joins two days before a deadline gets one email instead of three.
+- Tasks marked done send nothing. A missed deadline sends one note.
+- The address is confirmed first by a link in an email (double opt-in). It is kept apart from the plan and removed on unsubscribe. Every email has an unsubscribe link and header.
+- A daily job (`/api/reminders/run`) recomputes each plan from the stored session, so dates in emails always match the app. The endpoint stays closed unless `CRON_SECRET` is set. Cloud Scheduler calls it once a day.
+- Mail goes through Resend (`RESEND_API_KEY`, `MAIL_FROM`). The development server saves messages under its local `.data/outbox/`.
+- Sessions and subscriptions live in Firestore on Cloud Run and in `.data/` locally (`backend/app/sessions.py`, `backend/app/reminder_store.py`).
 
 ### Where AI is used
 
@@ -167,6 +218,10 @@ All endpoints take and return JSON. Interactive docs are at http://127.0.0.1:800
 | `POST /api/assistant` | Answers a question from retrieved passages, streamed as JSON lines. |
 | `POST /api/documents` | Rewrites a finished letter for tone and added details. |
 | `GET`, `PUT /api/session/{id}` | Loads or saves a plan by its anonymous session id. |
+| `GET`, `POST /api/reminders` | Check status or request a confirmation email for a saved plan. |
+| `GET /api/reminders/confirm` | Confirm an email subscription. |
+| `GET`, `POST /api/reminders/unsubscribe` | Turn off reminders from an email or the plan. |
+| `GET`, `POST /api/reminders/run` | Run the daily scheduler with its bearer secret. Add `?dry=1` to preview. |
 | `GET /api/health` | Liveness check. |
 
 ## What is verified, and what is not
@@ -196,9 +251,9 @@ Known limits:
 
 | Plan | Price | What it adds |
 |---|---|---|
-| Free | $0 | Full plan, assistant, cost calculator, who-to-notify list |
+| Free | $0 | Full plan, assistant, cost calculator, who-to-notify list, deadline reminders |
 | Move Pack | $19 per move | Letters filled from the profile, AI tailoring, copy/download/print |
-| Civio Watch | $5 per month | Planned: saved plans for repeat movers, rule-change notices, reminders |
+| Civio Watch | $5 per month | Planned: saved plans for repeat movers, rule-change notices |
 
 Checkout is a demo: "Unlock Move Pack" flips a flag and charges nothing. Civio Watch is not built, and its price is a placeholder.
 
@@ -206,7 +261,7 @@ Checkout is a demo: "Unlock Move Pack" flips a flag and charges nothing. Civio W
 
 **web/**: React 19, Vite, React Router, TypeScript, Tailwind CSS 4, Astryx (`@astryxdesign/core` with the neutral theme, recolored to Civio's palette), GSAP for landing reveals, lucide icons, Vitest.
 
-**backend/**: Python 3.12, FastAPI, Pydantic, Gemini over REST or the Anthropic SDK, SQLite for sessions, pytest.
+**backend/**: Python 3.12, FastAPI, Pydantic, Gemini over REST or the Anthropic SDK, SQLite and Firestore for sessions and subscriptions, pytest.
 
 <details>
 <summary>Where Astryx is used</summary>
@@ -227,3 +282,24 @@ Layout and visuals are Tailwind. Astryx supplies the interactive pieces that are
 The CSS layer order in `web/src/app/globals.css` follows the Astryx + Tailwind example; the overrides at the end of that file keep Civio's typefaces and text colors.
 
 </details>
+
+## Deploy on Google Cloud Run
+
+The Dockerfile builds the Vite frontend and serves its files and the FastAPI routes on the same port. On Cloud Run the container's disk is wiped on restart, so sessions and reminder subscriptions are stored in Firestore. Firestore is chosen automatically when `K_SERVICE` is set, or with `STORE=firestore`.
+
+```sh
+# once per project
+gcloud services enable run.googleapis.com cloudbuild.googleapis.com artifactregistry.googleapis.com firestore.googleapis.com secretmanager.googleapis.com cloudscheduler.googleapis.com
+gcloud firestore databases create --location=us-central1 --type=firestore-native
+printf '%s' "$GOOGLE_API_KEY" | gcloud secrets create google-api-key --data-file=-
+printf '%s' "$(openssl rand -hex 24)" | gcloud secrets create cron-secret --data-file=-
+# let the service account read the secrets and use Firestore (roles/secretmanager.secretAccessor, roles/datastore.user)
+
+# deploy (builds the image with Cloud Build)
+gcloud run deploy civio --source . --region us-central1 --allow-unauthenticated   --max-instances 3 --memory 512Mi   --set-secrets GOOGLE_API_KEY=google-api-key:latest,CRON_SECRET=cron-secret:latest   --set-env-vars APP_URL=https://civio-<PROJECT_NUMBER>.us-central1.run.app
+
+# daily reminders
+gcloud scheduler jobs create http civio-reminders --location us-central1 --schedule "0 15 * * *"   --uri https://civio-<PROJECT_NUMBER>.us-central1.run.app/api/reminders/run --http-method GET   --headers "Authorization=Bearer $(gcloud secrets versions access latest --secret cron-secret)"
+```
+
+For emails add `RESEND_API_KEY` and `MAIL_FROM` as secrets or env vars.

@@ -4,6 +4,7 @@ import time
 from fastapi import APIRouter, Request
 from fastapi.responses import JSONResponse
 from pydantic import ValidationError
+from starlette.concurrency import run_in_threadpool
 
 from app import sessions
 from app.routers.common import error
@@ -13,7 +14,7 @@ router = APIRouter(prefix="/api/session")
 
 
 @router.get("/{session_id}")
-async def read(session_id: str):
+def read(session_id: str):
     row = sessions.get(session_id) if sessions.is_session_id(session_id) else None
     if not row:
         return error("Not found.", 404)
@@ -35,5 +36,5 @@ async def write(session_id: str, request: Request):
     except (ValueError, ValidationError):
         return error("Invalid session.")
     updated_at = int(time.time() * 1000)
-    sessions.put(session_id, json.dumps(session.to_dict(), ensure_ascii=False), updated_at)
+    await run_in_threadpool(sessions.put, session_id, json.dumps(session.to_dict(), ensure_ascii=False), updated_at)
     return {"ok": True, "updatedAt": updated_at}

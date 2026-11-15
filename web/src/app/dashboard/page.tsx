@@ -26,6 +26,7 @@ import { Suspense, useEffect, useMemo, useState } from "react";
 import { ArrivalBanner } from "@/components/dashboard/ArrivalBanner";
 import { AssistantPanel } from "@/components/dashboard/AssistantPanel";
 import { ContinueLink } from "@/components/dashboard/ContinueLink";
+import { ReminderCard } from "@/components/dashboard/ReminderCard";
 import { CostCalculator } from "@/components/dashboard/CostCalculator";
 import { BudgetEditor } from "@/components/dashboard/BudgetEditor";
 import { PlanFolders } from "@/components/dashboard/PlanFolders";
@@ -624,11 +625,10 @@ function Dashboard({ preview, panel }: { preview: boolean; panel: string | null 
           </span>
         </Link>
 
-        {!preview && (
-          <div className="mt-8 max-w-sm">
-            <ContinueLink sid={sid} />
-          </div>
-        )}
+        <div className="mt-8 grid max-w-sm gap-3">
+          <ReminderCard sid={sid} tasks={tasks} demo={preview} />
+          {!preview && <ContinueLink sid={sid} />}
+        </div>
         {!preview && <button type="button" className="ledger-reset mt-6 text-sm text-ink-muted" onClick={() => setConfirmReset(true)}>Start over</button>}
       </main>
 

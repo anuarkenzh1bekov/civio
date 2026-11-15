@@ -2,8 +2,7 @@
 the browser generates; whoever holds the id (the "continue on another device"
 link) can read and write it. There are no accounts.
 
-Storage is SQLite in `.data/civio.db`. For a multi-instance deployment, replace
-this with Postgres: the interface is two functions.
+Storage is Firestore on Cloud Run and SQLite on a local server.
 """
 
 import json
@@ -11,6 +10,7 @@ import re
 import sqlite3
 from contextlib import closing
 
+from app import cloud_store
 from app.config import DATA_DIR
 
 _UUID = re.compile(r"^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}\Z")
@@ -31,6 +31,9 @@ def _connect() -> sqlite3.Connection:
 
 def get(session_id: str) -> tuple[str, int] | None:
     """The stored JSON and when it was written (ms since the epoch)."""
+    if cloud_store.enabled():
+        row = cloud_store.database().collection("sessions").document(session_id).get().to_dict()
+        return (row["data"], row["updatedAt"]) if row else None
     with closing(_connect()) as db:
         row = db.execute("SELECT data, updated_at FROM sessions WHERE id = ?", (session_id,)).fetchone()
     if row:
@@ -45,6 +48,11 @@ def get(session_id: str) -> tuple[str, int] | None:
 
 
 def put(session_id: str, data: str, updated_at: int) -> None:
+    if cloud_store.enabled():
+        cloud_store.database().collection("sessions").document(session_id).set(
+            {"data": data, "updatedAt": updated_at}
+        )
+        return
     with closing(_connect()) as db, db:
         db.execute(
             "INSERT INTO sessions (id, data, updated_at) VALUES (?, ?, ?) "

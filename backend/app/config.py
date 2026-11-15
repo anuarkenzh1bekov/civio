@@ -7,6 +7,8 @@ from dotenv import load_dotenv
 
 BACKEND_DIR = Path(__file__).resolve().parent.parent
 DATA_DIR = BACKEND_DIR / ".data"
+if not DATA_DIR.exists() and (BACKEND_DIR.parent / ".data").is_dir():
+    DATA_DIR = BACKEND_DIR.parent / ".data"
 
 # .env.local wins over .env; real environment variables win over both.
 load_dotenv(BACKEND_DIR / ".env.local")
