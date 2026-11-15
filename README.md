@@ -55,10 +55,6 @@ Civio gives general information. It is not legal, tax or insurance advice. It ha
 
 The plan, the assistant, the cost calculator and the who-to-notify list are free. Letters are a paid add-on, and checkout is a demo for now. Details are under [Pricing](#pricing).
 
-### How much of it is AI
-
-Requirements, deadlines, task order and totals come from a rule base and plain code. A model reads free text, explains rules and rewrites letters. Every AI feature has a rule-based fallback, so the app works with no API key at all.
-
 ## Run it
 
 ```bash
