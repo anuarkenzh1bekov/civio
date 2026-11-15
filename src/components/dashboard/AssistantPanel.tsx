@@ -5,6 +5,7 @@ import { Markdown } from "@astryxdesign/core/Markdown";
 import { Switch } from "@astryxdesign/core/Switch";
 import { ArrowUp, Square } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { splitGroupedCitations } from "@/lib/rag/citations";
 import type { Profile } from "@/lib/types";
 
 type Source = {
@@ -84,7 +85,7 @@ function Answer({ message }: { message: Message }) {
       ) : (
         <div className="answer">
           <Markdown density="compact" isStreaming={message.pending} sources={sources} headingLevelStart={3}>
-            {message.content}
+            {splitGroupedCitations(message.content)}
           </Markdown>
         </div>
       )}
